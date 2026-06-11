@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# App data
+backend/moodboard.db
+backend/.cache/
+
+# Env
+.env
+.env.local
+
+# Editor
+.DS_Store
