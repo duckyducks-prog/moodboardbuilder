@@ -4,14 +4,18 @@ An iterative vibes-to-visuals search tool for creative direction, modeled on
 Midjourney's style-tuner loop — but for found imagery.
 
 Type freeform **vibes** ("sun-bleached 16mm nostalgia, coastal Brazil, slow
-zooms, grain"), get a masonry grid of 10–15 images/GIFs/film stills pulled
-from visual reference sites, select the 3–5 closest to your intent, and
-**refine**. Each refinement round combines:
+zooms, grain"), get a masonry grid of up to ~30 images/GIFs/film stills
+pulled from visual reference sites, select however many feel right — or none
+at all — and **refine**. With selections, each refinement round combines:
 
 1. **Exa `findSimilar`** on the pages of your selected images, and
 2. a fresh **Exa neural search** using your original vibes enriched with an
    accumulating **style profile** — descriptors extracted by Claude (vision)
    from your selected images each round.
+
+With **zero selections** the button becomes **Refresh results**: a new batch
+for the same vibes (plus the current style profile), never repeating anything
+you've already been shown.
 
 Selections compound across rounds into a final moodboard you can export as a
 PNG contact sheet or JSON, and share via a read-only link.
@@ -51,9 +55,9 @@ just skips style-profile extraction for that round.
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/search` | Creates a board + round 1. Over-fetches ~25 Exa results (`type: neural`, `includeDomains`, `contents.extras.imageLinks`), resolves each to a displayable image (Exa image links → og:image scrape fallback), filters by media type, dedupes, caps at 15. |
+| `POST /api/search` | Creates a board + round 1. Over-fetches ~40 Exa results (`type: neural`, `includeDomains`, `contents.extras.imageLinks`), resolves each to a displayable image (Exa image links → og:image scrape fallback), filters by media type, dedupes, caps at 30. |
 | `POST /api/describe` | Sends the selected images to Claude (`claude-opus-4-8`, vision + JSON-schema structured output) → `{descriptors, palette, avoid}`. |
-| `POST /api/refine` | Records selections, persists the style profile, runs `findSimilar` per selected URL **plus** an enriched search, merges, and dedupes against everything already shown on the board. |
+| `POST /api/refine` | Records selections, persists the style profile, runs `findSimilar` per selected URL **plus** an enriched search, merges, and dedupes against everything already shown on the board. With zero selections it acts as a refresh — same intent, growing the Exa request so unseen results surface. |
 | `GET /api/board/:id` | Full board state — also powers the read-only share link `/board/:id`. |
 | `GET /api/board/:id/export.png` | PNG contact sheet (Pillow). |
 | `GET /api/board/:id/export.json` | Image URLs + style profile. |

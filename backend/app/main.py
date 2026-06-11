@@ -29,9 +29,6 @@ app.add_middleware(
 
 db.init_db()
 
-MIN_SELECT = 3
-MAX_SELECT = 5
-
 
 # ---------------------------------------------------------------------------
 # Request models
@@ -44,7 +41,7 @@ class SearchRequest(BaseModel):
 
 
 class DescribeRequest(BaseModel):
-    image_urls: list[str] = Field(min_length=1, max_length=MAX_SELECT)
+    image_urls: list[str] = Field(min_length=1, max_length=config.MAX_DESCRIBE_IMAGES)
 
 
 class StyleProfile(BaseModel):
@@ -56,7 +53,9 @@ class StyleProfile(BaseModel):
 class RefineRequest(BaseModel):
     board_id: str
     from_round_id: str
-    selected_ids: list[str] = Field(min_length=MIN_SELECT, max_length=MAX_SELECT)
+    # Any number of selections, including zero — an empty list means
+    # "refresh": re-search the same intent, excluding everything seen.
+    selected_ids: list[str] = []
     profile: StyleProfile = StyleProfile()
 
 
@@ -94,8 +93,7 @@ def _exa_http_error(exc: exa_client.ExaError) -> HTTPException:
 def get_config():
     return {
         "domains": config.SEARCH_DOMAINS,
-        "min_select": MIN_SELECT,
-        "max_select": MAX_SELECT,
+        "max_describe_images": config.MAX_DESCRIBE_IMAGES,
         "exa_configured": bool(config.EXA_API_KEY),
         "anthropic_configured": bool(config.ANTHROPIC_API_KEY),
     }
@@ -137,10 +135,9 @@ async def refine(req: RefineRequest):
 
     by_id = {r["id"]: r for r in from_round["results"]}
     selected = [by_id[i] for i in req.selected_ids if i in by_id]
-    if len(selected) < MIN_SELECT:
-        raise HTTPException(400, f"Select at least {MIN_SELECT} results from this round.")
 
-    db.add_selections(req.board_id, req.from_round_id, selected)
+    if selected:
+        db.add_selections(req.board_id, req.from_round_id, selected)
     db.update_style_profile(req.board_id, req.profile.model_dump())
 
     enriched_query = board["vibes"]
@@ -150,11 +147,18 @@ async def refine(req: RefineRequest):
     domains = config.SEARCH_DOMAINS
     seen = db.seen_urls_for_board(req.board_id)
 
+    # Grow the request as the board accumulates seen results, so a refresh
+    # (zero selections, same query) can still surface unseen imagery.
+    num_results = min(config.EXA_MAX_RESULTS, config.OVERFETCH_COUNT + len(seen) // 2)
+
     try:
-        similar = await exa_client.find_similar_many(
-            [s["url"] for s in selected], config.FIND_SIMILAR_PER_SELECTION, domains
-        )
-        fresh = await exa_client.search(enriched_query, config.OVERFETCH_COUNT, domains)
+        similar = []
+        if selected:
+            seeds = [s["url"] for s in selected[: config.MAX_FIND_SIMILAR_SEEDS]]
+            similar = await exa_client.find_similar_many(
+                seeds, config.FIND_SIMILAR_PER_SELECTION, domains
+            )
+        fresh = await exa_client.search(enriched_query, num_results, domains)
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)
 

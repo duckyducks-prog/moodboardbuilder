@@ -19,10 +19,17 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 EXA_BASE_URL = "https://api.exa.ai"
 
-# Over-fetch from Exa so that 10-15 clean cards survive image validation.
-OVERFETCH_COUNT = 25
-MAX_RESULTS_PER_ROUND = 15
+# Over-fetch from Exa so that enough clean cards survive image validation.
+OVERFETCH_COUNT = 40
+MAX_RESULTS_PER_ROUND = 30
 FIND_SIMILAR_PER_SELECTION = 8
+# findSimilar fan-out cap: with unlimited selections, only the first N
+# selected pages seed findSimilar calls (cost/latency control).
+MAX_FIND_SIMILAR_SEEDS = 8
+# Images sent to Claude for style analysis (vision cost control).
+MAX_DESCRIBE_IMAGES = 8
+# Exa caps numResults; used when growing requests to skip past seen results.
+EXA_MAX_RESULTS = 100
 
 CLAUDE_MODEL = "claude-opus-4-8"
 

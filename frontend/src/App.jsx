@@ -9,8 +9,7 @@ import Skeletons from "./components/Skeletons";
 import Toast from "./components/Toast";
 
 const DEFAULT_DOMAINS = ["dribbble.com", "pinterest.com", "film-grab.com", "behance.net", "giphy.com"];
-const MIN_SELECT = 3;
-const MAX_SELECT = 5;
+const MAX_DESCRIBE_IMAGES = 8; // style analysis samples at most this many selections
 
 function mergeUnique(existing, incoming) {
   const seen = new Set(existing.map((s) => s.toLowerCase().trim()));
@@ -84,8 +83,7 @@ export default function App() {
         if (i !== activeIdx) return round;
         const next = new Set(round.selectedIds);
         if (next.has(id)) next.delete(id);
-        else if (next.size < MAX_SELECT) next.add(id);
-        else showToast(`Max ${MAX_SELECT} selections per round.`);
+        else next.add(id);
         return { ...round, selectedIds: next };
       })
     );
@@ -94,23 +92,24 @@ export default function App() {
   const handleRefine = async () => {
     const round = rounds[activeIdx];
     const selectedIds = [...round.selectedIds];
-    if (selectedIds.length < MIN_SELECT) return;
     setLoading("refine");
 
     let nextProfile = profile;
-    try {
-      const byId = new Map(round.results.map((r) => [r.id, r]));
-      const imageUrls = selectedIds.map((id) => byId.get(id).image_url);
-      const dna = await api.describe(imageUrls);
-      nextProfile = {
-        descriptors: mergeUnique(profile.descriptors, dna.descriptors),
-        palette: mergeUnique(profile.palette, dna.palette),
-        avoid: mergeUnique(profile.avoid, dna.avoid),
-      };
-      setProfile(nextProfile);
-    } catch (e) {
-      // Style description is an enhancement — refine still works without it.
-      showToast(`Style analysis skipped: ${e.message}`);
+    if (selectedIds.length > 0) {
+      try {
+        const byId = new Map(round.results.map((r) => [r.id, r]));
+        const imageUrls = selectedIds.slice(0, MAX_DESCRIBE_IMAGES).map((id) => byId.get(id).image_url);
+        const dna = await api.describe(imageUrls);
+        nextProfile = {
+          descriptors: mergeUnique(profile.descriptors, dna.descriptors),
+          palette: mergeUnique(profile.palette, dna.palette),
+          avoid: mergeUnique(profile.avoid, dna.avoid),
+        };
+        setProfile(nextProfile);
+      } catch (e) {
+        // Style description is an enhancement — refine still works without it.
+        showToast(`Style analysis skipped: ${e.message}`);
+      }
     }
 
     try {
@@ -181,7 +180,7 @@ export default function App() {
 
   // ----- rounds view -----
   const selectedCount = activeRound ? activeRound.selectedIds.size : 0;
-  const canRefine = selectedCount >= MIN_SELECT && selectedCount <= MAX_SELECT && !loading;
+  const canRefine = !loading && !!activeRound;
 
   return (
     <div className="mx-auto flex max-w-7xl gap-6 px-6 py-8">
@@ -221,10 +220,20 @@ export default function App() {
             <button
               onClick={handleRefine}
               disabled={!canRefine}
-              title={selectedCount < MIN_SELECT ? `Select at least ${MIN_SELECT} to refine` : ""}
+              title={
+                selectedCount > 0
+                  ? "Refine using your selections"
+                  : "Nothing close? Get a fresh batch for the same vibes"
+              }
               className="rounded-lg bg-orange-400 px-4 py-1.5 text-sm font-medium text-zinc-950 transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-30"
             >
-              {loading === "refine" ? "Refining…" : `Refine (${selectedCount}/${MAX_SELECT})`}
+              {loading === "refine"
+                ? selectedCount > 0
+                  ? "Refining…"
+                  : "Refreshing…"
+                : selectedCount > 0
+                  ? `Refine with ${selectedCount}`
+                  : "Refresh results"}
             </button>
           </div>
         </div>
