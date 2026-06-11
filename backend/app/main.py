@@ -1,5 +1,15 @@
 import os
 
+try:
+    # Verify TLS against the OS trust store (macOS Keychain, Windows store)
+    # instead of Python's bundled CAs, so corporate TLS-inspection proxies
+    # (Netskope/Zscaler etc.) are trusted the same way browsers trust them.
+    import truststore
+
+    truststore.inject_into_ssl()
+except Exception:
+    pass
+
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
