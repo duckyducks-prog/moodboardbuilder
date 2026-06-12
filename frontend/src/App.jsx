@@ -8,7 +8,20 @@ import BoardView from "./components/BoardView";
 import Skeletons from "./components/Skeletons";
 import Toast from "./components/Toast";
 
-const DEFAULT_DOMAINS = ["dribbble.com", "pinterest.com", "film-grab.com", "behance.net", "giphy.com"];
+const DEFAULT_DOMAINS = [
+  "dribbble.com",
+  "behance.net",
+  "pinterest.com",
+  "eyecannndy.com",
+  "giphy.com",
+  "film-grab.com",
+  "shotdeck.com",
+  "shot.cafe",
+  "frameset.app",
+  "movie-screencaps.com",
+  "evanerichards.com",
+  "vimeo.com",
+];
 const MAX_DESCRIBE_IMAGES = 8; // style analysis samples at most this many selections
 
 function mergeUnique(existing, incoming) {

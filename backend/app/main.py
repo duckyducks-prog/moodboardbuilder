@@ -113,6 +113,8 @@ def get_config():
 @app.post("/api/search")
 async def search(req: SearchRequest):
     domains = _domains(req.domains, req.content_type)
+    if req.media_type == "gif" and "giphy.com" not in domains:
+        domains = domains + ["giphy.com"]
     query = _shape_query(req.vibes, req.content_type)
     try:
         raw = await exa_client.search(
@@ -163,6 +165,8 @@ async def refine(req: RefineRequest):
     enriched_query = _shape_query(enriched_query, content_type)
 
     domains = _domains(None, content_type)
+    if board["media_type"] == "gif" and "giphy.com" not in domains:
+        domains = domains + ["giphy.com"]
     seen = db.seen_urls_for_board(req.board_id)
 
     # Grow the request as the board accumulates seen results, so a refresh

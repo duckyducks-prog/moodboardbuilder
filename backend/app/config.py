@@ -6,11 +6,20 @@ _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Search sources — edit this list to add/remove visual reference sites.
 # ---------------------------------------------------------------------------
 SEARCH_DOMAINS = [
+    # design & motion
     "dribbble.com",
-    "pinterest.com",
-    "film-grab.com",
     "behance.net",
+    "pinterest.com",
+    "eyecannndy.com",
     "giphy.com",
+    # film & commercial cinematography
+    "film-grab.com",
+    "shotdeck.com",
+    "shot.cafe",
+    "frameset.app",
+    "movie-screencaps.com",
+    "evanerichards.com",
+    "vimeo.com",
 ]
 
 # API keys (server-side only — never exposed to the frontend)
@@ -33,10 +42,21 @@ MAX_DESCRIBE_IMAGES = 8
 VALIDATE_MAX_EDGE = 384
 
 # Default source bias per content type, used when the user hasn't picked
-# sources explicitly.
+# sources explicitly. Giphy is deliberately NOT in the motion defaults —
+# Dribbble/Behance/Pinterest carry better motion-design work; Giphy only
+# joins in when the user filters to GIFs or picks it explicitly.
 CONTENT_TYPE_DOMAINS = {
-    "motion": ["dribbble.com", "behance.net", "giphy.com", "pinterest.com"],
-    "live": ["film-grab.com", "pinterest.com"],
+    "motion": ["dribbble.com", "behance.net", "pinterest.com", "eyecannndy.com"],
+    "live": [
+        "film-grab.com",
+        "shotdeck.com",
+        "shot.cafe",
+        "frameset.app",
+        "movie-screencaps.com",
+        "evanerichards.com",
+        "pinterest.com",
+        "vimeo.com",
+    ],
     "both": SEARCH_DOMAINS,
 }
 
