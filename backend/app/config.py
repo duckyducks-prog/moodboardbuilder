@@ -64,12 +64,50 @@ CONTENT_TYPE_DOMAINS = {
     "both": SEARCH_DOMAINS,
 }
 
-# Query hints appended per content type so Exa leans the right way.
-CONTENT_TYPE_HINTS = {
-    "motion": "motion design animation",
-    "live": "film still cinematography",
-    "both": "",
+# ---------------------------------------------------------------------------
+# Per-source search strategy. Sources are not interchangeable: Vimeo needs
+# semantic search (its titles/tags are weak signal), Giphy is tag-driven,
+# and each source frames the query differently for live action vs motion.
+# ---------------------------------------------------------------------------
+
+# "inherit" follows the user's Vibes/Technical choice; explicit values pin it.
+DOMAIN_SEARCH_TYPE = {
+    "vimeo.com": "neural",      # always semantic — keyword search is too literal there
+    "pinterest.com": "neural",  # board/pin discovery is semantic by nature
+    "giphy.com": "keyword",     # pure tag search
+    # everyone else: inherit
 }
+
+# Query hints per source and content type ("*" = any content type).
+DOMAIN_HINTS = {
+    "vimeo.com": {
+        "live": "commercial short film cinematography",
+        "motion": "motion design animation reel",
+        "both": "commercial film",
+    },
+    "pinterest.com": {
+        "live": "film still cinematography frame",
+        "motion": "motion design animation",
+        "both": "",
+    },
+    "dribbble.com": {"motion": "motion design animation", "*": ""},
+    "behance.net": {"motion": "motion design", "*": ""},
+    "film-grab.com": {"*": "film still"},
+    "shot.cafe": {"*": "film still"},
+    "frameset.app": {"*": "cinematography frame"},
+    "movie-screencaps.com": {"*": "film frame"},
+    "evanerichards.com": {"*": "cinematography"},
+}
+
+
+def domain_hint(domain: str, content_type: str) -> str:
+    entry = DOMAIN_HINTS.get(domain, {})
+    return entry.get(content_type, entry.get("*", ""))
+
+
+def domain_search_type(domain: str, user_type: str) -> str:
+    pinned = DOMAIN_SEARCH_TYPE.get(domain, "inherit")
+    return user_type if pinned == "inherit" else pinned
 # Exa caps numResults; used when growing requests to skip past seen results.
 EXA_MAX_RESULTS = 100
 

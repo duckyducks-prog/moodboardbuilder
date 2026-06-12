@@ -83,11 +83,6 @@ def _domains(requested: list[str] | None, content_type: str = "both") -> list[st
     return allowed or config.SEARCH_DOMAINS
 
 
-def _shape_query(text: str, content_type: str) -> str:
-    hint = config.CONTENT_TYPE_HINTS.get(content_type, "")
-    return f"{text}, {hint}" if hint else text
-
-
 def _exa_type(search_mode: str) -> str:
     return "keyword" if search_mode == "technical" else "neural"
 
@@ -128,13 +123,13 @@ async def search(req: SearchRequest):
     # Translate terse input into image-search intent ("16mm" -> frames shot
     # on 16mm, not photos of cameras). Falls back to the raw input.
     expanded = await claude_client.expand_query(req.vibes, req.content_type, req.search_mode)
-    query = _shape_query(expanded, req.content_type)
     try:
         raw = await exa_client.search_per_domain(
-            query,
+            expanded,
             _per_domain(config.OVERFETCH_COUNT, domains),
             domains,
             search_type=_exa_type(req.search_mode),
+            content_type=req.content_type,
         )
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)
@@ -149,7 +144,7 @@ async def search(req: SearchRequest):
     board_id = db.create_board(
         req.vibes, req.media_type, req.search_mode, req.content_type, expanded_query=expanded
     )
-    round_id = db.create_round(board_id, idx=1, query=query, results=results)
+    round_id = db.create_round(board_id, idx=1, query=expanded, results=results)
 
     return {"board_id": board_id, "round": _round_payload(round_id)}
 
@@ -182,8 +177,6 @@ async def refine(req: RefineRequest):
     enriched_query = board.get("expanded_query") or board["vibes"]
     if req.profile.descriptors:
         enriched_query += ", " + ", ".join(req.profile.descriptors)
-    enriched_query = _shape_query(enriched_query, content_type)
-
     domains = _domains(None, content_type)
     if board["media_type"] == "gif" and "giphy.com" not in domains:
         domains = domains + ["giphy.com"]
@@ -206,6 +199,7 @@ async def refine(req: RefineRequest):
         fresh = await exa_client.search_per_domain(
             enriched_query, per_domain, domains,
             search_type=_exa_type(board.get("search_mode", "vibes")),
+            content_type=content_type,
         )
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)

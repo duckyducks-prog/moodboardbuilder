@@ -103,16 +103,28 @@ async def find_similar(url: str, num_results: int, domains: list[str]) -> list[d
 
 
 async def search_per_domain(
-    query: str, per_domain: int, domains: list[str], search_type: str = "neural"
+    query: str,
+    per_domain: int,
+    domains: list[str],
+    search_type: str = "neural",
+    content_type: str = "both",
 ) -> list[dict]:
-    """One search per source domain, in parallel.
+    """One search per source domain, in parallel, each with its own strategy.
 
     A single combined search lets whichever domain Exa ranks highest flood
     the batch (in practice: Behance). Querying each domain separately
-    guarantees every source gets a fair shot; main.py interleaves the merge.
+    guarantees every source gets a fair shot — and lets each source use the
+    search type and query framing that actually works there (see
+    config.DOMAIN_SEARCH_TYPE / DOMAIN_HINTS). main.py interleaves the merge.
     A failing domain is dropped as long as at least one succeeds.
     """
-    tasks = [search(query, per_domain, [d], search_type) for d in domains]
+    tasks = []
+    for d in domains:
+        hint = config.domain_hint(d, content_type)
+        domain_query = f"{query}, {hint}" if hint else query
+        tasks.append(
+            search(domain_query, per_domain, [d], config.domain_search_type(d, search_type))
+        )
     outcomes = await asyncio.gather(*tasks, return_exceptions=True)
     merged: list[dict] = []
     errors: list[Exception] = []
