@@ -110,6 +110,18 @@ async def resolve_images(results: list[dict], media_type: str = "both") -> list[
     return [r for r in resolved if r is not None]
 
 
+def drop_generic_images(results: list[dict]) -> list[dict]:
+    """Drop results that share an image URL with another result.
+
+    When several different pages resolve to the same image, it's the site's
+    generic og:image (e.g. the Dribbble logo), not content.
+    """
+    from collections import Counter
+
+    counts = Counter(r["image_url"] for r in results)
+    return [r for r in results if counts[r["image_url"]] == 1]
+
+
 def dedupe(results: list[dict], seen: set[str]) -> list[dict]:
     """Drop results whose page or image URL was already shown, plus in-batch dupes."""
     out = []

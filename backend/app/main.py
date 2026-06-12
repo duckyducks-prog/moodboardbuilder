@@ -37,6 +37,8 @@ db.init_db()
 class SearchRequest(BaseModel):
     vibes: str = Field(min_length=2, max_length=2000)
     media_type: str = "both"  # static | gif | both
+    search_mode: str = "vibes"  # vibes (neural) | technical (keyword)
+    content_type: str = "both"  # motion | live | both
     domains: list[str] | None = None
 
 
@@ -74,11 +76,20 @@ def _round_payload(round_id: str) -> dict:
     }
 
 
-def _domains(requested: list[str] | None) -> list[str]:
+def _domains(requested: list[str] | None, content_type: str = "both") -> list[str]:
     if not requested:
-        return config.SEARCH_DOMAINS
+        return config.CONTENT_TYPE_DOMAINS.get(content_type, config.SEARCH_DOMAINS)
     allowed = [d for d in requested if d in config.SEARCH_DOMAINS]
     return allowed or config.SEARCH_DOMAINS
+
+
+def _shape_query(text: str, content_type: str) -> str:
+    hint = config.CONTENT_TYPE_HINTS.get(content_type, "")
+    return f"{text}, {hint}" if hint else text
+
+
+def _exa_type(search_mode: str) -> str:
+    return "keyword" if search_mode == "technical" else "neural"
 
 
 def _exa_http_error(exc: exa_client.ExaError) -> HTTPException:
@@ -101,17 +112,22 @@ def get_config():
 
 @app.post("/api/search")
 async def search(req: SearchRequest):
-    domains = _domains(req.domains)
+    domains = _domains(req.domains, req.content_type)
+    query = _shape_query(req.vibes, req.content_type)
     try:
-        raw = await exa_client.search(req.vibes, config.OVERFETCH_COUNT, domains)
+        raw = await exa_client.search(
+            query, config.OVERFETCH_COUNT, domains, search_type=_exa_type(req.search_mode)
+        )
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)
 
     resolved = await images.resolve_images(raw, req.media_type)
-    results = images.dedupe(resolved, seen=set())[: config.MAX_RESULTS_PER_ROUND]
+    candidates = images.dedupe(images.drop_generic_images(resolved), seen=set())
+    vetted = await claude_client.filter_results(req.vibes, candidates)
+    results = vetted[: config.MAX_RESULTS_PER_ROUND]
 
-    board_id = db.create_board(req.vibes, req.media_type)
-    round_id = db.create_round(board_id, idx=1, query=req.vibes, results=results)
+    board_id = db.create_board(req.vibes, req.media_type, req.search_mode, req.content_type)
+    round_id = db.create_round(board_id, idx=1, query=query, results=results)
 
     return {"board_id": board_id, "round": _round_payload(round_id)}
 
@@ -140,11 +156,13 @@ async def refine(req: RefineRequest):
         db.add_selections(req.board_id, req.from_round_id, selected)
     db.update_style_profile(req.board_id, req.profile.model_dump())
 
+    content_type = board.get("content_type", "both")
     enriched_query = board["vibes"]
     if req.profile.descriptors:
         enriched_query += ", " + ", ".join(req.profile.descriptors)
+    enriched_query = _shape_query(enriched_query, content_type)
 
-    domains = config.SEARCH_DOMAINS
+    domains = _domains(None, content_type)
     seen = db.seen_urls_for_board(req.board_id)
 
     # Grow the request as the board accumulates seen results, so a refresh
@@ -158,7 +176,10 @@ async def refine(req: RefineRequest):
             similar = await exa_client.find_similar_many(
                 seeds, config.FIND_SIMILAR_PER_SELECTION, domains
             )
-        fresh = await exa_client.search(enriched_query, num_results, domains)
+        fresh = await exa_client.search(
+            enriched_query, num_results, domains,
+            search_type=_exa_type(board.get("search_mode", "vibes")),
+        )
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)
 
@@ -171,7 +192,9 @@ async def refine(req: RefineRequest):
         merged.append(r)
 
     resolved = await images.resolve_images(merged, board["media_type"])
-    results = images.dedupe(resolved, seen)[: config.MAX_RESULTS_PER_ROUND]
+    candidates = images.dedupe(images.drop_generic_images(resolved), seen)
+    vetted = await claude_client.filter_results(enriched_query, candidates)
+    results = vetted[: config.MAX_RESULTS_PER_ROUND]
 
     round_id = db.create_round(
         req.board_id,
@@ -194,6 +217,8 @@ def get_board(board_id: str):
         "id": board["id"],
         "vibes": board["vibes"],
         "media_type": board["media_type"],
+        "search_mode": board.get("search_mode", "vibes"),
+        "content_type": board.get("content_type", "both"),
         "style_profile": _json.loads(board["style_profile"]),
         "rounds": [
             {

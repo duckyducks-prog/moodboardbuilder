@@ -6,9 +6,41 @@ const MEDIA_OPTIONS = [
   { value: "gif", label: "GIFs" },
 ];
 
+const MODE_OPTIONS = [
+  { value: "vibes", label: "Vibes" },
+  { value: "technical", label: "Technical" },
+];
+
+const CONTENT_OPTIONS = [
+  { value: "both", label: "Any" },
+  { value: "motion", label: "Motion design" },
+  { value: "live", label: "Live action" },
+];
+
+function ToggleGroup({ options, value, onChange }) {
+  return (
+    <div className="flex rounded-lg border border-zinc-800 p-0.5">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={`rounded-md px-3 py-1 text-sm transition ${
+            value === opt.value ? "bg-zinc-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function VibeInput({ domains, onSearch, busy }) {
   const [vibes, setVibes] = useState("");
   const [mediaType, setMediaType] = useState("both");
+  const [searchMode, setSearchMode] = useState("vibes");
+  const [contentType, setContentType] = useState("both");
   const [activeDomains, setActiveDomains] = useState(new Set(domains));
 
   const toggleDomain = (d) => {
@@ -26,7 +58,7 @@ export default function VibeInput({ domains, onSearch, busy }) {
   const submit = (e) => {
     e.preventDefault();
     if (vibes.trim().length < 2 || busy) return;
-    onSearch({ vibes: vibes.trim(), mediaType, domains: [...activeDomains] });
+    onSearch({ vibes: vibes.trim(), mediaType, searchMode, contentType, domains: [...activeDomains] });
   };
 
   return (
@@ -40,27 +72,20 @@ export default function VibeInput({ domains, onSearch, busy }) {
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit(e);
         }}
-        placeholder={'"sun-bleached 16mm nostalgia, coastal Brazil, slow zooms, grain"'}
+        placeholder={
+          searchMode === "technical"
+            ? '"glassmorphism animation", "kinetic typography", "anamorphic lens flare"'
+            : '"sun-bleached 16mm nostalgia, coastal Brazil, slow zooms, grain"'
+        }
         rows={4}
         autoFocus
         className="w-full resize-none rounded-2xl border border-zinc-800 bg-zinc-950 p-5 text-lg text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-zinc-600"
       />
 
       <div className="mt-6 flex w-full flex-wrap items-center gap-2">
-        <div className="flex rounded-lg border border-zinc-800 p-0.5">
-          {MEDIA_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setMediaType(opt.value)}
-              className={`rounded-md px-3 py-1 text-sm transition ${
-                mediaType === opt.value ? "bg-zinc-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <ToggleGroup options={MODE_OPTIONS} value={searchMode} onChange={setSearchMode} />
+        <ToggleGroup options={CONTENT_OPTIONS} value={contentType} onChange={setContentType} />
+        <ToggleGroup options={MEDIA_OPTIONS} value={mediaType} onChange={setMediaType} />
         <div className="mx-2 h-5 w-px bg-zinc-800" />
         {domains.map((d) => (
           <button

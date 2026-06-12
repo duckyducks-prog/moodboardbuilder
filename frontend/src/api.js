@@ -21,10 +21,16 @@ async function request(path, options = {}) {
 export const api = {
   config: () => request("/api/config"),
 
-  search: ({ vibes, mediaType, domains }) =>
+  search: ({ vibes, mediaType, searchMode, contentType, domains }) =>
     request("/api/search", {
       method: "POST",
-      body: JSON.stringify({ vibes, media_type: mediaType, domains }),
+      body: JSON.stringify({
+        vibes,
+        media_type: mediaType,
+        search_mode: searchMode,
+        content_type: contentType,
+        domains,
+      }),
     }),
 
   describe: (imageUrls) =>

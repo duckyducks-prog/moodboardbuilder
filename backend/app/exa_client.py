@@ -76,10 +76,12 @@ def _normalize(raw_results: list[dict]) -> list[dict]:
     return results
 
 
-async def search(query: str, num_results: int, domains: list[str]) -> list[dict]:
+async def search(query: str, num_results: int, domains: list[str], search_type: str = "neural") -> list[dict]:
     payload = {
         "query": query,
-        "type": "neural",
+        # "neural" suits vibes-style prompts; "keyword" suits technical terms
+        # like "glassmorphism animation".
+        "type": search_type,
         "numResults": num_results,
         "includeDomains": domains,
         "contents": _contents_block(),

@@ -28,6 +28,24 @@ FIND_SIMILAR_PER_SELECTION = 8
 MAX_FIND_SIMILAR_SEEDS = 8
 # Images sent to Claude for style analysis (vision cost control).
 MAX_DESCRIBE_IMAGES = 8
+# Vision quality gate: candidate thumbnails are downscaled to this edge for
+# the single junk-filter call (small = cheap; enough to spot logos/placeholders).
+VALIDATE_MAX_EDGE = 384
+
+# Default source bias per content type, used when the user hasn't picked
+# sources explicitly.
+CONTENT_TYPE_DOMAINS = {
+    "motion": ["dribbble.com", "behance.net", "giphy.com", "pinterest.com"],
+    "live": ["film-grab.com", "pinterest.com"],
+    "both": SEARCH_DOMAINS,
+}
+
+# Query hints appended per content type so Exa leans the right way.
+CONTENT_TYPE_HINTS = {
+    "motion": "motion design animation",
+    "live": "film still cinematography",
+    "both": "",
+}
 # Exa caps numResults; used when growing requests to skip past seen results.
 EXA_MAX_RESULTS = 100
 

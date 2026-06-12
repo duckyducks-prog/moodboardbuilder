@@ -51,10 +51,10 @@ _PROMPT = (
 _MAX_EDGE = 768  # downscale before sending to keep vision token cost low
 
 
-def _to_jpeg(data: bytes) -> bytes:
+def _to_jpeg(data: bytes, max_edge: int = _MAX_EDGE) -> bytes:
     img = Image.open(io.BytesIO(data))
     img = img.convert("RGB")  # flattens GIFs to their first frame
-    img.thumbnail((_MAX_EDGE, _MAX_EDGE))
+    img.thumbnail((max_edge, max_edge))
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=85)
     return buf.getvalue()
@@ -110,3 +110,102 @@ async def describe_images(image_urls: list[str]) -> dict:
     if not text:
         raise DescribeError("Empty response from the model.", status=502)
     return json.loads(text)
+
+
+# ---------------------------------------------------------------------------
+# Quality gate: filter junk images out of a result batch before display.
+# ---------------------------------------------------------------------------
+
+_FILTER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "keep": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "description": "Indices of images that are usable visual references.",
+        },
+    },
+    "required": ["keep"],
+    "additionalProperties": False,
+}
+
+_FILTER_PROMPT = (
+    "You are quality-filtering image search results for the query: {query!r}.\n"
+    "Each image above is labeled with an index. Decide for each whether it is a "
+    "usable visual reference for a moodboard built around that query.\n"
+    "REJECT: website logos and brand marks of the source sites themselves (the "
+    "Dribbble basketball, Behance/Pinterest/Giphy logos), placeholder or error "
+    "images, login/signup walls, user avatars and profile photos, blank or "
+    "near-blank frames, screenshots of webpage chrome or cookie banners, and "
+    "images completely unrelated to the query.\n"
+    "KEEP everything else, including loosely related imagery — this is a "
+    "creative reference hunt, so err on the side of keeping anything visually "
+    "interesting and on-theme. Return the indices to keep."
+)
+
+
+async def filter_results(query: str, results: list[dict]) -> list[dict]:
+    """Fetch every candidate image and reject junk via one Claude vision call.
+
+    Fails open: results whose images fetch successfully are returned even if
+    the model call is unavailable (no key) or errors. Results whose images
+    cannot be fetched are always dropped — they could never render anyway.
+    The fetch pass also warms the proxy cache, so the browser loads instantly.
+    """
+    fetched: list[tuple[dict, bytes]] = []
+
+    async def grab(result: dict):
+        try:
+            data, _ = await proxy.fetch_image(result["image_url"])
+            fetched.append((result, _to_jpeg(data, config.VALIDATE_MAX_EDGE)))
+        except Exception:
+            pass  # unfetchable/undecodable -> drop
+
+    import asyncio
+
+    semaphore = asyncio.Semaphore(10)
+
+    async def bounded(result: dict):
+        async with semaphore:
+            await grab(result)
+
+    await asyncio.gather(*(bounded(r) for r in results))
+    # restore original (relevance) order — gather appends as tasks finish
+    order = {r["id"]: i for i, r in enumerate(results)}
+    fetched.sort(key=lambda pair: order[pair[0]["id"]])
+
+    if not config.ANTHROPIC_API_KEY or not fetched:
+        return [r for r, _ in fetched]
+
+    blocks = []
+    for i, (_, jpeg) in enumerate(fetched):
+        blocks.append({"type": "text", "text": f"Image {i}:"})
+        blocks.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": base64.standard_b64encode(jpeg).decode(),
+                },
+            }
+        )
+    blocks.append({"type": "text", "text": _FILTER_PROMPT.format(query=query)})
+
+    client = anthropic.AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY)
+    try:
+        response = await client.messages.create(
+            model=config.CLAUDE_MODEL,
+            max_tokens=16000,
+            thinking={"type": "adaptive"},
+            messages=[{"role": "user", "content": blocks}],
+            output_config={"format": {"type": "json_schema", "schema": _FILTER_SCHEMA}},
+        )
+        if response.stop_reason == "refusal":
+            return [r for r, _ in fetched]
+        text = next((b.text for b in response.content if b.type == "text"), "")
+        keep = set(json.loads(text)["keep"])
+    except Exception:
+        return [r for r, _ in fetched]  # fail open
+
+    return [r for i, (r, _) in enumerate(fetched) if i in keep]

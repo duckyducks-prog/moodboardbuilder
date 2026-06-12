@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS boards (
     id            TEXT PRIMARY KEY,
     vibes         TEXT NOT NULL,
     media_type    TEXT NOT NULL DEFAULT 'both',
+    search_mode   TEXT NOT NULL DEFAULT 'vibes',
+    content_type  TEXT NOT NULL DEFAULT 'both',
     style_profile TEXT NOT NULL DEFAULT '{}',
     created_at    REAL NOT NULL
 );
@@ -43,18 +45,27 @@ def get_conn() -> sqlite3.Connection:
 def init_db() -> None:
     with get_conn() as conn:
         conn.executescript(_SCHEMA)
+        # Lightweight migration for databases created before these columns.
+        for column, default in (("search_mode", "vibes"), ("content_type", "both")):
+            try:
+                conn.execute(
+                    f"ALTER TABLE boards ADD COLUMN {column} TEXT NOT NULL DEFAULT '{default}'"
+                )
+            except sqlite3.OperationalError:
+                pass  # column already exists
 
 
 def new_id() -> str:
     return uuid.uuid4().hex[:12]
 
 
-def create_board(vibes: str, media_type: str) -> str:
+def create_board(vibes: str, media_type: str, search_mode: str = "vibes", content_type: str = "both") -> str:
     board_id = new_id()
     with get_conn() as conn:
         conn.execute(
-            "INSERT INTO boards (id, vibes, media_type, style_profile, created_at) VALUES (?, ?, ?, '{}', ?)",
-            (board_id, vibes, media_type, time.time()),
+            "INSERT INTO boards (id, vibes, media_type, search_mode, content_type, style_profile, created_at) "
+            "VALUES (?, ?, ?, ?, ?, '{}', ?)",
+            (board_id, vibes, media_type, search_mode, content_type, time.time()),
         )
     return board_id
 

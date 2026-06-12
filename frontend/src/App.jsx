@@ -61,10 +61,10 @@ export default function App() {
 
   const activeRound = rounds[activeIdx];
 
-  const handleSearch = async ({ vibes, mediaType, domains }) => {
+  const handleSearch = async ({ vibes, mediaType, searchMode, contentType, domains }) => {
     setLoading("search");
     try {
-      const data = await api.search({ vibes, mediaType, domains });
+      const data = await api.search({ vibes, mediaType, searchMode, contentType, domains });
       setBoardId(data.board_id);
       setRounds([{ ...data.round, selectedIds: new Set() }]);
       setActiveIdx(0);
