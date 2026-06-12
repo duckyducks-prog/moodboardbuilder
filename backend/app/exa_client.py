@@ -70,6 +70,7 @@ def _normalize(raw_results: list[dict]) -> list[dict]:
                 "exa_id": r.get("id"),
                 "url": url,
                 "title": r.get("title") or "",
+                "score": r.get("score"),
                 "image_candidates": candidates,
             }
         )
@@ -99,6 +100,30 @@ async def find_similar(url: str, num_results: int, domains: list[str]) -> list[d
     }
     data = await _post("/findSimilar", payload)
     return _normalize(data.get("results", []))
+
+
+async def search_per_domain(
+    query: str, per_domain: int, domains: list[str], search_type: str = "neural"
+) -> list[dict]:
+    """One search per source domain, in parallel.
+
+    A single combined search lets whichever domain Exa ranks highest flood
+    the batch (in practice: Behance). Querying each domain separately
+    guarantees every source gets a fair shot; main.py interleaves the merge.
+    A failing domain is dropped as long as at least one succeeds.
+    """
+    tasks = [search(query, per_domain, [d], search_type) for d in domains]
+    outcomes = await asyncio.gather(*tasks, return_exceptions=True)
+    merged: list[dict] = []
+    errors: list[Exception] = []
+    for outcome in outcomes:
+        if isinstance(outcome, Exception):
+            errors.append(outcome)
+        else:
+            merged.extend(outcome)
+    if errors and not merged:
+        raise errors[0]
+    return merged
 
 
 async def find_similar_many(urls: list[str], num_results: int, domains: list[str]) -> list[dict]:

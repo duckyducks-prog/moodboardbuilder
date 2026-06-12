@@ -121,8 +121,19 @@ _FILTER_SCHEMA = {
     "properties": {
         "keep": {
             "type": "array",
-            "items": {"type": "integer"},
-            "description": "Indices of images that are usable visual references.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "index": {"type": "integer"},
+                    "relevance": {
+                        "type": "integer",
+                        "description": "0-10, how well this image serves the query as a visual reference.",
+                    },
+                },
+                "required": ["index", "relevance"],
+                "additionalProperties": False,
+            },
+            "description": "Usable images with their relevance scores.",
         },
     },
     "required": ["keep"],
@@ -133,14 +144,18 @@ _FILTER_PROMPT = (
     "You are quality-filtering image search results for the query: {query!r}.\n"
     "Each image above is labeled with an index. Decide for each whether it is a "
     "usable visual reference for a moodboard built around that query.\n"
-    "REJECT: website logos and brand marks of the source sites themselves (the "
-    "Dribbble basketball, Behance/Pinterest/Giphy logos), placeholder or error "
-    "images, login/signup walls, user avatars and profile photos, blank or "
-    "near-blank frames, screenshots of webpage chrome or cookie banners, and "
-    "images completely unrelated to the query.\n"
+    "REJECT (omit from keep): website logos and brand marks of the source sites "
+    "themselves (the Dribbble basketball, Behance/Pinterest/Giphy logos), "
+    "placeholder or error images, login/signup walls, user avatars and profile "
+    "photos, blank or near-blank frames, screenshots of webpage chrome or cookie "
+    "banners, and images completely unrelated to the query.\n"
     "KEEP everything else, including loosely related imagery — this is a "
     "creative reference hunt, so err on the side of keeping anything visually "
-    "interesting and on-theme. Return the indices to keep."
+    "interesting and on-theme.\n"
+    "For each kept image, also rate its relevance to the query from 0 to 10 "
+    "(10 = exactly the brief: subject, technique, and mood all match; "
+    "5 = right mood or technique but different subject; "
+    "1-2 = only loosely adjacent)."
 )
 
 
@@ -204,8 +219,19 @@ async def filter_results(query: str, results: list[dict]) -> list[dict]:
         if response.stop_reason == "refusal":
             return [r for r, _ in fetched]
         text = next((b.text for b in response.content if b.type == "text"), "")
-        keep = set(json.loads(text)["keep"])
+        keep = {
+            entry["index"]: entry["relevance"]
+            for entry in json.loads(text)["keep"]
+            if isinstance(entry.get("index"), int)
+        }
     except Exception:
         return [r for r, _ in fetched]  # fail open
 
-    return [r for i, (r, _) in enumerate(fetched) if i in keep]
+    kept = []
+    for i, (r, _) in enumerate(fetched):
+        if i in keep:
+            r["relevance"] = keep[i]
+            kept.append(r)
+    # most relevant first; stable, so the source interleave breaks ties
+    kept.sort(key=lambda r: -r.get("relevance", 0))
+    return kept

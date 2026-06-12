@@ -92,6 +92,16 @@ def _exa_type(search_mode: str) -> str:
     return "keyword" if search_mode == "technical" else "neural"
 
 
+def _per_domain(total: int, domains: list[str]) -> int:
+    return max(4, -(-total // len(domains)))  # ceil division, floor of 4
+
+
+def _finalize(vetted: list[dict]) -> list[dict]:
+    return images.cap_per_source(
+        vetted, config.MAX_PER_DOMAIN, config.MAX_RESULTS_PER_ROUND
+    )
+
+
 def _exa_http_error(exc: exa_client.ExaError) -> HTTPException:
     return HTTPException(status_code=exc.status, detail=str(exc))
 
@@ -117,16 +127,21 @@ async def search(req: SearchRequest):
         domains = domains + ["giphy.com"]
     query = _shape_query(req.vibes, req.content_type)
     try:
-        raw = await exa_client.search(
-            query, config.OVERFETCH_COUNT, domains, search_type=_exa_type(req.search_mode)
+        raw = await exa_client.search_per_domain(
+            query,
+            _per_domain(config.OVERFETCH_COUNT, domains),
+            domains,
+            search_type=_exa_type(req.search_mode),
         )
     except exa_client.ExaError as exc:
         raise _exa_http_error(exc)
 
     resolved = await images.resolve_images(raw, req.media_type)
-    candidates = images.dedupe(images.drop_generic_images(resolved), seen=set())
+    candidates = images.interleave_by_source(
+        images.dedupe(images.drop_generic_images(resolved), seen=set())
+    )
     vetted = await claude_client.filter_results(req.vibes, candidates)
-    results = vetted[: config.MAX_RESULTS_PER_ROUND]
+    results = _finalize(vetted)
 
     board_id = db.create_board(req.vibes, req.media_type, req.search_mode, req.content_type)
     round_id = db.create_round(board_id, idx=1, query=query, results=results)
@@ -171,7 +186,10 @@ async def refine(req: RefineRequest):
 
     # Grow the request as the board accumulates seen results, so a refresh
     # (zero selections, same query) can still surface unseen imagery.
-    num_results = min(config.EXA_MAX_RESULTS, config.OVERFETCH_COUNT + len(seen) // 2)
+    per_domain = min(
+        config.EXA_MAX_RESULTS,
+        _per_domain(config.OVERFETCH_COUNT, domains) + len(seen) // (2 * len(domains)),
+    )
 
     try:
         similar = []
@@ -180,8 +198,8 @@ async def refine(req: RefineRequest):
             similar = await exa_client.find_similar_many(
                 seeds, config.FIND_SIMILAR_PER_SELECTION, domains
             )
-        fresh = await exa_client.search(
-            enriched_query, num_results, domains,
+        fresh = await exa_client.search_per_domain(
+            enriched_query, per_domain, domains,
             search_type=_exa_type(board.get("search_mode", "vibes")),
         )
     except exa_client.ExaError as exc:
@@ -196,9 +214,11 @@ async def refine(req: RefineRequest):
         merged.append(r)
 
     resolved = await images.resolve_images(merged, board["media_type"])
-    candidates = images.dedupe(images.drop_generic_images(resolved), seen)
+    candidates = images.interleave_by_source(
+        images.dedupe(images.drop_generic_images(resolved), seen)
+    )
     vetted = await claude_client.filter_results(enriched_query, candidates)
-    results = vetted[: config.MAX_RESULTS_PER_ROUND]
+    results = _finalize(vetted)
 
     round_id = db.create_round(
         req.board_id,

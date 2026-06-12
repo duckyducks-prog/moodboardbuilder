@@ -103,6 +103,7 @@ async def resolve_images(results: list[dict], media_type: str = "both") -> list[
                 "still_url": giphy_still(image_url),
                 "media": media,
                 "source": source_domain(result["url"]),
+                "score": result.get("score"),
             }
 
         resolved = await asyncio.gather(*(resolve(r) for r in results))
@@ -120,6 +121,40 @@ def drop_generic_images(results: list[dict]) -> list[dict]:
 
     counts = Counter(r["image_url"] for r in results)
     return [r for r in results if counts[r["image_url"]] == 1]
+
+
+def interleave_by_source(results: list[dict]) -> list[dict]:
+    """Round-robin results across source domains, preserving each source's
+    own relevance order, so no single site dominates the top of the batch."""
+    groups: dict[str, list[dict]] = {}
+    order: list[str] = []
+    for r in results:
+        if r["source"] not in groups:
+            groups[r["source"]] = []
+            order.append(r["source"])
+        groups[r["source"]].append(r)
+
+    interleaved: list[dict] = []
+    queues = [groups[s] for s in order]
+    while queues:
+        queues = [q for q in queues if q]
+        for q in queues:
+            if q:
+                interleaved.append(q.pop(0))
+    return interleaved
+
+
+def cap_per_source(results: list[dict], cap: int, total: int) -> list[dict]:
+    out: list[dict] = []
+    counts: dict[str, int] = {}
+    for r in results:
+        if counts.get(r["source"], 0) >= cap:
+            continue
+        counts[r["source"]] = counts.get(r["source"], 0) + 1
+        out.append(r)
+        if len(out) >= total:
+            break
+    return out
 
 
 def dedupe(results: list[dict], seen: set[str]) -> list[dict]:
