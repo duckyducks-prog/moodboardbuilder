@@ -14,7 +14,6 @@ SEARCH_DOMAINS = [
     "giphy.com",
     # film & commercial cinematography
     "film-grab.com",
-    "shotdeck.com",
     "shot.cafe",
     "frameset.app",
     "movie-screencaps.com",
@@ -49,7 +48,6 @@ CONTENT_TYPE_DOMAINS = {
     "motion": ["dribbble.com", "behance.net", "pinterest.com", "eyecannndy.com"],
     "live": [
         "film-grab.com",
-        "shotdeck.com",
         "shot.cafe",
         "frameset.app",
         "movie-screencaps.com",

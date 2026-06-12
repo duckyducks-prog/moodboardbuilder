@@ -15,7 +15,6 @@ const DEFAULT_DOMAINS = [
   "eyecannndy.com",
   "giphy.com",
   "film-grab.com",
-  "shotdeck.com",
   "shot.cafe",
   "frameset.app",
   "movie-screencaps.com",
