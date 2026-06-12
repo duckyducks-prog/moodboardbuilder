@@ -28,10 +28,10 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 EXA_BASE_URL = "https://api.exa.ai"
 
 # Over-fetch from Exa so that enough clean cards survive image validation.
-OVERFETCH_COUNT = 40
-MAX_RESULTS_PER_ROUND = 30
+OVERFETCH_COUNT = 60
+MAX_RESULTS_PER_ROUND = 48
 # No single source may fill more than this many cards in a round.
-MAX_PER_DOMAIN = 6
+MAX_PER_DOMAIN = 10
 FIND_SIMILAR_PER_SELECTION = 8
 # findSimilar fan-out cap: with unlimited selections, only the first N
 # selected pages seed findSimilar calls (cost/latency control).
