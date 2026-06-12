@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { proxied } from "../api";
 import StyleProfile from "./StyleProfile";
+import { ResultMedia } from "./ResultsGrid";
 
 export default function BoardView({ board, readOnly = false }) {
   const [copied, setCopied] = useState(false);
@@ -65,7 +65,7 @@ export default function BoardView({ board, readOnly = false }) {
               className="group relative mb-3 block overflow-hidden rounded-xl"
               style={{ breakInside: "avoid" }}
             >
-              <img src={proxied(s.result.image_url)} alt={s.result.title || ""} loading="lazy" className="w-full" />
+              <ResultMedia result={s.result} hoverAnimate={false} hovered={false} className="w-full" />
               <span className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-zinc-300 opacity-0 transition group-hover:opacity-100">
                 {s.result.source.replace(/\.(com|net)$/, "")}
               </span>

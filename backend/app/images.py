@@ -22,6 +22,19 @@ _OG_IMAGE_RE_REV = re.compile(
     re.IGNORECASE,
 )
 
+_VIDEO_RES = [
+    re.compile(
+        r'<meta[^>]+(?:property|name)=["\'](?:og:video(?::secure_url|:url)?|twitter:player:stream)["\'][^>]+content=["\']([^"\']+)["\']',
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\'](?:og:video(?::secure_url|:url)?|twitter:player:stream)["\']',
+        re.IGNORECASE,
+    ),
+    re.compile(r'<video[^>]+src=["\']([^"\']+\.mp4[^"\']*)["\']', re.IGNORECASE),
+    re.compile(r'<source[^>]+src=["\']([^"\']+\.mp4[^"\']*)["\']', re.IGNORECASE),
+]
+
 _IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif")
 
 
@@ -54,7 +67,7 @@ def _pick_candidate(candidates: list[str]) -> str | None:
     return None
 
 
-async def _scrape_og_image(client: httpx.AsyncClient, page_url: str) -> str | None:
+async def _fetch_page(client: httpx.AsyncClient, page_url: str) -> str | None:
     try:
         resp = await client.get(
             page_url,
@@ -66,11 +79,22 @@ async def _scrape_og_image(client: httpx.AsyncClient, page_url: str) -> str | No
         return None
     if resp.status_code != 200 or "text/html" not in resp.headers.get("content-type", ""):
         return None
-    head = resp.text[:200_000]
-    match = _OG_IMAGE_RE.search(head) or _OG_IMAGE_RE_REV.search(head)
-    if not match:
-        return None
-    return urljoin(page_url, match.group(1))
+    return resp.text[:300_000]
+
+
+def parse_og_image(html: str, page_url: str) -> str | None:
+    match = _OG_IMAGE_RE.search(html) or _OG_IMAGE_RE_REV.search(html)
+    return urljoin(page_url, match.group(1)) if match else None
+
+
+def parse_video(html: str, page_url: str) -> str | None:
+    for pattern in _VIDEO_RES:
+        match = pattern.search(html)
+        if match:
+            url = urljoin(page_url, match.group(1))
+            if url.startswith("http"):
+                return url
+    return None
 
 
 async def resolve_images(results: list[dict], media_type: str = "both") -> list[dict]:
@@ -80,19 +104,35 @@ async def resolve_images(results: list[dict], media_type: str = "both") -> list[
     async with httpx.AsyncClient() as client:
 
         async def resolve(result: dict) -> dict | None:
+            domain = source_domain(result["url"])
             image_url = _pick_candidate(result.get("image_candidates", []))
-            if not image_url:
-                # The page URL itself might be a direct image link.
-                if urlparse(result["url"]).path.lower().endswith(_IMAGE_EXTENSIONS):
-                    image_url = result["url"]
-                else:
-                    async with semaphore:
-                        image_url = await _scrape_og_image(client, result["url"])
+            video_url = None
+
+            if not image_url and urlparse(result["url"]).path.lower().endswith(_IMAGE_EXTENSIONS):
+                # The page URL itself is a direct image link.
+                image_url = result["url"]
+
+            # Scrape the page when we still need an image, or when the source
+            # hosts motion work behind a static poster (e.g. Dribbble mp4s).
+            if not image_url or domain in config.VIDEO_SCRAPE_DOMAINS:
+                async with semaphore:
+                    html = await _fetch_page(client, result["url"])
+                if html:
+                    image_url = image_url or parse_og_image(html, result["url"])
+                    video_url = parse_video(html, result["url"])
             if not image_url:
                 return None
 
-            media = "gif" if is_gif(image_url) else "static"
-            if media_type != "both" and media != media_type:
+            if video_url:
+                media = "video"
+            elif is_gif(image_url):
+                media = "gif"
+            else:
+                media = "static"
+            # "gif" filter means "things that move" — gifs and videos alike.
+            if media_type == "static" and media != "static":
+                return None
+            if media_type == "gif" and media == "static":
                 return None
 
             return {
@@ -101,8 +141,9 @@ async def resolve_images(results: list[dict], media_type: str = "both") -> list[
                 "title": result["title"],
                 "image_url": image_url,
                 "still_url": giphy_still(image_url),
+                "video_url": video_url,
                 "media": media,
-                "source": source_domain(result["url"]),
+                "source": domain,
                 "score": result.get("score"),
             }
 

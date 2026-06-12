@@ -42,6 +42,10 @@ MAX_DESCRIBE_IMAGES = 8
 # the single junk-filter call (small = cheap; enough to spot logos/placeholders).
 VALIDATE_MAX_EDGE = 384
 
+# Domains whose result pages get scraped for an embedded video (mp4), so
+# motion work plays in the grid instead of showing a static poster frame.
+VIDEO_SCRAPE_DOMAINS = {"dribbble.com"}
+
 # Default source bias per content type, used when the user hasn't picked
 # sources explicitly. Giphy is deliberately NOT in the motion defaults —
 # Dribbble/Behance/Pinterest carry better motion-design work; Giphy only

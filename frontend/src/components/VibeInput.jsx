@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 const MEDIA_OPTIONS = [
-  { value: "both", label: "Both" },
+  { value: "both", label: "All media" },
   { value: "static", label: "Static" },
-  { value: "gif", label: "GIFs" },
+  { value: "gif", label: "Moving" }, // GIFs + looping videos
 ];
 
 const MODE_OPTIONS = [

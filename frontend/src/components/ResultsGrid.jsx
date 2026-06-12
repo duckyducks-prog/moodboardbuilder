@@ -1,15 +1,50 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { proxied } from "../api";
+
+export function ResultMedia({ result, hoverAnimate, hovered, className, onError }) {
+  const videoRef = useRef(null);
+
+  if (result.media === "video" && result.video_url) {
+    // hover-only mode: paused with poster until the pointer arrives
+    const playing = !hoverAnimate || hovered;
+    if (videoRef.current) {
+      if (playing) videoRef.current.play().catch(() => {});
+      else videoRef.current.pause();
+    }
+    return (
+      <video
+        ref={videoRef}
+        src={proxied(result.video_url)}
+        poster={proxied(result.image_url)}
+        muted
+        loop
+        playsInline
+        autoPlay={!hoverAnimate}
+        preload="metadata"
+        onError={onError}
+        className={className}
+      />
+    );
+  }
+
+  // GIF perf option: show the still thumbnail and only animate on hover.
+  const showStill = result.media === "gif" && hoverAnimate && result.still_url && !hovered;
+  return (
+    <img
+      src={proxied(showStill ? result.still_url : result.image_url)}
+      alt={result.title || "result"}
+      loading="lazy"
+      onError={onError}
+      className={className}
+    />
+  );
+}
 
 function Card({ result, selected, onToggle, hoverAnimate, readOnly }) {
   const [hovered, setHovered] = useState(false);
   const [failed, setFailed] = useState(false);
 
   if (failed) return null;
-
-  // GIF perf option: show the still thumbnail and only animate on hover.
-  const showStill = result.media === "gif" && hoverAnimate && result.still_url && !hovered;
-  const src = proxied(showStill ? result.still_url : result.image_url);
 
   return (
     <div
@@ -21,10 +56,10 @@ function Card({ result, selected, onToggle, hoverAnimate, readOnly }) {
       onMouseLeave={() => setHovered(false)}
       onClick={() => !readOnly && onToggle(result.id)}
     >
-      <img
-        src={src}
-        alt={result.title || "result"}
-        loading="lazy"
+      <ResultMedia
+        result={result}
+        hoverAnimate={hoverAnimate}
+        hovered={hovered}
         onError={() => setFailed(true)}
         className={`w-full transition ${selected ? "opacity-100" : "opacity-90 group-hover:opacity-100"}`}
       />
@@ -39,6 +74,7 @@ function Card({ result, selected, onToggle, hoverAnimate, readOnly }) {
         <span className="rounded bg-black/60 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-zinc-300">
           {result.source.replace(/\.(com|net)$/, "")}
           {result.media === "gif" && " · gif"}
+          {result.media === "video" && " · motion"}
         </span>
         <a
           href={result.url}

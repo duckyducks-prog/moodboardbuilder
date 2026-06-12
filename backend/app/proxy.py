@@ -99,10 +99,11 @@ async def fetch_image(url: str) -> tuple[bytes, str]:
         raise ProxyError(f"Upstream returned {resp.status_code}.", status=502)
 
     content_type = resp.headers.get("content-type", "").split(";")[0].strip().lower()
-    if not content_type.startswith("image/"):
-        raise ProxyError("URL did not resolve to an image.", status=415)
+    # Images plus short looping clips (Dribbble motion shots are mp4s).
+    if not content_type.startswith(("image/", "video/")):
+        raise ProxyError("URL did not resolve to an image or video.", status=415)
     if len(resp.content) > config.IMG_MAX_BYTES:
-        raise ProxyError("Image too large to proxy.", status=413)
+        raise ProxyError("File too large to proxy.", status=413)
 
     _write_cache(url, resp.content, content_type)
     return resp.content, content_type
