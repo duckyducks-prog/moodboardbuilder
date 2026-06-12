@@ -125,7 +125,10 @@ async def search(req: SearchRequest):
     domains = _domains(req.domains, req.content_type)
     if req.media_type == "gif" and "giphy.com" not in domains:
         domains = domains + ["giphy.com"]
-    query = _shape_query(req.vibes, req.content_type)
+    # Translate terse input into image-search intent ("16mm" -> frames shot
+    # on 16mm, not photos of cameras). Falls back to the raw input.
+    expanded = await claude_client.expand_query(req.vibes, req.content_type, req.search_mode)
+    query = _shape_query(expanded, req.content_type)
     try:
         raw = await exa_client.search_per_domain(
             query,
@@ -140,10 +143,12 @@ async def search(req: SearchRequest):
     candidates = images.interleave_by_source(
         images.dedupe(images.drop_generic_images(resolved), seen=set())
     )
-    vetted = await claude_client.filter_results(req.vibes, candidates)
+    vetted = await claude_client.filter_results(expanded, candidates)
     results = _finalize(vetted)
 
-    board_id = db.create_board(req.vibes, req.media_type, req.search_mode, req.content_type)
+    board_id = db.create_board(
+        req.vibes, req.media_type, req.search_mode, req.content_type, expanded_query=expanded
+    )
     round_id = db.create_round(board_id, idx=1, query=query, results=results)
 
     return {"board_id": board_id, "round": _round_payload(round_id)}
@@ -174,7 +179,7 @@ async def refine(req: RefineRequest):
     db.update_style_profile(req.board_id, req.profile.model_dump())
 
     content_type = board.get("content_type", "both")
-    enriched_query = board["vibes"]
+    enriched_query = board.get("expanded_query") or board["vibes"]
     if req.profile.descriptors:
         enriched_query += ", " + ", ".join(req.profile.descriptors)
     enriched_query = _shape_query(enriched_query, content_type)

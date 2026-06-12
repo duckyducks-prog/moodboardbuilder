@@ -87,12 +87,18 @@ def parse_og_image(html: str, page_url: str) -> str | None:
     return urljoin(page_url, match.group(1)) if match else None
 
 
+_VIDEO_EXTENSIONS = (".mp4", ".webm", ".m4v", ".mov")
+
+
 def parse_video(html: str, page_url: str) -> str | None:
     for pattern in _VIDEO_RES:
         match = pattern.search(html)
         if match:
             url = urljoin(page_url, match.group(1))
-            if url.startswith("http"):
+            # Only direct video files. og:video often points at an HTML embed
+            # page (e.g. player.vimeo.com/video/...), which can't play in a
+            # <video> tag and gets rejected by the media proxy.
+            if url.startswith("http") and urlparse(url).path.lower().endswith(_VIDEO_EXTENSIONS):
                 return url
     return None
 
@@ -119,7 +125,8 @@ async def resolve_images(results: list[dict], media_type: str = "both") -> list[
                     html = await _fetch_page(client, result["url"])
                 if html:
                     image_url = image_url or parse_og_image(html, result["url"])
-                    video_url = parse_video(html, result["url"])
+                    if domain in config.VIDEO_SCRAPE_DOMAINS:
+                        video_url = parse_video(html, result["url"])
             if not image_url:
                 return None
 

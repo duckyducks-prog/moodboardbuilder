@@ -3,8 +3,9 @@ import { proxied } from "../api";
 
 export function ResultMedia({ result, hoverAnimate, hovered, className, onError }) {
   const videoRef = useRef(null);
+  const [videoFailed, setVideoFailed] = useState(false);
 
-  if (result.media === "video" && result.video_url) {
+  if (result.media === "video" && result.video_url && !videoFailed) {
     // hover-only mode: paused with poster until the pointer arrives
     const playing = !hoverAnimate || hovered;
     if (videoRef.current) {
@@ -21,7 +22,7 @@ export function ResultMedia({ result, hoverAnimate, hovered, className, onError 
         playsInline
         autoPlay={!hoverAnimate}
         preload="metadata"
-        onError={onError}
+        onError={() => setVideoFailed(true)} // degrade to the still, keep the card
         className={className}
       />
     );

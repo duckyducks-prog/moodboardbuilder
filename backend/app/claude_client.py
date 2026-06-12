@@ -113,6 +113,70 @@ async def describe_images(image_urls: list[str]) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Query expansion: translate terse user input into image-search intent.
+# ---------------------------------------------------------------------------
+
+_EXPAND_SCHEMA = {
+    "type": "object",
+    "properties": {"query": {"type": "string"}},
+    "required": ["query"],
+    "additionalProperties": False,
+}
+
+_CONTENT_FOCUS = {
+    "live": "live-action imagery: stills and frames from films, commercials, and music videos",
+    "motion": "motion design, animation, and graphic design work",
+    "both": "visual reference imagery (film frames, design work, photography)",
+}
+
+
+async def expand_query(vibes: str, content_type: str, search_mode: str) -> str:
+    """Rewrite terse input as image-search intent. Fails open to the raw input.
+
+    'Film 16mm' should find frames SHOT ON 16mm — not photos of 16mm cameras.
+    """
+    if not config.ANTHROPIC_API_KEY:
+        return vibes
+
+    if search_mode == "technical":
+        style_rule = (
+            "Keep the user's exact technical terms verbatim and add at most a few "
+            "disambiguating words (e.g. 'film still', 'frame', 'showcase')."
+        )
+    else:
+        style_rule = "Stay faithful to the user's mood and subjects; do not invent new subjects."
+
+    prompt = (
+        "You write search queries for a visual moodboard tool that searches film-still "
+        f"and design reference sites. The user typed: {vibes!r}. They are hunting for "
+        f"{_CONTENT_FOCUS.get(content_type, _CONTENT_FOCUS['both'])}.\n"
+        "Rewrite their input as ONE search query that finds images EXHIBITING the "
+        "requested look, technique, format, or mood — for '16mm' that means frames "
+        "shot on 16mm film with its grain and texture, never photos of 16mm cameras "
+        "or film reels. Never target equipment, gear, product shots, tutorials, "
+        "how-tos, or articles about the topic.\n"
+        f"{style_rule} Keep it under 20 words."
+    )
+
+    client = anthropic.AsyncAnthropic(api_key=config.ANTHROPIC_API_KEY)
+    try:
+        response = await client.messages.create(
+            model=config.CLAUDE_MODEL,
+            max_tokens=16000,
+            thinking={"type": "adaptive"},
+            messages=[{"role": "user", "content": prompt}],
+            output_config={"format": {"type": "json_schema", "schema": _EXPAND_SCHEMA}},
+        )
+        if response.stop_reason == "refusal":
+            return vibes
+        text = next((b.text for b in response.content if b.type == "text"), "")
+        expanded = json.loads(text)["query"].strip()
+        return expanded or vibes
+    except Exception:
+        return vibes  # fail open
+
+
+# ---------------------------------------------------------------------------
 # Quality gate: filter junk images out of a result batch before display.
 # ---------------------------------------------------------------------------
 
@@ -152,6 +216,12 @@ _FILTER_PROMPT = (
     "KEEP everything else, including loosely related imagery — this is a "
     "creative reference hunt, so err on the side of keeping anything visually "
     "interesting and on-theme.\n"
+    "IMPORTANT: when the query names a medium, format, or technique (16mm, "
+    "anamorphic, glassmorphism, drone...), relevant images EXHIBIT that look — "
+    "frames shot on 16mm, anamorphic-looking stills. Photos OF the equipment "
+    "itself (cameras, lenses, film reels, gear product shots), software "
+    "screenshots, and behind-the-scenes rig photos are NOT relevant: reject "
+    "them or score them 0-2.\n"
     "For each kept image, also rate its relevance to the query from 0 to 10 "
     "(10 = exactly the brief: subject, technique, and mood all match; "
     "5 = right mood or technique but different subject; "

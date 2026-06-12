@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS boards (
     media_type    TEXT NOT NULL DEFAULT 'both',
     search_mode   TEXT NOT NULL DEFAULT 'vibes',
     content_type  TEXT NOT NULL DEFAULT 'both',
+    expanded_query TEXT NOT NULL DEFAULT '',
     style_profile TEXT NOT NULL DEFAULT '{}',
     created_at    REAL NOT NULL
 );
@@ -46,7 +47,11 @@ def init_db() -> None:
     with get_conn() as conn:
         conn.executescript(_SCHEMA)
         # Lightweight migration for databases created before these columns.
-        for column, default in (("search_mode", "vibes"), ("content_type", "both")):
+        for column, default in (
+            ("search_mode", "vibes"),
+            ("content_type", "both"),
+            ("expanded_query", ""),
+        ):
             try:
                 conn.execute(
                     f"ALTER TABLE boards ADD COLUMN {column} TEXT NOT NULL DEFAULT '{default}'"
@@ -59,13 +64,19 @@ def new_id() -> str:
     return uuid.uuid4().hex[:12]
 
 
-def create_board(vibes: str, media_type: str, search_mode: str = "vibes", content_type: str = "both") -> str:
+def create_board(
+    vibes: str,
+    media_type: str,
+    search_mode: str = "vibes",
+    content_type: str = "both",
+    expanded_query: str = "",
+) -> str:
     board_id = new_id()
     with get_conn() as conn:
         conn.execute(
-            "INSERT INTO boards (id, vibes, media_type, search_mode, content_type, style_profile, created_at) "
-            "VALUES (?, ?, ?, ?, ?, '{}', ?)",
-            (board_id, vibes, media_type, search_mode, content_type, time.time()),
+            "INSERT INTO boards (id, vibes, media_type, search_mode, content_type, expanded_query, style_profile, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, '{}', ?)",
+            (board_id, vibes, media_type, search_mode, content_type, expanded_query, time.time()),
         )
     return board_id
 
