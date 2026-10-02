@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>ClientBase Pro 97</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+<style>
+/* Layout: a 1998 office PC. Teal desktop, grey bevelled windows, taskbar pinned to the bottom. Single deliberate look in both host themes. */
+:root {
+  --desk: #008080;
+  --face: #c0c0c0;
+  --hi: #ffffff;
+  --lo: #808080;
+  --dk: #000000;
+  --title: #000080;
+  --title2: #1084d0;
+  --title-off: #808080;
+  --ink: #000000;
+  --paper: #ffffff;
+  --sel: #000080;
+  --sel-ink: #ffffff;
+  --tip: #ffffe1;
+  --term: #00ff66;
+  --font-ui: Tahoma, "MS Sans Serif", Verdana, Geneva, Arial, sans-serif;
+  --font-term: "VT323", "Courier New", Courier, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font: 12px/1.35 var(--font-ui);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input, select, textarea, button, table { font: inherit; color: var(--ink); }
+input, textarea, .selectable { user-select: text; -webkit-user-select: text; }
+
+/* ---------- bevels ---------- */
+.raised { background: var(--face); box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--hi), inset -2px -2px var(--lo), inset 2px 2px var(--face); }
+.sunken { background: var(--paper); box-shadow: inset -1px -1px var(--hi), inset 1px 1px var(--lo), inset -2px -2px var(--face), inset 2px 2px var(--dk); }
+.groove { border: 1px solid var(--lo); box-shadow: 1px 1px 0 var(--hi), inset 1px 1px 0 var(--hi); }
+
+.btn {
+  background: var(--face); border: 0; padding: 4px 12px; min-width: 72px; cursor: pointer;
+  box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--hi), inset -2px -2px var(--lo), inset 2px 2px var(--face);
+}
+.btn:active, .btn.down { box-shadow: inset -1px -1px var(--hi), inset 1px 1px var(--dk), inset -2px -2px var(--face), inset 2px 2px var(--lo); padding: 5px 11px 3px 13px; }
+.btn:focus-visible { outline: 1px dotted var(--dk); outline-offset: -5px; }
+.btn[disabled] { color: var(--lo); text-shadow: 1px 1px var(--hi); cursor: default; }
+.btn.sm { min-width: 0; padding: 2px 6px; }
+.btn.sm:active { padding: 3px 5px 1px 7px; }
+
+input[type=text], input[type=password], input[type=number], select, textarea {
+  border: 0; padding: 3px 4px; background: var(--paper); border-radius: 0; outline: none;
+  box-shadow: inset -1px -1px var(--hi), inset 1px 1px var(--lo), inset -2px -2px var(--face), inset 2px 2px var(--dk);
+  min-width: 0;
+}
+textarea { resize: none; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 1px dotted var(--dk); outline-offset: 1px; }
+
+/* ---------- boot / login / shutdown ---------- */
+#boot {
+  position: fixed; inset: 0; background: #000; color: #c0c0c0; z-index: 9000;
+  font: 20px/1.15 var(--font-term); padding: 24px 16px; overflow: hidden; white-space: pre-wrap; cursor: pointer;
+}
+#boot .skip { position: absolute; bottom: 16px; left: 16px; color: #808080; }
+#shutdown {
+  position: fixed; inset: 0; background: #000; z-index: 9500; display: flex; align-items: center; justify-content: center;
+  color: #ff8c00; font: 28px/1.3 var(--font-term); text-align: center; padding: 16px; cursor: pointer;
+}
+
+/* ---------- desktop ---------- */
+#desktop { position: absolute; inset: 0 0 32px 0; }
+.icons { position: absolute; top: 8px; left: 8px; display: grid; grid-auto-flow: row; gap: 10px; }
+.icon {
+  width: 76px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 2px; border: 0; background: none;
+  color: var(--hi); text-align: center; cursor: pointer;
+}
+.icon svg { width: 34px; height: 34px; }
+.icon span { padding: 1px 2px; font-size: 11px; line-height: 1.2; }
+.icon:focus { outline: none; }
+.icon:focus span, .icon.on span { background: var(--sel); outline: 1px dotted var(--hi); }
+.icon:focus svg, .icon.on svg { filter: brightness(.6) sepia(1) hue-rotate(190deg) saturate(4); }
+
+/* ---------- windows ---------- */
+.win {
+  position: absolute; padding: 3px; display: flex; flex-direction: column; min-width: 260px; max-width: calc(100vw - 8px);
+  background: var(--face);
+  box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--face), inset -2px -2px var(--lo), inset 2px 2px var(--hi);
+}
+.titlebar {
+  display: flex; align-items: center; gap: 4px; padding: 2px 2px 2px 4px; height: 20px; color: var(--hi); font-weight: bold;
+  background: linear-gradient(90deg, var(--title-off), #b5b5b5); cursor: default; touch-action: none;
+}
+.win.active .titlebar { background: linear-gradient(90deg, var(--title), var(--title2)); }
+.titlebar .t { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.titlebar svg { width: 16px; height: 16px; flex: none; }
+.tb-btn {
+  width: 16px; height: 14px; border: 0; padding: 0; display: grid; place-items: center; cursor: pointer; flex: none;
+  background: var(--face); color: var(--ink); font: bold 10px/1 var(--font-ui);
+  box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--hi), inset -2px -2px var(--lo), inset 2px 2px var(--face);
+}
+.tb-btn:active { box-shadow: inset -1px -1px var(--hi), inset 1px 1px var(--dk), inset -2px -2px var(--face), inset 2px 2px var(--lo); }
+.tb-btn + .tb-btn.x { margin-left: 2px; }
+
+.menubar { display: flex; gap: 0; padding: 1px 0; position: relative; flex-wrap: wrap; }
+.menubar > div { position: relative; }
+.menubar > div > button { background: none; border: 0; padding: 2px 7px; cursor: pointer; }
+.menubar > div > button u { text-decoration: underline; }
+.menubar > div.open > button { box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); }
+.menu {
+  position: absolute; top: 100%; left: 0; z-index: 50; min-width: 180px; padding: 2px; display: none;
+  background: var(--face); box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--face), inset -2px -2px var(--lo), inset 2px 2px var(--hi);
+}
+.menubar > div.open .menu { display: block; }
+.menu button { display: flex; justify-content: space-between; gap: 24px; width: 100%; text-align: left; border: 0; background: none; padding: 3px 20px; cursor: pointer; white-space: nowrap; }
+.menu button:hover, .menu button:focus { background: var(--sel); color: var(--sel-ink); outline: none; }
+.menu hr { border: 0; border-top: 1px solid var(--lo); border-bottom: 1px solid var(--hi); margin: 3px 1px; }
+.menu .k { opacity: .9; }
+
+.toolbar { display: flex; gap: 2px; padding: 3px 2px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--lo); border-bottom: 1px solid var(--hi); box-shadow: 0 -1px var(--hi), 0 1px var(--lo); margin-bottom: 3px; }
+.toolbar .tool {
+  border: 1px solid transparent; background: none; padding: 2px 5px; display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; font-size: 11px; min-width: 44px;
+}
+.toolbar .tool svg { width: 20px; height: 20px; }
+.toolbar .tool:hover { box-shadow: inset -1px -1px var(--lo), inset 1px 1px var(--hi); }
+.toolbar .tool:active { box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); }
+.toolbar .sep { width: 2px; align-self: stretch; border-left: 1px solid var(--lo); border-right: 1px solid var(--hi); margin: 0 3px; }
+.toolbar label { display: flex; align-items: center; gap: 4px; margin-left: 4px; }
+
+.body { flex: 1; min-height: 0; padding: 2px; display: flex; flex-direction: column; gap: 6px; }
+.statusbar { display: flex; gap: 2px; margin-top: 2px; }
+.statusbar > div { padding: 2px 4px; box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.statusbar > div:first-child { flex: 1; }
+
+/* ---------- table ---------- */
+.grid-wrap { overflow: auto; flex: 1; min-height: 120px; }
+table.grid { border-collapse: collapse; width: 100%; background: var(--paper); font-variant-numeric: tabular-nums; }
+table.grid th {
+  position: sticky; top: 0; background: var(--face); font-weight: normal; text-align: left; padding: 2px 6px; white-space: nowrap; cursor: pointer;
+  box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--hi), inset -2px -2px var(--lo);
+}
+table.grid th:active { box-shadow: inset 1px 1px var(--lo); }
+table.grid td { padding: 2px 6px; white-space: nowrap; border-bottom: 1px dotted #d4d4d4; cursor: default; }
+table.grid tr.sel td { background: var(--sel); color: var(--sel-ink); }
+table.grid td.num, table.grid th.num { text-align: right; }
+
+.pill { display: inline-block; padding: 0 5px; font-size: 11px; border: 1px solid currentColor; }
+.st-Lead { color: #806000; } .st-Prospect { color: #0000c0; } .st-Customer { color: #007000; } .st-Lost { color: #a00000; }
+tr.sel .pill { color: var(--sel-ink); }
+
+/* ---------- forms ---------- */
+fieldset { border: 1px solid var(--lo); margin: 0; padding: 12px 8px 8px; position: relative; box-shadow: inset 1px 1px var(--hi), 1px 1px var(--hi); }
+legend { padding: 0 3px; background: var(--face); position: absolute; top: -7px; left: 8px; }
+.form { display: grid; grid-template-columns: 92px 1fr; gap: 5px 8px; align-items: center; }
+.form label { text-align: right; white-space: nowrap; }
+.form .full { grid-column: 1 / -1; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.row.end { justify-content: flex-end; }
+.split { display: flex; gap: 8px; min-height: 0; flex: 1; }
+.split > .left { flex: 1.15; min-width: 0; display: flex; flex-direction: column; }
+.split > .right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.tabs { display: flex; padding-left: 2px; position: relative; z-index: 1; }
+.tabs button {
+  border: 0; background: var(--face); padding: 3px 10px; margin-right: -1px; cursor: pointer;
+  box-shadow: inset -1px 0 var(--dk), inset 1px 1px var(--hi), inset -2px 0 var(--lo);
+  position: relative; top: 2px;
+}
+.tabs button.on { top: 0; padding-bottom: 5px; z-index: 2; }
+.tabpanel { padding: 10px 8px; box-shadow: inset -1px -1px var(--dk), inset 1px 1px var(--hi), inset -2px -2px var(--lo); flex: 1; min-height: 0; overflow: auto; }
+
+.navbar { display: flex; align-items: center; gap: 2px; font-variant-numeric: tabular-nums; }
+.navbar .rec { padding: 2px 8px; box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); background: var(--paper); min-width: 110px; text-align: center; }
+
+.hist { display: flex; flex-direction: column; gap: 4px; font-variant-numeric: tabular-nums; }
+.hist div { padding: 3px 6px; background: var(--paper); box-shadow: inset 1px 1px var(--lo); }
+
+/* ---------- dialogs ---------- */
+#modal { position: fixed; inset: 0; z-index: 8000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+#modal .win { position: relative; width: 380px; max-width: 100%; }
+.msg { display: flex; gap: 14px; padding: 14px 10px 8px; align-items: flex-start; }
+.msg svg { width: 32px; height: 32px; flex: none; }
+.msg p { margin: 0 0 6px; }
+.msg-btns { display: flex; justify-content: center; gap: 6px; padding: 6px 0 8px; flex-wrap: wrap; }
+
+.progress { height: 20px; padding: 3px; display: flex; gap: 2px; overflow: hidden; }
+.progress i { width: 9px; flex: none; background: var(--sel); }
+.term {
+  background: #000; color: var(--term); font: 18px/1.1 var(--font-term); padding: 8px; height: 150px; overflow: auto; white-space: pre-wrap;
+  box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi);
+}
+
+/* ---------- reports ---------- */
+.chart { display: grid; grid-template-columns: 70px 1fr 80px; gap: 6px 8px; align-items: center; padding: 10px; background: var(--paper); font-variant-numeric: tabular-nums; }
+.bar { height: 18px; border: 1px solid var(--dk); box-shadow: 2px 2px 0 var(--lo); }
+.bar.Lead { background: repeating-linear-gradient(45deg, #ffd700 0 3px, #c0a000 3px 6px); }
+.bar.Prospect { background: repeating-linear-gradient(-45deg, #4040ff 0 3px, #000080 3px 6px); }
+.bar.Customer { background: repeating-linear-gradient(0deg, #00c000 0 2px, #006000 2px 4px); }
+.bar.Lost { background: repeating-linear-gradient(90deg, #ff4040 0 2px, #800000 2px 4px); }
+.chart .v { text-align: right; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; }
+.kpis div { padding: 6px 8px; box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); }
+.kpis b { display: block; font: 26px/1 var(--font-term); color: var(--title); }
+
+/* ---------- assistant ---------- */
+#helper { position: absolute; right: 12px; bottom: 44px; z-index: 7000; display: flex; align-items: flex-end; gap: 6px; max-width: calc(100vw - 24px); }
+#helper .bubble { background: var(--tip); border: 1px solid var(--dk); border-radius: 10px; padding: 8px 10px; max-width: 230px; box-shadow: 2px 2px 0 rgba(0,0,0,.4); }
+#helper .bubble p { margin: 0 0 6px; }
+#helper svg { width: 64px; height: 76px; flex: none; animation: bob 2.4s ease-in-out infinite; cursor: pointer; }
+@keyframes bob { 50% { transform: translateY(-4px) rotate(-3deg); } }
+
+/* ---------- taskbar ---------- */
+#taskbar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 32px; z-index: 6000; display: flex; gap: 4px; align-items: center; padding: 2px;
+  padding-bottom: calc(2px + env(safe-area-inset-bottom, 0px)); box-sizing: content-box;
+  background: var(--face); box-shadow: inset 0 1px var(--face), inset 0 2px var(--hi);
+}
+#startbtn { display: flex; align-items: center; gap: 4px; font-weight: bold; min-width: 0; padding: 3px 6px; height: 26px; }
+#startbtn svg { width: 18px; height: 18px; }
+#tasks { flex: 1; display: flex; gap: 3px; min-width: 0; overflow: hidden; }
+#tasks button { flex: 0 1 160px; min-width: 40px; height: 26px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 6px; }
+#tasks button.on { background: repeating-conic-gradient(var(--face) 0 25%, var(--hi) 0 50%) 0 0 / 2px 2px; font-weight: bold; }
+#tray { display: flex; align-items: center; gap: 6px; padding: 0 8px; height: 24px; box-shadow: inset 1px 1px var(--lo), inset -1px -1px var(--hi); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#tray svg { width: 16px; height: 16px; }
+#startmenu { position: fixed; left: 2px; bottom: calc(34px + env(safe-area-inset-bottom, 0px)); z-index: 6500; display: flex; padding: 3px; }
+#startmenu .side { width: 22px; background: linear-gradient(0deg, var(--title), var(--title2)); color: var(--face); writing-mode: vertical-rl; transform: rotate(180deg); font: bold 15px var(--font-ui); padding: 6px 2px; letter-spacing: .5px; }
+#startmenu .side b { color: var(--hi); }
+#startmenu .items { display: flex; flex-direction: column; min-width: 190px; }
+#startmenu .items button { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 6px 14px 6px 8px; text-align: left; cursor: pointer; }
+#startmenu .items button svg { width: 24px; height: 24px; }
+#startmenu .items button:hover, #startmenu .items button:focus { background: var(--sel); color: var(--sel-ink); outline: none; }
+
+/* ---------- phone: windows go full-width and stack ---------- */
+@media (max-width: 700px) {
+  .icons { grid-template-columns: repeat(3, 76px); }
+  .win.app { left: 4px !important; right: 4px; top: 4px !important; bottom: 4px; width: auto !important; height: auto !important; min-width: 0; }
+  .split { flex-direction: column; overflow: auto; }
+  .split > .left { min-height: 200px; flex: none; height: 220px; }
+  .form { grid-template-columns: 78px 1fr; }
+  #tasks button { flex-basis: 90px; }
+  #tray .date { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { #helper svg { animation: none; } }
+</style>
+
+<!-- ===================== SVG icon sprites ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-rolodex" viewBox="0 0 32 32"><rect x="4" y="22" width="24" height="6" fill="#404040"/><rect x="6" y="6" width="20" height="17" fill="#fff" stroke="#000"/><rect x="8" y="4" width="16" height="15" fill="#ffffc0" stroke="#000"/><path d="M10 8h12M10 11h9M10 14h11" stroke="#000080"/><circle cx="7" cy="25" r="2" fill="#c0c0c0" stroke="#000"/><circle cx="25" cy="25" r="2" fill="#c0c0c0" stroke="#000"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 32 32"><rect x="4" y="14" width="24" height="14" fill="#c00000" stroke="#000"/><path d="M3 12c4-6 22-6 26 0l-1 4h-6l-1-3H11l-1 3H4z" fill="#e02020" stroke="#000"/><g fill="#fff"><rect x="10" y="17" width="3" height="2"/><rect x="15" y="17" width="3" height="2"/><rect x="20" y="17" width="3" height="2"/><rect x="10" y="21" width="3" height="2"/><rect x="15" y="21" width="3" height="2"/><rect x="20" y="21" width="3" height="2"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" fill="#fff" stroke="#000"/><rect x="7" y="16" width="4" height="10" fill="#0000c0"/><rect x="13" y="10" width="4" height="16" fill="#00a000"/><rect x="19" y="6" width="4" height="20" fill="#c00000"/><path d="M5 26h22" stroke="#000"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 32 32"><rect x="3" y="5" width="18" height="14" fill="#c0c0c0" stroke="#000"/><rect x="5" y="7" width="14" height="10" fill="#008080"/><rect x="8" y="19" width="8" height="3" fill="#808080"/><rect x="18" y="13" width="11" height="16" fill="#c0c0c0" stroke="#000"/><path d="M20 17h7M20 20h7" stroke="#000"/><circle cx="23.5" cy="25" r="1.5" fill="#0f0"/></symbol>
+    <symbol id="i-bin" viewBox="0 0 32 32"><path d="M8 9h16l-2 20H10z" fill="#e0e0e0" stroke="#000"/><path d="M6 7h20v3H6z" fill="#c0c0c0" stroke="#000"/><path d="M12 12v14M16 12v14M20 12v14" stroke="#808080"/></symbol>
+    <symbol id="i-note" viewBox="0 0 32 32"><path d="M7 3h13l6 6v20H7z" fill="#fff" stroke="#000"/><path d="M20 3v6h6" fill="#c0c0c0" stroke="#000"/><path d="M10 13h13M10 16h13M10 19h13M10 22h9" stroke="#000080"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 32 32"><path d="M4 6c5-3 8 3 12 0v9c-4 3-7-3-12 0z" fill="#f03030"/><path d="M16 6c4-3 7 3 12 0v9c-5 3-8-3-12 0z" fill="#30a030"/><path d="M4 17c5-3 8 3 12 0v9c-4 3-7-3-12 0z" fill="#3060f0"/><path d="M16 17c4-3 7 3 12 0v9c-5 3-8-3-12 0z" fill="#f0c020"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 32 32"><path d="M16 2L31 29H1z" fill="#ffd700" stroke="#000"/><rect x="14.5" y="10" width="3" height="11" fill="#000"/><rect x="14.5" y="23" width="3" height="3" fill="#000"/></symbol>
+    <symbol id="i-err" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#e00000" stroke="#800000"/><path d="M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="3.5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#fff" stroke="#000080" stroke-width="2"/><rect x="14" y="13" width="4" height="11" fill="#000080"/><circle cx="16" cy="9" r="2.2" fill="#000080"/></symbol>
+    <symbol id="i-q" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#fff" stroke="#000080" stroke-width="2"/><path d="M11.5 12a4.5 4.5 0 1 1 6 4.2c-1.2.6-1.5 1.3-1.5 2.8" fill="none" stroke="#000080" stroke-width="3"/><circle cx="16" cy="23.5" r="2" fill="#000080"/></symbol>
+    <symbol id="i-new" viewBox="0 0 20 20"><path d="M4 2h8l4 4v12H4z" fill="#fff" stroke="#000"/><path d="M12 2v4h4" fill="none" stroke="#000"/><path d="M14 11v6M11 14h6" stroke="#008000" stroke-width="2"/></symbol>
+    <symbol id="i-save" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="#000080"/><rect x="5" y="2" width="10" height="6" fill="#fff"/><rect x="11" y="3" width="2" height="4" fill="#000080"/><rect x="4" y="11" width="12" height="7" fill="#c0c0c0"/></symbol>
+    <symbol id="i-del" viewBox="0 0 20 20"><path d="M4 4l12 12M16 4L4 16" stroke="#c00000" stroke-width="3"/></symbol>
+    <symbol id="i-print" viewBox="0 0 20 20"><rect x="5" y="2" width="10" height="6" fill="#fff" stroke="#000"/><rect x="2" y="8" width="16" height="7" fill="#c0c0c0" stroke="#000"/><rect x="5" y="13" width="10" height="5" fill="#fff" stroke="#000"/><circle cx="15" cy="10.5" r="1" fill="#0c0"/></symbol>
+    <symbol id="i-dial" viewBox="0 0 20 20"><path d="M3 6c3-4 11-4 14 0l-1 3h-3l-1-2H8L7 9H4z" fill="#000" /><rect x="4" y="10" width="12" height="8" fill="#808080" stroke="#000"/><circle cx="10" cy="14" r="2.5" fill="#fff"/></symbol>
+    <symbol id="i-fax" viewBox="0 0 20 20"><rect x="2" y="8" width="16" height="10" fill="#c0c0c0" stroke="#000"/><rect x="5" y="2" width="10" height="8" fill="#fff" stroke="#000"/><path d="M7 5h6M7 7h4" stroke="#000"/><rect x="4" y="11" width="6" height="4" fill="#008080"/></symbol>
+    <symbol id="i-helper" viewBox="0 0 64 76"><rect x="10" y="40" width="44" height="30" rx="3" fill="#7a4a1e" stroke="#000"/><rect x="16" y="10" width="32" height="38" fill="#fff" stroke="#000"/><rect x="12" y="16" width="32" height="34" fill="#ffffc0" stroke="#000"/><circle cx="22" cy="28" r="5" fill="#fff" stroke="#000"/><circle cx="35" cy="28" r="5" fill="#fff" stroke="#000"/><circle cx="23" cy="29" r="2.2" fill="#000"/><circle cx="36" cy="29" r="2.2" fill="#000"/><path d="M17 20l9 2M40 20l-9 2" stroke="#000" stroke-width="1.5"/><path d="M22 38q6 5 13 0" fill="none" stroke="#000" stroke-width="1.6"/><circle cx="12" cy="62" r="5" fill="#c0c0c0" stroke="#000"/><circle cx="52" cy="62" r="5" fill="#c0c0c0" stroke="#000"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===================== desktop ===================== -->
+<div id="desktop">
+  <div class="icons" id="icons">
+    <button class="icon" data-open="contacts" id="ic-contacts"><svg><use href="#i-rolodex"/></svg><span>ClientBase Contacts</span></button>
+    <button class="icon" data-open="calls" id="ic-calls"><svg><use href="#i-phone"/></svg><span>Call Log</span></button>
+    <button class="icon" data-open="reports" id="ic-reports"><svg><use href="#i-chart"/></svg><span>Pipeline Report</span></button>
+    <button class="icon" data-open="sync" id="ic-sync"><svg><use href="#i-sync"/></svg><span>Sync to Mainframe</span></button>
+    <button class="icon" data-open="readme" id="ic-readme"><svg><use href="#i-note"/></svg><span>README.TXT</span></button>
+    <button class="icon" data-open="bin" id="ic-bin"><svg><use href="#i-bin"/></svg><span>Recycle Bin</span></button>
+  </div>
+
+  <!-- ===== Contacts window ===== -->
+  <section class="win app" id="win-contacts" data-title="ClientBase Pro 97 - [Contacts]" data-icon="i-rolodex" hidden style="left:110px;top:12px;width:840px;height:560px">
+    <div class="titlebar"><svg><use href="#i-rolodex"/></svg><span class="t">ClientBase Pro 97 - [Contacts]</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <nav class="menubar">
+      <div><button><u>F</u>ile</button><div class="menu">
+        <button data-act="new">New Record<span class="k">Ctrl+N</span></button>
+        <button data-act="save">Save Record<span class="k">Ctrl+S</span></button>
+        <hr><button data-act="print">Print Mailing Labels...</button>
+        <button data-act="fax">Fax Cover Sheet...</button>
+        <hr><button data-act="reset">Restore Sample Database</button>
+        <button data-act="close-contacts">Exit</button>
+      </div></div>
+      <div><button><u>E</u>dit</button><div class="menu">
+        <button data-act="undo">Undo<span class="k">Ctrl+Z</span></button><hr>
+        <button data-act="find">Find...<span class="k">Ctrl+F</span></button>
+        <button data-act="delete">Delete Record<span class="k">Del</span></button>
+      </div></div>
+      <div><button><u>R</u>ecord</button><div class="menu">
+        <button data-act="first">First Record</button><button data-act="prev">Previous Record</button>
+        <button data-act="next">Next Record</button><button data-act="last">Last Record</button>
+        <hr><button data-act="dial">AutoDial Contact...</button><button data-act="logcall">Log a Call</button>
+      </div></div>
+      <div><button><u>H</u>elp</button><div class="menu">
+        <button data-act="tip">Tip of the Day...</button>
+        <button data-act="y2k">Year 2000 Readiness</button><hr>
+        <button data-act="about">About ClientBase Pro 97</button>
+      </div></div>
+    </nav>
+    <div class="toolbar">
+      <button class="tool" data-act="new"><svg><use href="#i-new"/></svg>New</button>
+      <button class="tool" data-act="save"><svg><use href="#i-save"/></svg>Save</button>
+      <button class="tool" data-act="delete"><svg><use href="#i-del"/></svg>Delete</button>
+      <span class="sep"></span>
+      <button class="tool" data-act="dial"><svg><use href="#i-dial"/></svg>Dial</button>
+      <button class="tool" data-act="fax"><svg><use href="#i-fax"/></svg>Fax</button>
+      <button class="tool" data-act="print"><svg><use href="#i-print"/></svg>Print</button>
+      <span class="sep"></span>
+      <label for="q">Find:</label><input type="text" id="q" size="14" placeholder="Name or company">
+      <select id="fstatus" aria-label="Filter by status"><option value="">(All statuses)</option><option>Lead</option><option>Prospect</option><option>Customer</option><option>Lost</option></select>
+    </div>
+    <div class="body">
+      <div class="split">
+        <div class="left">
+          <div class="grid-wrap sunken"><table class="grid" id="ctable"><thead><tr>
+            <th data-sort="company">Company</th><th data-sort="name">Contact</th><th data-sort="status">Status</th><th data-sort="value" class="num">Deal $</th><th data-sort="last">Last Contact</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="right">
+          <div class="tabs" role="tablist">
+            <button class="on" data-tab="gen">General</button><button data-tab="notes">Notes</button><button data-tab="hist">History</button>
+          </div>
+          <div class="tabpanel">
+            <div data-pane="gen">
+              <div class="form">
+                <label for="f-company">Company:</label><input type="text" id="f-company">
+                <label for="f-name">Contact:</label><input type="text" id="f-name">
+                <label for="f-title">Title:</label><input type="text" id="f-title">
+                <label for="f-phone">Phone:</label><input type="text" id="f-phone">
+                <label for="f-fax">Fax:</label><input type="text" id="f-fax">
+                <label for="f-pager">Pager:</label><input type="text" id="f-pager">
+                <label for="f-email">E-mail:</label><input type="text" id="f-email" placeholder="(if they have it)">
+                <label for="f-status">Status:</label><select id="f-status"><option>Lead</option><option>Prospect</option><option>Customer</option><option>Lost</option></select>
+                <label for="f-value">Deal Value $:</label><input type="number" id="f-value" min="0" step="500">
+                <label for="f-last">Last Contact:</label><input type="text" id="f-last" placeholder="MM/DD/YY" maxlength="8">
+              </div>
+            </div>
+            <div data-pane="notes" hidden>
+              <textarea id="f-notes" rows="12" style="width:100%;box-sizing:border-box" aria-label="Notes"></textarea>
+            </div>
+            <div data-pane="hist" hidden><div class="hist" id="hist"></div></div>
+          </div>
+          <div class="row" style="justify-content:space-between">
+            <div class="navbar">
+              <button class="btn sm" data-act="first" title="First">|◀</button><button class="btn sm" data-act="prev" title="Previous">◀</button>
+              <span class="rec" id="recpos">Record 1 of 1</span>
+              <button class="btn sm" data-act="next" title="Next">▶</button><button class="btn sm" data-act="last" title="Last">▶|</button>
+            </div>
+            <button class="btn" data-act="save">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="statusbar"><div id="cstatus">Ready</div><div id="ccount">0 records</div><div>NUM</div></div>
+  </section>
+
+  <!-- ===== Call log window ===== -->
+  <section class="win app" id="win-calls" data-title="Call Log" data-icon="i-phone" hidden style="left:180px;top:70px;width:620px;height:430px">
+    <div class="titlebar"><svg><use href="#i-phone"/></svg><span class="t">Call Log</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <div class="body">
+      <fieldset>
+        <legend>Log a call</legend>
+        <div class="row">
+          <label for="lc-who">Contact:</label><select id="lc-who" style="max-width:190px"></select>
+          <label for="lc-out">Outcome:</label><select id="lc-out"><option>Left voicemail</option><option>Spoke - interested</option><option>Spoke - call back</option><option>Busy signal</option><option>Wrong number</option><option>Sent fax</option><option>Closed deal!</option></select>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <label for="lc-note">Notes:</label><input type="text" id="lc-note" style="flex:1;min-width:120px" placeholder="What happened?">
+          <button class="btn" id="lc-add">Log Call</button>
+        </div>
+      </fieldset>
+      <div class="grid-wrap sunken"><table class="grid" id="ltable"><thead><tr><th>Date</th><th>Time</th><th>Contact</th><th>Outcome</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="statusbar"><div id="lstatus">Ready</div></div>
+  </section>
+
+  <!-- ===== Reports window ===== -->
+  <section class="win app" id="win-reports" data-title="Pipeline Report" data-icon="i-chart" hidden style="left:240px;top:40px;width:540px;height:420px">
+    <div class="titlebar"><svg><use href="#i-chart"/></svg><span class="t">Pipeline Report - Q3 1998</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <div class="body" style="overflow:auto">
+      <div class="kpis" id="kpis"></div>
+      <fieldset><legend>Deal value by status</legend><div class="chart sunken" id="chart"></div></fieldset>
+      <div class="row end"><button class="btn" data-act="print">Print Report</button><button class="btn" id="rep-refresh">Refresh</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Sync window ===== -->
+  <section class="win app" id="win-sync" data-title="Sync to Mainframe" data-icon="i-sync" hidden style="left:300px;top:110px;width:440px;height:auto">
+    <div class="titlebar"><svg><use href="#i-sync"/></svg><span class="t">Sync to Mainframe</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <div class="body">
+      <div class="row"><label for="sync-port">Modem:</label><select id="sync-port"><option>COM2: 28.8 Kbps Fax/Modem</option><option>COM1: 14.4 Kbps (Sportster)</option><option>COM3: 56K (x2) BETA</option></select></div>
+      <div class="term selectable" id="sync-term">C:\CLIENTB&gt; Ready.</div>
+      <div class="progress sunken" id="sync-bar"></div>
+      <div class="row end"><button class="btn" id="sync-sound">Sound: Off</button><button class="btn" id="sync-go">Connect</button><button class="btn" data-close>Cancel</button></div>
+    </div>
+  </section>
+
+  <!-- ===== README window ===== -->
+  <section class="win app" id="win-readme" data-title="README.TXT - Notepad" data-icon="i-note" hidden style="left:150px;top:30px;width:520px;height:400px">
+    <div class="titlebar"><svg><use href="#i-note"/></svg><span class="t">README.TXT - Notepad</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <div class="body"><textarea id="readme-text" class="selectable" style="flex:1;font:13px/1.35 'Courier New',monospace;white-space:pre;overflow:auto" aria-label="Readme" spellcheck="false">CLIENTBASE PRO 97  v3.11  - README.TXT
+=======================================
+
+Thank you for choosing ClientBase Pro 97!
+
+GETTING STARTED
+ 1. Double-click "ClientBase Contacts" on your desktop.
+ 2. Click a row to load the record. Edit fields, then SAVE.
+ 3. Use the |&lt; &lt; &gt; &gt;| buttons to flip through the Rolodex.
+ 4. Click a column header to sort.
+ 5. Press DIAL to have your modem call a client for you.
+    (Pick up the handset BEFORE the modem screeches.)
+
+KNOWN ISSUES
+ - Printing to LPT1 may hang if the printer is out of paper.
+   Or toner. Or mood.
+ - Two-digit years are stored as YY. Our engineers assure us
+   this will be fixed well before it matters.
+ - Do not sync while someone is using the phone line.
+
+SYSTEM REQUIREMENTS
+ 486DX2/66 or better, 8 MB RAM (16 MB recommended),
+ 12 MB free disk space, VGA 640x480 256 colours,
+ Windows 95 or Windows NT 4.0.
+
+Tech support: please have your 25-digit CD key ready.
+</textarea></div>
+  </section>
+
+  <!-- ===== Recycle bin ===== -->
+  <section class="win app" id="win-bin" data-title="Recycle Bin" data-icon="i-bin" hidden style="left:200px;top:90px;width:460px;height:300px">
+    <div class="titlebar"><svg><use href="#i-bin"/></svg><span class="t">Recycle Bin</span><button class="tb-btn" data-min title="Minimize">_</button><button class="tb-btn x" data-close title="Close">✕</button></div>
+    <div class="body">
+      <div class="grid-wrap sunken"><table class="grid" id="btable"><thead><tr><th>Name</th><th>Company</th><th>Deleted</th></tr></thead><tbody></tbody></table></div>
+      <div class="row end"><button class="btn" id="bin-restore">Restore</button><button class="btn" id="bin-empty">Empty Recycle Bin</button></div>
+    </div>
+  </section>
+
+  <div id="helper" hidden>
+    <div class="bubble" id="helper-bubble"></div>
+    <svg id="helper-guy" aria-label="Rolly, the Rolodex assistant" role="img"><use href="#i-helper"/></svg>
+  </div>
+</div>
+
+<!-- ===================== start menu + taskbar ===================== -->
+<div id="startmenu" class="raised" hidden>
+  <div class="side"><b>ClientBase</b>&nbsp;Pro 97</div>
+  <div class="items">
+    <button data-open="contacts"><svg><use href="#i-rolodex"/></svg>Contacts</button>
+    <button data-open="calls"><svg><use href="#i-phone"/></svg>Call Log</button>
+    <button data-open="reports"><svg><use href="#i-chart"/></svg>Pipeline Report</button>
+    <button data-open="sync"><svg><use href="#i-sync"/></svg>Sync to Mainframe</button>
+    <button data-act="tip"><svg><use href="#i-q"/></svg>Tip of the Day</button>
+    <button data-act="about"><svg><use href="#i-info"/></svg>About...</button>
+    <hr style="width:100%;border:0;border-top:1px solid var(--lo);border-bottom:1px solid var(--hi);margin:2px 0">
+    <button data-act="shutdown"><svg><use href="#i-err"/></svg>Shut Down...</button>
+  </div>
+</div>
+<div id="taskbar">
+  <button class="btn" id="startbtn"><svg><use href="#i-flag"/></svg>Start</button>
+  <div id="tasks"></div>
+  <div id="tray"><svg><use href="#i-sync"/></svg><span id="clock">9:00 AM</span><span class="date" id="cdate"></span></div>
+</div>
+
+<div id="modal" hidden></div>
+<div id="boot" hidden></div>
+<div id="shutdown" hidden>It's now safe to turn off<br>your computer.<br><br><small style="font-size:20px;color:#808080">(click to restart)</small></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const money = n => '$' + Number(n || 0).toLocaleString('en-US');
+
+// The in-app calendar is frozen in 1998; the clock ticks with the real time of day.
+const YEAR = 1998;
+const now = () => { const d = new Date(); d.setFullYear(YEAR); return d; };
+const pad = n => String(n).padStart(2, '0');
+const mmddyy = d => `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${String(d.getFullYear()).slice(2)}`;
+const hhmm = d => { let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${pad(d.getMinutes())} ${ap}`; };
+const yyKey = s => { const m = /^(\d\d)\/(\d\d)\/(\d\d)$/.exec(s || ''); return m ? `19${m[3]}${m[1]}${m[2]}` : '0'; };
+
+// ---------------- sample data (fictional) ----------------
+const SAMPLE = [
+  { company: 'Acme Widget Supply', name: 'Gary Kowalski', title: 'Purchasing Mgr', phone: '(312) 555-0142', fax: '(312) 555-0143', pager: '(312) 555-7720', email: 'gkowalski@aol.com', status: 'Customer', value: 48000, last: '09/14/98', notes: 'Prefers calls before 10am. Golf on Fridays.\nRenewal due Q1 99. Ask about the Y2K patch.' },
+  { company: 'Rewind Video Rentals', name: 'Denise Harper', title: 'Store Ops Director', phone: '(214) 555-0199', fax: '(214) 555-0198', pager: '', email: '', status: 'Prospect', value: 125000, last: '09/02/98', notes: 'Wants 400 seats. Needs demo on a Pentium II.\nDoes NOT have e-mail. Fax everything.' },
+  { company: 'Hyperlink Browsers Inc', name: 'Raj Patel', title: 'VP Partnerships', phone: '(650) 555-0110', fax: '', pager: '(650) 555-3000', email: 'raj@hyperlinkbrowse.com', status: 'Lead', value: 75000, last: '08/28/98', notes: 'Met at COMDEX. Very excited about "push technology".' },
+  { company: 'Pager Planet', name: 'Tammy Nguyen', title: 'Owner', phone: '(503) 555-0175', fax: '(503) 555-0176', pager: '(503) 555-0001', email: 'tammy@pagerplanet.net', status: 'Customer', value: 12500, last: '09/18/98', notes: 'Pays by cheque. Net 30. Always sends a fruit basket at Christmas.' },
+  { company: 'Dial-Up Depot', name: 'Steve Brennan', title: 'IT Manager', phone: '(617) 555-0133', fax: '(617) 555-0134', pager: '', email: 'sbrennan@compuserve.com', status: 'Lost', value: 30000, last: '07/22/98', notes: 'Went with a competitor that bundles a free mousepad.' },
+  { company: 'Floppy Disk Warehouse', name: 'Linda Ostrowski', title: 'Office Manager', phone: '(708) 555-0156', fax: '(708) 555-0157', pager: '', email: '', status: 'Prospect', value: 18000, last: '09/10/98', notes: 'Decision maker is her boss (Mr. Delgado). He is "always at lunch".' },
+  { company: 'Tamagotchi Care Center', name: 'Kevin O\'Malley', title: 'Founder', phone: '(415) 555-0181', fax: '', pager: '(415) 555-4242', email: 'kev@geocities.com', status: 'Lead', value: 6000, last: '09/21/98', notes: 'Business plan is... ambitious. Page him, he never answers the phone.' },
+  { company: 'Grunge Apparel Co.', name: 'Courtney Walsh', title: 'Buyer', phone: '(206) 555-0167', fax: '(206) 555-0168', pager: '', email: 'cwalsh@grungeapparel.com', status: 'Customer', value: 52000, last: '09/16/98', notes: 'Flannel season starts Oct. Reorder reminder 10/01.' },
+  { company: 'Millennium Consulting', name: 'Harold Finch', title: 'Y2K Practice Lead', phone: '(202) 555-0122', fax: '(202) 555-0123', pager: '(202) 555-2000', email: 'hfinch@mill2k.com', status: 'Prospect', value: 210000, last: '09/22/98', notes: 'Biggest deal in the pipe. Says the world ends 01/01/00 so wants it signed by 12/31/99.' },
+  { company: 'Beanie Collectibles Ltd', name: 'Margaret Lee', title: 'Controller', phone: '(630) 555-0144', fax: '(630) 555-0145', pager: '', email: '', status: 'Lead', value: 9500, last: '08/30/98', notes: 'Warehouse is 100% plush. Insists the inventory is an investment.' },
+  { company: 'CD-ROM Express', name: 'Tony Russo', title: 'Sales Director', phone: '(201) 555-0190', fax: '(201) 555-0191', pager: '(201) 555-8080', email: 'trusso@prodigy.net', status: 'Customer', value: 27000, last: '09/08/98', notes: 'Sent us 3,000 free trial CDs. We have no idea why.' },
+  { company: 'Cyber Café 2000', name: 'Jenna Morales', title: 'Manager', phone: '(305) 555-0137', fax: '', pager: '', email: 'jenna@cybercafe2k.com', status: 'Lost', value: 4500, last: '06/11/98', notes: 'Closed after the espresso machine shorted the T1 line.' },
+];
+const SAMPLE_CALLS = [
+  { date: '09/22/98', time: '10:14 AM', who: 'Harold Finch', out: 'Spoke - interested', note: 'Wants a proposal FedExed overnight.' },
+  { date: '09/21/98', time: '3:40 PM', who: 'Kevin O\'Malley', out: 'Left voicemail', note: 'Paged him twice too.' },
+  { date: '09/18/98', time: '11:02 AM', who: 'Tammy Nguyen', out: 'Closed deal!', note: 'Upgrade to 10 seats.' },
+  { date: '09/16/98', time: '9:30 AM', who: 'Courtney Walsh', out: 'Sent fax', note: 'Fall price list, 6 pages.' },
+  { date: '09/14/98', time: '9:05 AM', who: 'Gary Kowalski', out: 'Spoke - call back', note: 'Back from the golf course Mon.' },
+];
+
+const STORE = 'clientbase97-v1';
+let db;
+const load = () => { try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && Array.isArray(s.contacts)) return s; } catch (e) {} return null; };
+const fresh = () => ({ contacts: SAMPLE.map((c, i) => ({ id: i + 1, ...c })), calls: SAMPLE_CALLS.map(c => ({ ...c })), bin: [], nextId: SAMPLE.length + 1 });
+const persist = () => { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} };
+db = load() || fresh();
+
+// ---------------- sound (only after a click) ----------------
+let audio = null, soundOn = false;
+const ctx = () => (audio ||= new (window.AudioContext || window.webkitAudioContext)());
+function tone(freqs, ms, vol = .08, type = 'sine', at = 0) {
+  if (!soundOn) return;
+  try {
+    const a = ctx(), t = a.currentTime + at / 1000, g = a.createGain();
+    g.gain.setValueAtTime(vol, t); g.gain.setValueAtTime(0, t + ms / 1000);
+    g.connect(a.destination);
+    freqs.forEach(f => { const o = a.createOscillator(); o.type = type; o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + ms / 1000); });
+  } catch (e) {}
+}
+const DTMF = { 1: [697, 1209], 2: [697, 1336], 3: [697, 1477], 4: [770, 1209], 5: [770, 1336], 6: [770, 1477], 7: [852, 1209], 8: [852, 1336], 9: [852, 1477], 0: [941, 1336] };
+function dialTones(num) { [...num.replace(/\D/g, '')].forEach((d, i) => tone(DTMF[d], 90, .07, 'sine', i * 130)); return num.replace(/\D/g, '').length * 130; }
+function screech(at) { for (let i = 0; i < 14; i++) tone([1200 + Math.random() * 1400, 980 + Math.random() * 300], 110, .05, i % 3 ? 'square' : 'sawtooth', at + i * 120); }
+const ding = () => tone([880, 1320], 160, .06, 'triangle');
+const chord = () => tone([523, 659, 784], 380, .05, 'triangle');
+
+// ---------------- window manager ----------------
+let z = 10;
+const openSet = new Set();
+function focusWin(w) {
+  $$('.win.app').forEach(x => x.classList.remove('active'));
+  w.classList.add('active'); w.style.zIndex = ++z;
+  renderTasks();
+}
+function openWin(id) {
+  const w = $('#win-' + id); if (!w) return;
+  w.hidden = false; openSet.add(id); focusWin(w);
+  if (id === 'reports') renderReport();
+  if (id === 'calls') renderCalls();
+  if (id === 'bin') renderBin();
+}
+function closeWin(id) { const w = $('#win-' + id); w.hidden = true; openSet.delete(id); w.classList.remove('active'); renderTasks(); }
+function minWin(id) { $('#win-' + id).hidden = true; $('#win-' + id).classList.remove('active'); renderTasks(); }
+function renderTasks() {
+  $('#tasks').innerHTML = [...openSet].map(id => {
+    const w = $('#win-' + id);
+    return `<button class="btn ${w.classList.contains('active') && !w.hidden ? 'on' : ''}" data-task="${id}">${esc(w.dataset.title)}</button>`;
+  }).join('');
+}
+$('#tasks').addEventListener('click', e => {
+  const b = e.target.closest('[data-task]'); if (!b) return;
+  const w = $('#win-' + b.dataset.task);
+  if (!w.hidden && w.classList.contains('active')) minWin(b.dataset.task); else openWin(b.dataset.task);
+});
+$$('.win.app').forEach(w => {
+  const id = w.id.slice(4);
+  w.addEventListener('pointerdown', () => focusWin(w));
+  w.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); closeWin(id); }));
+  w.querySelector('[data-min]').addEventListener('click', e => { e.stopPropagation(); minWin(id); });
+  // drag by title bar (desktop widths only)
+  const bar = w.querySelector('.titlebar');
+  bar.addEventListener('pointerdown', e => {
+    if (e.target.closest('button') || innerWidth <= 700) return;
+    const sx = e.clientX - w.offsetLeft, sy = e.clientY - w.offsetTop;
+    bar.setPointerCapture(e.pointerId);
+    const mv = ev => {
+      w.style.left = Math.max(-w.offsetWidth + 80, Math.min(innerWidth - 80, ev.clientX - sx)) + 'px';
+      w.style.top = Math.max(0, Math.min(innerHeight - 60, ev.clientY - sy)) + 'px';
+    };
+    const up = () => { bar.removeEventListener('pointermove', mv); bar.removeEventListener('pointerup', up); };
+    bar.addEventListener('pointermove', mv); bar.addEventListener('pointerup', up);
+  });
+});
+// Fit windows to small-but-not-phone screens.
+function fitWins() {
+  if (innerWidth <= 700) return;
+  $$('.win.app').forEach(w => {
+    const maxW = innerWidth - 16, maxH = innerHeight - 50;
+    if (w.offsetWidth > maxW || parseInt(w.style.width) > maxW) { w.style.width = maxW + 'px'; w.style.left = '8px'; }
+    if (w.style.height !== 'auto' && parseInt(w.style.height) > maxH) { w.style.height = maxH + 'px'; w.style.top = '4px'; }
+    if (parseInt(w.style.left) + Math.min(parseInt(w.style.width) || 400, maxW) > innerWidth) w.style.left = Math.max(8, innerWidth - (parseInt(w.style.width) || 400) - 8) + 'px';
+  });
+}
+addEventListener('resize', fitWins);
+
+// desktop icons: single click selects, double click (or tap on touch) opens
+$('#icons').addEventListener('click', e => {
+  const b = e.target.closest('.icon'); if (!b) return;
+  $$('.icon').forEach(i => i.classList.toggle('on', i === b));
+  if (matchMedia('(pointer: coarse)').matches) openWin(b.dataset.open);
+});
+$('#icons').addEventListener('dblclick', e => { const b = e.target.closest('.icon'); if (b) openWin(b.dataset.open); });
+$('#icons').addEventListener('keydown', e => { const b = e.target.closest('.icon'); if (b && e.key === 'Enter') openWin(b.dataset.open); });
+$('#desktop').addEventListener('pointerdown', e => { if (e.target.id === 'desktop') $$('.icon').forEach(i => i.classList.remove('on')); });
+
+// ---------------- menus ----------------
+document.addEventListener('click', e => {
+  const top = e.target.closest('.menubar > div > button');
+  const openOne = $('.menubar > div.open');
+  if (top) {
+    const host = top.parentElement, was = host.classList.contains('open');
+    $$('.menubar > div.open').forEach(d => d.classList.remove('open'));
+    if (!was) host.classList.add('open');
+    return;
+  }
+  if (openOne && !e.target.closest('.menu')) openOne.classList.remove('open');
+  if (e.target.closest('.menu button')) $$('.menubar > div.open').forEach(d => d.classList.remove('open'));
+  if (!e.target.closest('#startmenu, #startbtn')) $('#startmenu').hidden = true;
+});
+$('#startbtn').addEventListener('click', () => { const m = $('#startmenu'); m.hidden = !m.hidden; $('#startbtn').classList.toggle('down', !m.hidden); });
+$('#startmenu').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $('#startmenu').hidden = true; $('#startbtn').classList.remove('down'); if (b.dataset.open) openWin(b.dataset.open); });
+
+// ---------------- modal message boxes ----------------
+function msgBox(title, html, icon = 'info', buttons = ['OK']) {
+  return new Promise(res => {
+    const m = $('#modal');
+    m.innerHTML = `<div class="win active" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="titlebar"><span class="t">${esc(title)}</span><button class="tb-btn x" data-r="${esc(buttons[buttons.length - 1])}" title="Close">✕</button></div>
+      <div class="msg"><svg><use href="#i-${icon}"/></svg><div class="selectable">${html}</div></div>
+      <div class="msg-btns">${buttons.map(b => `<button class="btn" data-r="${esc(b)}">${esc(b)}</button>`).join('')}</div></div>`;
+    m.hidden = false;
+    if (icon === 'err' || icon === 'warn') chord(); else ding();
+    m.querySelector('.msg-btns .btn').focus();
+    m.onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; m.hidden = true; m.innerHTML = ''; res(b.dataset.r); };
+  });
+}
+
+// ---------------- contacts ----------------
+let view = [], cur = null, sortKey = 'company', sortDir = 1, dirty = false, undoSnap = null;
+const FIELDS = ['company', 'name', 'title', 'phone', 'fax', 'pager', 'email', 'status', 'value', 'last', 'notes'];
+const F = k => $('#f-' + k);
+
+function computeView() {
+  const q = $('#q').value.trim().toLowerCase(), st = $('#fstatus').value;
+  view = db.contacts.filter(c => (!q || (c.name + ' ' + c.company).toLowerCase().includes(q)) && (!st || c.status === st));
+  view.sort((a, b) => {
+    let x = a[sortKey], y = b[sortKey];
+    if (sortKey === 'last') { x = yyKey(x); y = yyKey(y); }
+    if (sortKey === 'value') return (x - y) * sortDir;
+    return String(x).localeCompare(String(y)) * sortDir;
+  });
+}
+function renderTable() {
+  computeView();
+  $('#ctable tbody').innerHTML = view.map(c => `<tr data-id="${c.id}" class="${cur && cur.id === c.id ? 'sel' : ''}">
+    <td>${esc(c.company)}</td><td>${esc(c.name)}</td><td><span class="pill st-${esc(c.status)}">${esc(c.status)}</span></td>
+    <td class="num">${money(c.value)}</td><td>${esc(c.last)}</td></tr>`).join('') ||
+    `<tr><td colspan="5" style="padding:10px">No records match your search.</td></tr>`;
+  $$('#ctable th').forEach(th => { const k = th.dataset.sort; th.textContent = th.textContent.replace(/ [▲▼]$/, '') + (k === sortKey ? (sortDir > 0 ? ' ▲' : ' ▼') : ''); });
+  $('#ccount').textContent = `${view.length} of ${db.contacts.length} records`;
+  const i = cur ? view.findIndex(c => c.id === cur.id) : -1;
+  $('#recpos').textContent = cur && cur.id == null ? 'New Record' : `Record ${i + 1} of ${view.length}`;
+}
+function fillForm(c) {
+  FIELDS.forEach(k => { F(k).value = c[k] ?? ''; });
+  renderHist(c);
+  setDirty(false);
+}
+function renderHist(c) {
+  const rows = db.calls.filter(l => l.who === c.name);
+  $('#hist').innerHTML = rows.length ? rows.map(l => `<div><b>${esc(l.date)}</b> ${esc(l.time)} - ${esc(l.out)}${l.note ? '<br>' + esc(l.note) : ''}</div>`).join('') : '<div>No calls logged yet. Use Record &gt; Log a Call.</div>';
+}
+function setDirty(v) {
+  dirty = v;
+  const t = 'ClientBase Pro 97 - [Contacts' + (dirty ? ' *' : '') + ']';
+  $('#win-contacts .titlebar .t').textContent = t;
+  $('#cstatus').textContent = dirty ? 'Record modified - press Save (Ctrl+S)' : 'Ready';
+}
+async function select(id) {
+  if (dirty && !(await confirmDiscard())) return;
+  cur = db.contacts.find(c => c.id === id) || null;
+  if (cur) fillForm(cur);
+  renderTable();
+  const row = $(`#ctable tr[data-id="${id}"]`); if (row) row.scrollIntoView({ block: 'nearest' });
+}
+async function confirmDiscard() {
+  const r = await msgBox('ClientBase Pro 97', `<p>Save changes to <b>${esc(F('name').value || 'this record')}</b>?</p>`, 'warn', ['Yes', 'No', 'Cancel']);
+  if (r === 'Cancel') return false;
+  if (r === 'Yes') return save(true);
+  setDirty(false); return true;
+}
+function save(quiet) {
+  const name = F('name').value.trim(), company = F('company').value.trim();
+  if (!name && !company) { msgBox('Invalid Entry', '<p>Field <b>Contact</b> or <b>Company</b> cannot be blank.</p><p>Error code 0x0000DEAD.</p>', 'err'); return false; }
+  const last = F('last').value.trim();
+  if (last && !/^\d\d\/\d\d\/\d\d$/.test(last)) { msgBox('Invalid Date', '<p>Dates must be entered as <b>MM/DD/YY</b>.</p><p>Four-digit years are not supported in this version.</p>', 'warn'); return false; }
+  const before = cur && cur.id != null ? { ...cur } : null;
+  const data = {}; FIELDS.forEach(k => { data[k] = k === 'value' ? Math.max(0, Number(F(k).value) || 0) : F(k).value; });
+  if (!cur || cur.id == null) { cur = { id: db.nextId++, ...data }; db.contacts.push(cur); }
+  else Object.assign(cur, data);
+  undoSnap = { id: cur.id, before };
+  persist(); setDirty(false); renderTable();
+  $('#cstatus').textContent = `Record saved to C:\\CLIENTB\\DATA\\CLIENTS.DBF`;
+  refreshDependents();
+  if (!quiet) ding();
+  return true;
+}
+async function newRec() {
+  if (dirty && !(await confirmDiscard())) return;
+  cur = { id: null, status: 'Lead', value: 0, last: mmddyy(now()) };
+  fillForm(cur); renderTable();
+  setTab('gen'); F('company').focus();
+  $('#cstatus').textContent = 'New record - fill in the fields and press Save';
+}
+async function delRec() {
+  if (!cur || cur.id == null) return;
+  const r = await msgBox('Confirm Record Delete', `<p>Are you sure you want to send <b>${esc(cur.name)}</b> (${esc(cur.company)}) to the Recycle Bin?</p>`, 'q', ['Yes', 'No']);
+  if (r !== 'Yes') return;
+  db.contacts = db.contacts.filter(c => c !== cur);
+  db.bin.push({ ...cur, deleted: mmddyy(now()) });
+  persist(); setDirty(false);
+  computeView(); cur = view[0] || null;
+  cur ? fillForm(cur) : FIELDS.forEach(k => F(k).value = '');
+  renderTable(); refreshDependents();
+  $('#cstatus').textContent = '1 record moved to Recycle Bin';
+}
+function nav(dir) {
+  computeView(); if (!view.length) return;
+  let i = cur ? view.findIndex(c => c.id === cur.id) : -1;
+  i = dir === 'first' ? 0 : dir === 'last' ? view.length - 1 : dir === 'next' ? Math.min(view.length - 1, i + 1) : Math.max(0, i - 1);
+  select(view[i].id);
+}
+function setTab(t) {
+  $$('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  $$('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== t);
+}
+$('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
+$('#ctable tbody').addEventListener('click', e => { const r = e.target.closest('tr[data-id]'); if (r) select(+r.dataset.id); });
+$('#ctable tbody').addEventListener('dblclick', () => { setTab('gen'); F('name').focus(); });
+$('#ctable thead').addEventListener('click', e => {
+  const th = e.target.closest('th[data-sort]'); if (!th) return;
+  if (sortKey === th.dataset.sort) sortDir *= -1; else { sortKey = th.dataset.sort; sortDir = 1; }
+  renderTable();
+});
+FIELDS.forEach(k => F(k).addEventListener('input', () => setDirty(true)));
+$('#q').addEventListener('input', renderTable);
+$('#fstatus').addEventListener('change', renderTable);
+
+// ---------------- dialing ----------------
+async function dial() {
+  if (!cur || cur.id == null) return msgBox('AutoDial', '<p>Select a saved contact first.</p>', 'info');
+  const num = cur.phone || cur.pager;
+  if (!num) return msgBox('AutoDial', `<p>${esc(cur.name)} has no phone or pager number on file.</p>`, 'warn');
+  const m = $('#modal');
+  m.innerHTML = `<div class="win active" role="dialog" aria-label="AutoDial"><div class="titlebar"><span class="t">AutoDial - ${esc(cur.name)}</span></div>
+    <div class="body" style="padding:8px"><div class="term selectable" id="dterm"></div>
+    <label class="row" style="margin-top:6px"><input type="checkbox" id="dsound" ${soundOn ? 'checked' : ''}> Play modem sounds</label>
+    <div class="msg-btns"><button class="btn" id="dhang">Hang Up</button></div></div></div>`;
+  m.hidden = false;
+  $('#dsound').onchange = e => { soundOn = e.target.checked; updateSoundBtn(); };
+  let done = false;
+  const out = $('#dterm'), say = (s, ms) => new Promise(r => setTimeout(() => { if (!done) { out.textContent += s + '\n'; out.scrollTop = 1e9; } r(); }, ms));
+  const finish = (outcome) => { done = true; m.hidden = true; m.innerHTML = ''; if (outcome) promptLog(outcome); };
+  $('#dhang').onclick = () => finish(null);
+  await say('ATZ', 100); await say('OK', 400);
+  await say('ATDT ' + num.replace(/\D/g, ''), 300);
+  const t = dialTones(num);
+  await say('', t + 200);
+  const r = Math.random();
+  if (r < .25) { await say('BUSY', 900); await say('NO CARRIER', 500); if (!done) $('#dhang').textContent = 'Log as Busy', $('#dhang').onclick = () => finish('Busy signal'); }
+  else if (r < .55) { await say('RING...', 900); await say('RING...', 1000); await say('RING...', 1000); await say('*click* "You have reached ' + cur.company + '. Please leave a message after the tone."', 600); await say('BEEEEP', 900); if (!done) $('#dhang').textContent = 'Log Voicemail', $('#dhang').onclick = () => finish('Left voicemail'); }
+  else { await say('RING...', 900); await say('RING...', 1000); await say('CONNECT - ' + cur.name.split(' ')[0] + ' picked up!', 600); await say('"Oh hey, I was just thinking about you guys."', 900); if (!done) $('#dhang').textContent = 'Hang Up & Log', $('#dhang').onclick = () => finish('Spoke - interested'); }
+}
+function promptLog(outcome) {
+  openWin('calls');
+  $('#lc-who').value = cur.name; $('#lc-out').value = outcome; $('#lc-note').focus();
+  $('#lstatus').textContent = 'Call ended - add a note and press Log Call';
+}
+
+// ---------------- call log ----------------
+function renderCalls() {
+  $('#lc-who').innerHTML = db.contacts.map(c => `<option>${esc(c.name)}</option>`).join('');
+  if (cur && cur.name) $('#lc-who').value = cur.name;
+  $('#ltable tbody').innerHTML = db.calls.map(l => `<tr><td>${esc(l.date)}</td><td>${esc(l.time)}</td><td>${esc(l.who)}</td><td>${esc(l.out)}</td><td>${esc(l.note)}</td></tr>`).join('');
+}
+$('#lc-add').addEventListener('click', () => {
+  const who = $('#lc-who').value; if (!who) return;
+  const d = now();
+  db.calls.unshift({ date: mmddyy(d), time: hhmm(d), who, out: $('#lc-out').value, note: $('#lc-note').value.trim() });
+  const c = db.contacts.find(x => x.name === who);
+  if (c) { c.last = mmddyy(d); if ($('#lc-out').value === 'Closed deal!') c.status = 'Customer'; }
+  $('#lc-note').value = '';
+  persist(); renderCalls(); refreshDependents();
+  if (cur && c === cur && !dirty) fillForm(cur);
+  $('#lstatus').textContent = 'Call logged.';
+  if ($('#lc-out').value === 'Closed deal!') say(`Congratulations on closing ${esc(c ? c.company : who)}! Time to update the whiteboard.`);
+});
+
+// ---------------- report ----------------
+function renderReport() {
+  const st = ['Lead', 'Prospect', 'Customer', 'Lost'];
+  const sums = st.map(s => db.contacts.filter(c => c.status === s).reduce((a, c) => a + Number(c.value || 0), 0));
+  const max = Math.max(1, ...sums);
+  $('#chart').innerHTML = st.map((s, i) => `<span>${s}</span><div><div class="bar ${s}" style="width:${Math.max(1, sums[i] / max * 100)}%"></div></div><span class="v">${money(sums[i])}</span>`).join('');
+  const open = sums[0] + sums[1], won = sums[2], lost = sums[3];
+  const rate = won + lost ? Math.round(won / (won + lost) * 100) : 0;
+  $('#kpis').innerHTML = `<div><b>${db.contacts.length}</b>Contacts</div><div><b>${money(open)}</b>Open pipeline</div><div><b>${money(won)}</b>Closed won</div><div><b>${rate}%</b>Win rate</div>`;
+}
+$('#rep-refresh').addEventListener('click', () => { $('#chart').innerHTML = '<span style="grid-column:1/-1">Recalculating... please wait.</span>'; setTimeout(renderReport, 900); });
+function refreshDependents() { if (openSet.has('reports')) renderReport(); if (openSet.has('calls')) renderCalls(); if (openSet.has('bin')) renderBin(); }
+
+// ---------------- recycle bin ----------------
+let binSel = null;
+function renderBin() {
+  $('#btable tbody').innerHTML = db.bin.map((c, i) => `<tr data-i="${i}" class="${binSel === i ? 'sel' : ''}"><td>${esc(c.name)}</td><td>${esc(c.company)}</td><td>${esc(c.deleted)}</td></tr>`).join('') || '<tr><td colspan="3" style="padding:10px">The Recycle Bin is empty.</td></tr>';
+}
+$('#btable tbody').addEventListener('click', e => { const r = e.target.closest('tr[data-i]'); if (r) { binSel = +r.dataset.i; renderBin(); } });
+$('#bin-restore').addEventListener('click', () => {
+  if (binSel == null || !db.bin[binSel]) return msgBox('Recycle Bin', '<p>Select an item to restore.</p>');
+  const [c] = db.bin.splice(binSel, 1); delete c.deleted; db.contacts.push(c); binSel = null;
+  persist(); renderBin(); renderTable(); refreshDependents();
+});
+$('#bin-empty').addEventListener('click', async () => {
+  if (!db.bin.length) return;
+  if (await msgBox('Confirm Delete', `<p>Are you sure you want to permanently delete these ${db.bin.length} item(s)?</p>`, 'q', ['Yes', 'No']) !== 'Yes') return;
+  db.bin = []; binSel = null; persist(); renderBin(); tone([200], 300, .08, 'sawtooth');
+});
+
+// ---------------- sync ----------------
+let syncing = false;
+function updateSoundBtn() { $('#sync-sound').textContent = 'Sound: ' + (soundOn ? 'On' : 'Off'); }
+$('#sync-sound').addEventListener('click', () => { soundOn = !soundOn; updateSoundBtn(); if (soundOn) ding(); });
+$('#sync-go').addEventListener('click', async () => {
+  if (syncing) return; syncing = true;
+  const term = $('#sync-term'), bar = $('#sync-bar'), port = $('#sync-port').value;
+  term.textContent = ''; bar.innerHTML = '';
+  const say = (s, ms) => new Promise(r => setTimeout(() => { term.textContent += s + '\n'; term.scrollTop = 1e9; r(); }, ms));
+  const baud = port.match(/\d+(\.\d)?K?/)[0];
+  await say('C:\\CLIENTB> SYNC.EXE /MAINFRAME /' + port.slice(0, 4), 50);
+  await say('Initializing modem on ' + port.slice(0, 4) + '...', 300);
+  await say('ATDT 18005550199', 500);
+  const t = dialTones('18005550199'); screech(t + 300);
+  await say('*** HANDSHAKE ***  krrrsshhhh-eeeeee-dong-dong-shhhh', t + 400);
+  await say('CONNECT ' + baud + ' bps', 1600);
+  await say('Logging in as ADMIN... OK', 400);
+  const total = db.contacts.length + db.calls.length;
+  const cells = Math.floor((bar.clientWidth - 6) / 11);
+  for (let i = 1; i <= cells; i++) {
+    await new Promise(r => setTimeout(r, 40 + Math.random() * 120 + (i === Math.floor(cells * .8) ? 1500 : 0)));
+    bar.insertAdjacentHTML('beforeend', '<i></i>');
+    if (i === Math.floor(cells * .3)) await say(`Uploading ${db.contacts.length} contact records...`, 0);
+    if (i === Math.floor(cells * .6)) await say(`Uploading ${db.calls.length} call log entries...`, 0);
+    if (i === Math.floor(cells * .8)) await say('Waiting for mainframe (someone picked up the phone?)...', 0);
+  }
+  if (Math.random() < .2) {
+    await say('NO CARRIER', 300); syncing = false;
+    msgBox('Sync Failed', '<p>The connection was lost. Someone in the house may have picked up the phone.</p><p>Please try again.</p>', 'err');
+  } else {
+    await say(`Sync complete. ${total} records transferred. 0 errors.`, 300);
+    await say('NO CARRIER', 400); syncing = false;
+    msgBox('Sync Complete', `<p>${total} records were synchronised with the corporate mainframe.</p><p>Elapsed time: 4 min 12 sec. Phone line is free.</p>`, 'info');
+  }
+});
+
+// ---------------- assistant ----------------
+const TIPS = [
+  'It looks like you\'re writing a sales note. Would you like help?<br><br>Tip: Click any column header to sort the Rolodex.',
+  'Tip: Customers who own a pager will call you back 40% faster. Probably.',
+  'Tip: Press Ctrl+N for a new record and Ctrl+S to save it. No mouse required!',
+  'Tip: Log every call. Your manager reads the Call Log on Monday mornings.',
+  'Tip: Sync to Mainframe before 5pm so the night batch picks up your changes.',
+  'Tip: Deleted a contact by mistake? Open the Recycle Bin and press Restore.',
+  'Tip: Faxing a cover sheet first is just good manners.',
+];
+let tipI = 0;
+function say(html, btns = true) {
+  $('#helper-bubble').innerHTML = `<p>${html}</p>${btns ? '<div class="row end"><button class="btn sm" id="tip-next">Next Tip</button><button class="btn sm" id="tip-close">Close</button></div>' : ''}`;
+  $('#helper').hidden = false;
+  const n = $('#tip-next'), c = $('#tip-close');
+  if (n) n.onclick = () => say(TIPS[(++tipI) % TIPS.length]);
+  if (c) c.onclick = () => { $('#helper').hidden = true; };
+}
+$('#helper-guy').addEventListener('click', () => say(TIPS[(++tipI) % TIPS.length]));
+
+// ---------------- actions ----------------
+const ACTIONS = {
+  new: newRec, save: () => save(), delete: delRec,
+  first: () => nav('first'), prev: () => nav('prev'), next: () => nav('next'), last: () => nav('last'),
+  find: () => { $('#q').focus(); $('#q').select(); },
+  dial, logcall: () => { if (cur && cur.id != null) promptLog('Spoke - call back'); else openWin('calls'); },
+  undo: () => {
+    if (!undoSnap) return msgBox('Undo', '<p>There is nothing to undo.</p>');
+    const { id, before } = undoSnap; undoSnap = null;
+    if (!before) { db.contacts = db.contacts.filter(c => c.id !== id); computeView(); cur = view[0] || null; if (cur) fillForm(cur); }
+    else { const c = db.contacts.find(x => x.id === id); if (c) { Object.assign(c, before); cur = c; fillForm(c); } }
+    persist(); renderTable(); refreshDependents(); $('#cstatus').textContent = 'Last save undone';
+  },
+  print: () => msgBox('Printer Error', '<p>There was an error writing to <b>LPT1:</b> for the printer (HP LaserJet 4L).</p><p>The printer may be out of paper, offline, or jammed. Check the printer and click Retry.</p>', 'err', ['Retry', 'Cancel'])
+    .then(r => r === 'Retry' && msgBox('Printer Error', '<p>Still no. Have you tried turning it off and on again?</p>', 'err')),
+  fax: () => {
+    if (!cur || !cur.fax) return msgBox('Fax Cover Sheet', `<p>${cur ? esc(cur.name) + ' has no fax number on file.' : 'Select a contact first.'}</p>`, 'warn');
+    msgBox('Fax Cover Sheet', `<pre style="font:12px 'Courier New',monospace;margin:0">*** FAX ***  ${mmddyy(now())}
+TO:    ${esc(cur.name)}, ${esc(cur.company)}
+FAX:   ${esc(cur.fax)}
+FROM:  Sales Dept, ClientBase Pro 97
+PAGES: 1 (including cover)
+
+Following up on our call. Please
+fax back the signed order form.</pre><p style="margin-top:8px">Queued for sending at the 11pm off-peak rate.</p>`, 'info', ['Send', 'Cancel'])
+      .then(r => { if (r === 'Send') { db.calls.unshift({ date: mmddyy(now()), time: hhmm(now()), who: cur.name, out: 'Sent fax', note: 'Cover sheet, 1 page' }); persist(); refreshDependents(); fillForm(cur); } });
+  },
+  reset: async () => {
+    if (await msgBox('Restore Sample Database', '<p>This replaces every contact, call and Recycle Bin item with the original sample data.</p><p>Continue?</p>', 'warn', ['Yes', 'No']) !== 'Yes') return;
+    db = fresh(); persist(); cur = null; computeView(); cur = view[0]; fillForm(cur); renderTable(); refreshDependents();
+  },
+  'close-contacts': () => closeWin('contacts'),
+  tip: () => say(TIPS[tipI % TIPS.length]),
+  y2k: () => msgBox('Year 2000 Readiness', '<p><b>ClientBase Pro 97 is Year 2000 Aware&trade;.</b></p><p>Dates are stored with two-digit years. After 12/31/99 all records will be sorted as if they were from 1900. A patch is expected in Q4 1999.</p>', 'warn'),
+  about: () => msgBox('About ClientBase Pro 97', '<p><b>ClientBase Pro 97</b><br>Version 3.11 (Build 1998.09)</p><p>Licensed to: SALES DEPT<br>Serial: CBP-0042-1998-XYZ</p><p>Physical memory available: 16,384 KB<br>System resources: 63% free</p>', 'info'),
+  shutdown: async () => {
+    const r = await msgBox('Shut Down ClientBase', '<p>Are you sure you want to shut down the computer?</p>', 'q', ['Yes', 'No']);
+    if (r !== 'Yes') return;
+    $('#shutdown').hidden = false;
+  },
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const f = ACTIONS[b.dataset.act]; if (f) f();
+});
+document.addEventListener('keydown', e => {
+  if (!$('#modal').hidden && e.key === 'Escape') { const b = $$('#modal .msg-btns .btn').pop(); if (b) b.click(); return; }
+  if (!(e.ctrlKey || e.metaKey) || $('#win-contacts').hidden) return;
+  const k = e.key.toLowerCase();
+  if (k === 's') { e.preventDefault(); save(); } else if (k === 'n') { e.preventDefault(); newRec(); } else if (k === 'f') { e.preventDefault(); ACTIONS.find(); }
+});
+$('#shutdown').addEventListener('click', () => { $('#shutdown').hidden = true; boot(); });
+
+// ---------------- clock ----------------
+function tick() { const d = now(); $('#clock').textContent = hhmm(d); $('#cdate').textContent = mmddyy(d); }
+setInterval(tick, 15000); tick();
+
+// ---------------- boot sequence ----------------
+let booting = false;
+function boot() {
+  booting = true;
+  const el = $('#boot'); el.hidden = false; el.textContent = '';
+  const lines = [
+    '(click or press any key to skip)', '',
+    'Modular BIOS v4.51PG, An Energy Star Ally',
+    'Copyright (C) 1984-98', '',
+    'PENTIUM-MMX CPU at 233MHz',
+    'Memory Test :  32768K OK', '',
+    'Detecting IDE Primary Master ... QUANTUM FIREBALL 2.1GB',
+    'Detecting IDE Secondary Master... CD-ROM 24X', '',
+    'Starting Windows 95...', '',
+    'C:\\> CD CLIENTB',
+    'C:\\CLIENTB> LOADHIGH CBPRO97.EXE /NETWORK',
+    'Loading ClientBase Pro 97 ......... OK',
+    `Opening CLIENTS.DBF (${db.contacts.length} records) ... OK`,
+  ];
+  let i = 0;
+  const step = () => {
+    if (!booting) return;
+    if (i < lines.length) { el.textContent += lines[i++] + '\n'; setTimeout(step, lines[i - 1] ? 140 + Math.random() * 160 : 60); }
+    else setTimeout(endBoot, 500);
+  };
+  step();
+}
+function endBoot() {
+  if (!booting) return; booting = false;
+  $('#boot').hidden = true;
+  login();
+}
+$('#boot').addEventListener('click', endBoot);
+document.addEventListener('keydown', e => { if (booting) endBoot(); });
+
+function login() {
+  const m = $('#modal');
+  m.innerHTML = `<form class="win active" id="loginform" role="dialog" aria-label="Log on">
+    <div class="titlebar"><svg><use href="#i-rolodex"/></svg><span class="t">Welcome to ClientBase Pro 97</span></div>
+    <div class="msg"><svg><use href="#i-rolodex"/></svg><div style="flex:1">
+      <p>Type a user name and password to log on to the Sales Network.</p>
+      <div class="form" style="grid-template-columns:80px 1fr;margin-top:8px">
+        <label for="lg-user">User name:</label><input type="text" id="lg-user" value="ADMIN" autocomplete="off">
+        <label for="lg-pass">Password:</label><input type="password" id="lg-pass" value="********" autocomplete="off">
+      </div>
+      <label class="row" style="margin-top:8px"><input type="checkbox" id="lg-snd"> Enable sounds (modem, dial tones)</label>
+    </div></div>
+    <div class="msg-btns"><button class="btn" type="submit">OK</button><button class="btn" type="button" id="lg-cancel">Cancel</button></div></form>`;
+  m.hidden = false;
+  $('#lg-user').focus(); $('#lg-user').select();
+  $('#lg-cancel').onclick = () => { m.hidden = true; m.innerHTML = ''; start(true); };
+  $('#loginform').onsubmit = e => { e.preventDefault(); soundOn = $('#lg-snd').checked; updateSoundBtn(); m.hidden = true; m.innerHTML = ''; start(false); };
+}
+function start(guest) {
+  chord();
+  fitWins();
+  openWin('contacts');
+  computeView(); if (!cur) cur = view[0] || null;
+  if (cur) fillForm(cur);
+  renderTable();
+  setTimeout(() => say(guest ? 'You logged on as a guest. Your changes will still be saved... on this computer only!<br><br>' + TIPS[0] : 'Welcome back! ' + TIPS[0]), 700);
+}
+
+computeView();
+boot();
+})();
+</script>
+
+</body>
+</html>
