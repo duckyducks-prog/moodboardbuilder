@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 <body>
-<title>Halvora CRM</title>
+<title>Corvessa CRM</title>
 <style>
 /* Layout: an older enterprise web app. Gradient header, coloured object tabs, grey sidebar, dense list tables. One deliberate light look. */
 :root {
@@ -224,20 +224,20 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#1d4f7c"/><path d="M9 9v14M23 9v14M9 16h14" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><circle cx="25.5" cy="7" r="4" fill="#f8a51b" stroke="#fff" stroke-width="1.5"/></symbol>
+  <symbol id="logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#1d4f7c"/><path d="M21.5 11a7 7 0 1 0 0 10" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><circle cx="25.5" cy="7" r="4" fill="#f8a51b" stroke="#fff" stroke-width="1.5"/></symbol>
 </defs></svg>
 
 <!-- ===================== login ===================== -->
 <div id="login">
   <form class="box" id="loginform">
-    <h1 class="logo"><svg><use href="#logo"/></svg>Halvora<small>CRM</small></h1>
+    <h1 class="logo"><svg><use href="#logo"/></svg>Corvessa<small>CRM</small></h1>
     <p class="sub">Sign in to your account</p>
     <label for="lg-user">Username</label><input type="text" id="lg-user" value="admin@brightwatersales.example" autocomplete="off">
-    <label for="lg-pass">Password</label><input type="password" id="lg-pass" value="halvora2026" autocomplete="off">
+    <label for="lg-pass">Password</label><input type="password" id="lg-pass" value="corvessa2026" autocomplete="off">
     <div class="row"><label style="margin:0;font-weight:normal"><input type="checkbox" id="lg-rem" checked> Remember me</label><a id="lg-forgot">Forgot your password?</a></div>
     <button class="cbtn pri go" type="button" data-submit="loginform">Log In</button>
   </form>
-  <footer>© 2026 Halvora, Inc. All rights reserved. · Privacy Statement · Security Statement · Terms of Use</footer>
+  <footer>© 2026 Corvessa, Inc. All rights reserved. · Privacy Statement · Security Statement · Terms of Use</footer>
 </div>
 
 <!-- ===================== app ===================== -->
@@ -250,7 +250,7 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
     <a data-act="logout">Logout</a>
   </div>
   <div class="hdr">
-    <div class="logo"><svg><use href="#logo"/></svg>Halvora<small>CRM · Enterprise Edition</small></div>
+    <div class="logo"><svg><use href="#logo"/></svg>Corvessa<small>CRM · Enterprise Edition</small></div>
     <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, opportunities..."><button class="cbtn" type="button" data-submit="gsearch">Search</button></form>
     <div class="msgs">
       <a data-act="sheet">Open Spreadsheet</a>
@@ -264,12 +264,12 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
     <aside class="side" id="side"></aside>
     <main class="main" id="main"></main>
   </div>
-  <div class="foot">Copyright © 2000-2026 Halvora, Inc. All rights reserved. | <a data-act="help">Privacy Statement</a> | <a data-act="help">Security Statement</a> | <a data-act="help">Terms of Use</a> | <span class="addr" id="addr"></span></div>
+  <div class="foot">Copyright © 2000-2026 Corvessa, Inc. All rights reserved. | <a data-act="help">Privacy Statement</a> | <a data-act="help">Security Statement</a> | <a data-act="help">Terms of Use</a> | <span class="addr" id="addr"></span></div>
 </div>
 
 <!-- ===================== spreadsheet ===================== -->
 <div id="sheet" hidden>
-  <div class="xh"><span class="fn" id="xfile">Pipeline_Export.xlsx</span><span class="meta" id="xmeta">Halvora Sheets · Last saved just now</span>
+  <div class="xh"><span class="fn" id="xfile">Pipeline_Export.xlsx</span><span class="meta" id="xmeta">Corvessa Sheets · Last saved just now</span>
     <div class="r"><button class="cbtn" id="xsave">Save</button><button class="cbtn" id="xclose">Close Spreadsheet</button></div></div>
   <div class="xmenu" id="xmenu">
     <div><button>File</button><div class="dd"><button data-x="newsheet">New Sheet</button><button data-x="save">Save</button><button data-x="close">Close</button></div></div>
@@ -363,7 +363,7 @@ const CASE_COMMENTS = ['Customer confirmed issue on their side as well.', 'Escal
 const TASK_SUBJ = ['Call to follow up on proposal', 'Send pricing sheet', 'Prepare QBR deck', 'Schedule product demo', 'Email contract redlines', 'Confirm renewal terms', 'Send case study', 'Introduce solutions engineer', 'Update opportunity next steps', 'Book onsite visit', 'Review security questionnaire', 'Send meeting recap'];
 const TASK_STATUS = ['Not Started', 'In Progress', 'Waiting on someone else', 'Deferred'];
 const ACT_SUBJ = { Call: ['Intro call', 'Follow-up call', 'Pricing discussion', 'Check-in call', 'Renewal call'], Email: ['Sent proposal', 'Sent pricing', 'Follow-up email', 'Meeting recap', 'Sent case study'], Meeting: ['Discovery meeting', 'Product demo', 'QBR', 'Onsite visit', 'Executive briefing'] };
-const PRODUCTS = [['Halvora Platform License - Standard', 'Software', 1200], ['Halvora Platform License - Enterprise', 'Software', 2400], ['Analytics Add-on', 'Software', 600], ['Premium Support (Annual)', 'Support', 4800], ['Implementation Services', 'Services', 15000], ['Training Day (Onsite)', 'Services', 2200], ['API Access Tier 2', 'Software', 3600], ['Additional Storage 1 TB', 'Infrastructure', 900], ['Mobile Seats (10-pack)', 'Software', 1500], ['SSO Module', 'Software', 1800], ['Data Migration Package', 'Services', 7500], ['Sandbox Environment', 'Infrastructure', 3000], ['Marketing Automation Add-on', 'Software', 4200], ['Field Service Module', 'Software', 3900], ['CPQ Module', 'Software', 5400], ['Health Check (Quarterly)', 'Services', 3500], ['Dedicated Success Manager', 'Support', 12000], ['E-signature Integration', 'Software', 800]];
+const PRODUCTS = [['Corvessa Platform License - Standard', 'Software', 1200], ['Corvessa Platform License - Enterprise', 'Software', 2400], ['Analytics Add-on', 'Software', 600], ['Premium Support (Annual)', 'Support', 4800], ['Implementation Services', 'Services', 15000], ['Training Day (Onsite)', 'Services', 2200], ['API Access Tier 2', 'Software', 3600], ['Additional Storage 1 TB', 'Infrastructure', 900], ['Mobile Seats (10-pack)', 'Software', 1500], ['SSO Module', 'Software', 1800], ['Data Migration Package', 'Services', 7500], ['Sandbox Environment', 'Infrastructure', 3000], ['Marketing Automation Add-on', 'Software', 4200], ['Field Service Module', 'Software', 3900], ['CPQ Module', 'Software', 5400], ['Health Check (Quarterly)', 'Services', 3500], ['Dedicated Success Manager', 'Support', 12000], ['E-signature Integration', 'Software', 800]];
 const CAMP_TYPES = ['Webinar', 'Trade Show', 'Email', 'Conference', 'Direct Mail', 'Paid Search', 'Partner Event'];
 const CAMP_NAMES = ['Q4 Product Launch Webinar', 'Spring Customer Summit', 'Retail Ops Roundtable', 'Healthcare IT Expo', 'Year-End Renewal Push', 'Analytics Add-on Promo', 'Partner Kickoff', 'Manufacturing Tour', 'New Logo Email Nurture', 'Executive Dinner Series', 'Mid-Market Paid Search', 'Fintech Forum', 'Customer Advisory Board', 'West Coast Roadshow', 'Security Webinar Series', 'Field Service Launch', 'Holiday Direct Mail', 'Trial Conversion Drip', 'Logistics Leaders Meetup', 'CPQ Early Access'];
 
@@ -376,7 +376,7 @@ const slug = s => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ''
 function generate() {
   seed = 7341;
   db = { seq: { ACC: 10200, CON: 30500, LEA: 50100, OPP: 60400, CAS: 1048, CMP: 7000, PRD: 900, TSK: 80000, ACT: 90000 }, accounts: [], contacts: [], leads: [], opps: [], cases: [], campaigns: [], products: [], tasks: [], acts: [], events: [], approvals: [], bin: [], recent: [] };
-  PRODUCTS.forEach(([name, family, price]) => db.products.push({ id: nid('PRD'), name, code: 'HV-' + family.slice(0, 3).toUpperCase() + '-' + int(100, 999), family, price, active: 'Yes', description: '' }));
+  PRODUCTS.forEach(([name, family, price]) => db.products.push({ id: nid('PRD'), name, code: 'CV-' + family.slice(0, 3).toUpperCase() + '-' + int(100, 999), family, price, active: 'Yes', description: '' }));
   CAMP_NAMES.forEach(name => {
     const st = int(-60, 200), len = int(1, 45), budget = int(5, 80) * 1000;
     db.campaigns.push({ id: nid('CMP'), name, type: pick(CAMP_TYPES), status: st > len + 5 ? 'Completed' : st > 0 ? 'In Progress' : 'Planned', start: dAgo(st), end: dAgo(st - len), budget, cost: st > 0 ? Math.round(budget * (0.6 + rnd() * .5)) : 0, expected: budget * int(3, 9), owner: pick(OWNERS), description: '' });
@@ -430,7 +430,7 @@ function generate() {
   for (let i = 0; i < 6; i++) { const o = pick(open); db.approvals.push({ id: 'APR-' + (4400 + i), opp: o.id, type: pick(['Discount Approval', 'Discount Approval', 'Non-standard Terms', 'Extended Payment Terms']), detail: pick(['18% discount', '22% discount', 'Net 60 payment terms', '3-year price lock', '15% discount', 'Custom SLA']), by: pick(OWNERS.slice(1)), date: dAgo(int(0, 6)) }); }
 }
 
-const STORE = 'halvora-crm-v2';
+const STORE = 'corvessa-crm-v2';
 function persist() { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }
 function loadDb() { try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.accounts) { db = s; return true; } } catch (e) {} return false; }
 if (!loadDb()) generate();
@@ -568,7 +568,7 @@ function render() {
   main.innerHTML = v === 'home' ? viewHome() : v === 'list' ? viewList(S.obj) : v === 'detail' ? viewDetail(S.id) : v === 'edit' ? viewEdit(S.obj, S.id) : v === 'search' ? viewSearch(S.q) : v === 'forecasts' ? viewForecasts() : v === 'reports' ? viewReports() : v === 'dashboards' ? viewDash() : '';
   renderSide();
   const path = v === 'detail' ? '/' + S.id : v === 'list' ? '/' + PRE_OF[S.obj].toLowerCase() + '/o' : v === 'edit' ? '/' + (S.id || PRE_OF[S.obj].toLowerCase()) + '/e' : '/' + v;
-  $('#addr').textContent = 'https://brightwater.halvora.example' + path;
+  $('#addr').textContent = 'https://brightwater.corvessa.example' + path;
 }
 
 function renderSide() {
@@ -592,7 +592,7 @@ function renderSide() {
       <button class="cbtn" type="button" data-submit="qc">Save</button></form></div>
     <div class="sbox"><h4>${t.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4><table class="cal">${cal}</table></div>
     <div class="sbox"><h4>Messages &amp; Alerts</h4><div style="display:grid;gap:6px">
-      <div class="alert"><b>Scheduled maintenance:</b> Saturday 11:00 PM - 1:00 AM ET. Halvora will be read-only.</div>
+      <div class="alert"><b>Scheduled maintenance:</b> Saturday 11:00 PM - 1:00 AM ET. Corvessa will be read-only.</div>
       <div class="alert">FY${fy(t)} Q${quarter(t)} pricing guide updated. See Documents &gt; Sales Collateral.</div>
       <div class="alert">Forecast submissions due Friday 5:00 PM.</div></div></div>
     <div class="sbox"><h4>Recycle Bin</h4><a data-act="bin">Recycle Bin (${db.bin.length})</a></div>`;
@@ -913,7 +913,7 @@ async function callRec() {
   const num = r.phone || r.mobile;
   if (!num) return dialog('Call', `<p>${esc(title(r))} has no phone number on file.</p>`);
   const m = $('#modal');
-  m.innerHTML = `<div class="dlg" role="dialog" aria-label="Call"><div class="dh">Halvora Dialer</div><div class="db"><p><b>${esc(title(r))}</b><br>${esc(r.title || '')}${r.account ? ', ' + esc(title(get(r.account))) : r.company ? ', ' + esc(r.company) : ''}<br>${esc(num)}</p>
+  m.innerHTML = `<div class="dlg" role="dialog" aria-label="Call"><div class="dh">Corvessa Dialer</div><div class="db"><p><b>${esc(title(r))}</b><br>${esc(r.title || '')}${r.account ? ', ' + esc(title(get(r.account))) : r.company ? ', ' + esc(r.company) : ''}<br>${esc(num)}</p>
     <label><input type="checkbox" id="dsnd" ${soundOn ? 'checked' : ''}> Play call sounds</label><div class="term" id="dterm"></div></div><div class="df"><button class="cbtn pri" id="dend">End Call</button></div></div>`;
   m.hidden = false; m.onclick = null;
   $('#dsnd').onchange = e => soundOn = e.target.checked;
@@ -1098,7 +1098,7 @@ function setCell(r, c, v) {
   const n = v.trim() !== '' && !v.startsWith('=') && !isNaN(Number(v.replace(/[$,]/g, ''))) ? Number(v.replace(/[$,]/g, '')) : v;
   row[c] = n;
   refreshCell(r, c); refreshFormulas();
-  $('#xmeta').textContent = 'Halvora Sheets · Unsaved changes';
+  $('#xmeta').textContent = 'Corvessa Sheets · Unsaved changes';
 }
 function startEdit(initial) {
   const td = tdAt(X.r, X.c); if (!td) return;
@@ -1152,7 +1152,7 @@ function xAction(a) {
     case 'selall': { const [R, C] = sheetDims(sh); select(0, 0, sh.data.length - 1, C - 1, true); break; }
     case 'grid': X.grid = !X.grid; renderSheet(); break;
     case 'newsheet': X.sheets.push(mkSheet('Sheet' + (X.sheets.length + 1), [], [])); X.cur = X.sheets.length - 1; X.r = X.ar = 0; X.c = X.ac = 0; renderSheet(); break;
-    case 'save': $('#xmeta').textContent = 'Halvora Sheets · Saved ' + hhmm(new Date()); break;
+    case 'save': $('#xmeta').textContent = 'Corvessa Sheets · Saved ' + hhmm(new Date()); break;
     case 'close': closeSheet(); break;
     case 'xhelp': $('#xmsg').textContent = 'Tip: type to edit, Enter to confirm, arrows to move, Shift+click to select a range. Formulas: =SUM(A1:A10), =AVERAGE, =MIN, =MAX, =COUNT, + - * /'; break;
   }
@@ -1251,7 +1251,7 @@ async function act(k) {
     case 'submitfc': toast('Forecast submitted for Q' + quarter(today())); break;
     case 'reset': { const res = await dialog('Reset Sample Data', '<p>Replace all records with the original sample data? Your changes will be lost.</p>', ['Reset', 'Cancel']); if (res.btn === 'Reset') { generate(); persist(); X.sheets = []; S.lists = {}; goTab('home'); toast('Sample data restored'); } break; }
     case 'logout': $('#app').hidden = true; $('#login').hidden = false; closeSheet(); break;
-    case 'help': dialog('Help & Training', '<p><b>Halvora CRM Enterprise Edition</b> · Release Winter \'' + String(today().getFullYear() + 1).slice(2) + '</p><p>Click a tab to browse records. Click any name to open its detail page. Use <b>Open in Spreadsheet</b> on any list, report or forecast to work with the data in a grid.</p><p>Support: support@halvora.example</p>'); break;
+    case 'help': dialog('Help & Training', '<p><b>Corvessa CRM Enterprise Edition</b> · Release Winter \'' + String(today().getFullYear() + 1).slice(2) + '</p><p>Click a tab to browse records. Click any name to open its detail page. Use <b>Open in Spreadsheet</b> on any list, report or forecast to work with the data in a grid.</p><p>Support: support@corvessa.example</p>'); break;
     case 'setup': dialog('Setup', '<p><b>Personal Setup</b><br>My Personal Information · Email · Import · Desktop Integration</p><p><b>App Setup</b><br>Customize · Create · Workflow &amp; Approvals · Data Management</p><p style="color:#666">Setup changes are restricted to system administrators in this org.</p>'); break;
     case 'editview': dialog('List Views', '<p>List view changes are managed by your system administrator.</p>'); break;
     case 'import': dialog('Import Wizard', '<p>Start the import wizard to add up to 50,000 records from a CSV file.</p><p style="color:#666">Imports are restricted to system administrators in this org.</p>'); break;
