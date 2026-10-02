@@ -10,7 +10,7 @@
 /* Layout: an older enterprise web app. Gradient header, coloured object tabs, grey sidebar, dense list tables. One deliberate light look. */
 :root {
   --page: #ffffff;
-  --chrome: #f3f3ec;
+  --chrome: #eef3f8;
   --ink: #222222;
   --muted: #5a5f66;
   --line: #d4dadc;
@@ -19,9 +19,9 @@
   --hdr2: #d9e3ee;
   --brand: #1d4f7c;
   --hover: #e3f3ff;
-  --warn-bg: #fff9d6;
-  --warn-line: #f0d878;
-  --red: #c00000;
+  --warn-bg: #e8f2fc;
+  --warn-line: #a9c8e8;
+  --req: #1f6fb5;
   --font-ui: Arial, Helvetica, sans-serif;
   --font-head: Verdana, Geneva, Tahoma, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
@@ -36,7 +36,7 @@ input, select, textarea, button, table { font: inherit; color: inherit; }
 input[type=text], input[type=password], input[type=number], select, textarea {
   border: 1px solid #a5acb2; border-top-color: #7f8890; padding: 2px 4px; background: #fff; border-radius: 0; min-width: 0;
 }
-:focus-visible { outline: 2px solid #f8a51b; outline-offset: 1px; }
+:focus-visible { outline: 2px solid #4aa3e8; outline-offset: 1px; }
 .cbtn {
   font: bold 11px var(--font-ui); padding: 3px 8px; border: 1px solid #b5b5b5; border-bottom-color: #7f7f7f; border-radius: 3px;
   background: linear-gradient(#ffffff, #e5e5e5); color: #333; cursor: pointer; white-space: nowrap;
@@ -44,7 +44,7 @@ input[type=text], input[type=password], input[type=number], select, textarea {
 .cbtn:hover { background: linear-gradient(#ffffff, #d8d8d8); }
 .cbtn:active { background: #d8d8d8; }
 .cbtn.pri { color: #fff; border-color: #2a5d8a; background: linear-gradient(#5b93c7, #2f6aa3); }
-.req { border-left: 3px solid var(--red) !important; }
+.req { border-left: 3px solid var(--req) !important; }
 
 /* ---------- login ---------- */
 #login { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding-inline: 16px; background: linear-gradient(#e9eff5, #ffffff 380px); box-sizing: border-box; }
@@ -69,13 +69,13 @@ input[type=text], input[type=password], input[type=number], select, textarea {
 .gsearch { display: flex; gap: 4px; align-items: center; }
 .gsearch input { width: 220px; padding: 4px 6px; }
 .hdr .msgs { margin-left: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 11px; }
-.badge { display: inline-block; min-width: 14px; padding: 0 4px; border-radius: 8px; background: var(--red); color: #fff; font-size: 10px; font-weight: bold; text-align: center; }
+.badge { display: inline-block; min-width: 14px; padding: 0 4px; border-radius: 8px; background: var(--req); color: #fff; font-size: 10px; font-weight: bold; text-align: center; }
 .tabs { display: flex; gap: 2px; padding: 5px 8px 0; background: var(--page); border-bottom: 5px solid var(--tabc); overflow-x: auto; scrollbar-width: thin; }
 .tabs button { border: 0; padding: 6px 11px; border-radius: 7px 7px 0 0; background: linear-gradient(#f1f4f7, #dfe5eb); color: #333; font: bold 11px var(--font-ui); cursor: pointer; white-space: nowrap; }
 .tabs button:hover { background: #cfd9e3; }
 .tabs button.on { background: var(--tabc); color: var(--tabink); }
 .body { flex: 1; display: flex; min-height: 0; }
-.side { width: 205px; flex: none; background: var(--chrome); border-right: 1px solid #d6d6c8; padding: 8px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+.side { width: 205px; flex: none; background: var(--chrome); border-right: 1px solid #cdd8e3; padding: 8px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
 .sbox h4 { margin: 0 0 5px; font: bold 11px var(--font-ui); color: #333; border-bottom: 2px solid var(--tabc); padding-bottom: 2px; }
 .sbox ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .sbox li { display: flex; gap: 5px; align-items: center; min-width: 0; }
@@ -115,7 +115,7 @@ table.lt { border-collapse: collapse; width: 100%; font-variant-numeric: tabular
 table.lt th { background: linear-gradient(#f2f3f3, #dfe2e3); border-right: 1px solid var(--line); border-bottom: 1px solid #c4cacc; text-align: left; padding: 4px 5px; white-space: nowrap; }
 table.lt th[data-sort] { cursor: pointer; }
 table.lt th[data-sort]:hover { background: #d4dade; }
-table.lt td { padding: 3px 5px; border-bottom: 1px solid #ebe7cf; white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+table.lt td { padding: 3px 5px; border-bottom: 1px solid #e1e8ef; white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 table.lt tbody tr:hover td { background: var(--hover); }
 table.lt .n { text-align: right; }
 table.lt td.act { color: #999; }
@@ -131,9 +131,9 @@ table.lt td.act { color: #999; }
 .dt input, .dt select, .dt textarea { width: 100%; max-width: 320px; box-sizing: border-box; }
 .dt textarea { max-width: 100%; }
 .pill { display: inline-block; padding: 0 5px; border-radius: 8px; font-size: 10.5px; font-weight: bold; }
-.p-hot { background: #ffd9d4; color: #9c1c0b; } .p-warm { background: #ffecc2; color: #7a5000; } .p-cold { background: #dbe9f7; color: #1b4f86; }
-.p-high, .p-critical { background: #ffd9d4; color: #9c1c0b; } .p-medium { background: #ffecc2; color: #7a5000; } .p-low { background: #e4f1dc; color: #2f6b12; }
-.overdue { color: var(--red); font-weight: bold; }
+.p-hot { background: #c3daf2; color: #0d3a66; } .p-warm { background: #dbe9f7; color: #1b4f86; } .p-cold { background: #dbe9f7; color: #1b4f86; }
+.p-high, .p-critical { background: #c3daf2; color: #0d3a66; } .p-medium { background: #dbe9f7; color: #1b4f86; } .p-low { background: #e7f1fb; color: #2b5f91; }
+.overdue { color: var(--req); font-weight: bold; }
 .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .cols2 > *, .cols3 > * { min-width: 0; }
@@ -164,26 +164,26 @@ tr.sub td { background: #f6f6f6 !important; font-weight: bold; border-bottom: 2p
 .dlg .df { display: flex; justify-content: flex-end; gap: 5px; padding: 8px 12px; background: #f3f3f3; border-top: 1px solid #ddd; }
 .dlg .fm { display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; }
 .dlg .fm label { text-align: right; font-weight: bold; font-size: 11px; color: #444; }
-.term { background: #10161d; color: #8fe39b; font: 12px/1.4 var(--font-mono); padding: 8px; height: 110px; overflow: auto; white-space: pre-wrap; margin-top: 8px; }
-#toast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 950; background: #fff9d6; border: 1px solid #e0c34a; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.term { background: #10161d; color: #9cc9f2; font: 12px/1.4 var(--font-mono); padding: 8px; height: 110px; overflow: auto; white-space: pre-wrap; margin-top: 8px; }
+#toast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 950; background: #e8f2fc; border: 1px solid #7fb0de; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
 
 /* ---------- spreadsheet ---------- */
 #sheet { position: fixed; inset: 0; z-index: 800; background: #fff; display: flex; flex-direction: column; font: 12px var(--font-ui); }
-.xh { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: linear-gradient(#2f7a4b, #1d5c35); color: #fff; flex-wrap: wrap; }
+.xh { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: linear-gradient(#2f6aa3, #1c4f80); color: #fff; flex-wrap: wrap; }
 .xh .fn { font-weight: bold; font-size: 14px; }
 .xh .meta { font-size: 11px; opacity: .85; }
 .xh .r { margin-left: auto; display: flex; gap: 6px; }
 .xmenu { display: flex; gap: 0; padding: 2px 6px; background: #f3f3f3; border-bottom: 1px solid #ddd; flex-wrap: wrap; position: relative; }
 .xmenu > div { position: relative; }
 .xmenu > div > button { background: none; border: 0; padding: 3px 8px; cursor: pointer; }
-.xmenu > div > button:hover, .xmenu > div.open > button { background: #dde6dd; }
+.xmenu > div > button:hover, .xmenu > div.open > button { background: #dde8f3; }
 .xmenu .dd { position: absolute; top: 100%; left: 0; z-index: 30; background: #fff; border: 1px solid #aaa; box-shadow: 2px 2px 6px rgba(0,0,0,.2); min-width: 190px; padding: 3px 0; display: none; }
 .xmenu > div.open .dd { display: block; }
 .xmenu .dd button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 4px 16px; cursor: pointer; white-space: nowrap; }
-.xmenu .dd button:hover { background: #e3f0e6; }
+.xmenu .dd button:hover { background: #e3eef9; }
 .xtool { display: flex; gap: 3px; align-items: center; padding: 4px 6px; background: #fafafa; border-bottom: 1px solid #ddd; flex-wrap: wrap; }
 .xtool .tb { min-width: 24px; height: 22px; border: 1px solid transparent; background: none; cursor: pointer; padding: 0 5px; border-radius: 2px; }
-.xtool .tb:hover { border-color: #b7c9b9; background: #eaf3ec; }
+.xtool .tb:hover { border-color: #b4cbe0; background: #e6f0fb; }
 .xtool .vs { width: 1px; height: 18px; background: #ccc; margin: 0 3px; }
 .xfx { display: flex; gap: 4px; align-items: center; padding: 3px 6px; border-bottom: 1px solid #ccc; }
 .xfx #xname { width: 70px; text-align: center; }
@@ -197,16 +197,16 @@ table.xt th.rn { z-index: 3; }
 table.xt td { border-right: 1px solid #e2e4e6; border-bottom: 1px solid #e2e4e6; padding: 0 4px; height: 19px; white-space: nowrap; overflow: hidden; text-overflow: clip; cursor: cell; }
 table.xt td.num { text-align: right; }
 table.xt td.s { background: #d7e8fb; }
-table.xt td.c { outline: 2px solid #1d6f3d; outline-offset: -2px; background: #fff; }
-table.xt th.hs, table.xt td.rn.hs { background: #c9dfcf; color: #000; font-weight: bold; }
+table.xt td.c { outline: 2px solid #1f6fb5; outline-offset: -2px; background: #fff; }
+table.xt th.hs, table.xt td.rn.hs { background: #c6dbf0; color: #000; font-weight: bold; }
 table.xt td.b { font-weight: bold; } table.xt td.i { font-style: italic; } table.xt td.u { text-decoration: underline; }
 table.xt td.al { text-align: left; } table.xt td.ac { text-align: center; } table.xt td.ar { text-align: right; }
 table.xt td input { width: 100%; height: 17px; border: 0; padding: 0; outline: none; font: inherit; background: #fff; }
-table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
+table.xt td.hdrrow { background: #e3eef9; font-weight: bold; }
 .xtabs { display: flex; gap: 2px; padding: 0 6px; background: #eef0f2; border-top: 1px solid #ccc; overflow-x: auto; align-items: flex-end; min-height: 26px; }
 .xtabs button { border: 1px solid #c3c3c3; border-top: 0; background: #e1e3e5; padding: 3px 12px; cursor: pointer; white-space: nowrap; border-radius: 0 0 4px 4px; }
-.xtabs button.on { background: #fff; color: #1d5c35; font-weight: bold; border-bottom: 2px solid #1d6f3d; }
-.xstat { display: flex; gap: 16px; padding: 3px 10px; background: #1d5c35; color: #fff; font-size: 11px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.xtabs button.on { background: #fff; color: #1c4f80; font-weight: bold; border-bottom: 2px solid #1f6fb5; }
+.xstat { display: flex; gap: 16px; padding: 3px 10px; background: #1c4f80; color: #fff; font-size: 11px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
 .xstat span:first-child { margin-right: auto; }
 
 /* ---------- narrow screens ---------- */
@@ -224,7 +224,7 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#1d4f7c"/><path d="M21.5 11a7 7 0 1 0 0 10" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><circle cx="25.5" cy="7" r="4" fill="#f8a51b" stroke="#fff" stroke-width="1.5"/></symbol>
+  <symbol id="logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#1d4f7c"/><path d="M21.5 11a7 7 0 1 0 0 10" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><circle cx="25.5" cy="7" r="4" fill="#4aa3e8" stroke="#fff" stroke-width="1.5"/></symbol>
 </defs></svg>
 
 <!-- ===================== login ===================== -->
@@ -291,7 +291,7 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
     <span class="vs"></span>
     <button class="tb" data-x="autosum" title="AutoSum">Σ</button><button class="tb" data-x="asc" title="Sort A to Z">A↓Z</button><button class="tb" data-x="desc" title="Sort Z to A">Z↓A</button>
     <span class="vs"></span>
-    <label for="xfill" style="font-size:11px">Fill</label><select id="xfill"><option value="">None</option><option value="#fff2a8">Yellow</option><option value="#cdeccf">Green</option><option value="#ffd3cf">Red</option><option value="#d6e6fb">Blue</option></select>
+    <label for="xfill" style="font-size:11px">Fill</label><select id="xfill"><option value="">None</option><option value="#dbeafc">Light Blue</option><option value="#bcdcf7">Sky Blue</option><option value="#c7d5e4">Steel Blue</option><option value="#9cc3ea">Mid Blue</option></select>
   </div>
   <div class="xfx"><input type="text" id="xname" readonly aria-label="Cell name"><span class="fx">fx</span><input type="text" id="xbar" aria-label="Formula bar"></div>
   <div class="xgrid" id="xgrid" tabindex="0"></div>
@@ -449,7 +449,7 @@ const OBJ = {
       ['Deals', 'opps', (x, r) => x.account === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
       ['Cases', 'cases', (x, r) => x.account === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['priority', 'Priority', 'prio'], ['status', 'Status'], ['opened', 'Date Opened', 'date']]],
       'history'] },
-  contacts: { label: 'Contacts', one: 'Contact', color: '#56458c', ic: 'C',
+  contacts: { label: 'Contacts', one: 'Contact', color: '#2a4f8a', ic: 'C',
     sections: [['Contact Information', [['first', 'First Name'], ['owner', 'Contact Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['phone', 'Phone'], ['account', 'Account Name', 'ref', 'accounts'], ['mobile', 'Mobile'], ['title', 'Title'], ['email', 'Email'], ['department', 'Department', 'pick', DEPTS], ['source', 'Lead Source', 'pick', SOURCES]]],
       ['Address Information', [['city', 'Mailing City'], ['state', 'Mailing State']]],
       ['Description Information', [['description', 'Description', 'area']]],
@@ -459,7 +459,7 @@ const OBJ = {
     rel: [['Deals', 'opps', (x, r) => x.contact === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
       ['Cases', 'cases', (x, r) => x.contact === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio']]],
       'history'] },
-  leads: { label: 'Leads', one: 'Lead', color: '#e08a1e', ic: 'L',
+  leads: { label: 'Leads', one: 'Lead', color: '#3b82c4', ic: 'L',
     sections: [['Lead Information', [['first', 'First Name'], ['owner', 'Lead Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['status', 'Lead Status', 'pick', LEAD_STATUS], ['company', 'Company', 'text', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['title', 'Title'], ['rating', 'Rating', 'pick', RATINGS], ['email', 'Email'], ['industry', 'Industry', 'pick', INDUSTRIES], ['phone', 'Phone'], ['campaign', 'Campaign', 'ref', 'campaigns']]],
       ['Address Information', [['city', 'City'], ['state', 'State']]],
       ['Description Information', [['description', 'Description', 'area']]],
@@ -467,33 +467,33 @@ const OBJ = {
     cols: [['first', 'Name', 'link'], ['company', 'Company'], ['state', 'State'], ['email', 'Email'], ['status', 'Lead Status'], ['source', 'Lead Source'], ['rating', 'Rating', 'rating'], ['owner', 'Owner'], ['created', 'Created', 'date']],
     views: [['All Open Leads', r => !['Qualified', 'Unqualified'].includes(r.status)], ['My Unread Leads', r => r.owner === ME && r.status === LEAD_STATUS[0]], ['Today\'s Leads', r => ageDays(r.created) <= 1], ['Hot Leads', r => r.rating === 'Hot'], ['All Leads', () => true]],
     rel: ['history'] },
-  opps: { label: 'Deals', one: 'Deal', color: '#c9a400', ic: 'D',
+  opps: { label: 'Deals', one: 'Deal', color: '#1f78c8', ic: 'D',
     sections: [['Deal Information', [['name', 'Deal Name', 'text', 0, 1], ['owner', 'Deal Owner', 'pick', OWNERS], ['account', 'Account Name', 'ref', 'accounts', 1], ['amount', 'Amount', 'money'], ['type', 'Type', 'pick', OPP_TYPES], ['close', 'Close Date', 'date', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['stage', 'Stage', 'pick', STAGES.map(s => s[0])], ['contact', 'Primary Contact', 'ref', 'contacts'], ['prob', 'Probability (%)', 'pct'], ['campaign', 'Primary Campaign', 'ref', 'campaigns'], ['next', 'Next Step']]],
       ['Description Information', [['description', 'Description', 'area']]],
       ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
     cols: [['name', 'Deal Name', 'link'], ['account', 'Account Name', 'ref'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date'], ['stage', 'Stage'], ['prob', 'Prob (%)', 'pct'], ['owner', 'Owner'], ['next', 'Next Step']],
     views: [['All Deals', () => true], ['My Deals', r => r.owner === ME], ['Open Deals', r => !r.stage.startsWith('Closed')], ['Closing This Month', r => !r.stage.startsWith('Closed') && r.close.slice(0, 7) === iso(today()).slice(0, 7)], ['Won', r => r.stage === 'Closed Won'], ['Recently Viewed', r => db.recent.includes(r.id)]],
     rel: ['items', 'stagehist', 'history'] },
-  cases: { label: 'Cases', one: 'Case', color: '#a2903a', ic: '!',
+  cases: { label: 'Cases', one: 'Case', color: '#2d5f8f', ic: '!',
     sections: [['Case Information', [['number', 'Case Number', 'text', 0, 0, 1], ['owner', 'Case Owner', 'pick', OWNERS], ['contact', 'Contact Name', 'ref', 'contacts'], ['status', 'Status', 'pick', CASE_STATUS], ['account', 'Account Name', 'ref', 'accounts'], ['priority', 'Priority', 'pick', PRIORITIES], ['origin', 'Case Origin', 'pick', ORIGINS], ['type', 'Type', 'pick', CASE_TYPES], ['opened', 'Date/Time Opened', 'date', 0, 0, 1]]],
       ['Description Information', [['subject', 'Subject', 'text', 0, 1], ['description', 'Description', 'area']]]],
     cols: [['number', 'Case', 'link'], ['contact', 'Contact Name', 'ref'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio'], ['opened', 'Date Opened', 'date'], ['owner', 'Case Owner']],
     views: [['All Open Cases', r => r.status !== 'Closed'], ['My Open Cases', r => r.owner === ME && r.status !== 'Closed'], ['Escalated', r => r.status === 'Escalated'], ['High Priority', r => ['Critical', 'High'].includes(r.priority) && r.status !== 'Closed'], ['All Cases', () => true]],
     rel: ['comments', 'history'] },
-  campaigns: { label: 'Campaigns', one: 'Campaign', color: '#d0632b', ic: 'M',
+  campaigns: { label: 'Campaigns', one: 'Campaign', color: '#4a6fa5', ic: 'M',
     sections: [['Campaign Information', [['name', 'Campaign Name', 'text', 0, 1], ['owner', 'Campaign Owner', 'pick', OWNERS], ['type', 'Type', 'pick', CAMP_TYPES], ['status', 'Status', 'pick', ['Planned', 'In Progress', 'Completed', 'Aborted']], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['expected', 'Expected Revenue', 'money']]],
       ['Description Information', [['description', 'Description', 'area']]]],
     cols: [['name', 'Campaign Name', 'link'], ['type', 'Type'], ['status', 'Status'], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['owner', 'Owner']],
     views: [['All Campaigns', () => true], ['Active Campaigns', r => r.status === 'In Progress'], ['My Campaigns', r => r.owner === ME]],
     rel: [['Campaign Leads', 'leads', (x, r) => x.campaign === r.id, [['first', 'Name', 'link'], ['company', 'Company'], ['status', 'Lead Status'], ['email', 'Email']]],
       ['Influenced Deals', 'opps', (x, r) => x.campaign === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
-  products: { label: 'Products', one: 'Product', color: '#5f8a3a', ic: 'P',
+  products: { label: 'Products', one: 'Product', color: '#3d7ab0', ic: 'P',
     sections: [['Product Detail', [['name', 'Product Name', 'text', 0, 1], ['code', 'Product Code'], ['family', 'Product Family', 'pick', ['Software', 'Services', 'Support', 'Infrastructure']], ['price', 'List Price', 'money'], ['active', 'Active', 'pick', ['Yes', 'No']], ['description', 'Product Description', 'area']]]],
     cols: [['name', 'Product Name', 'link'], ['code', 'Product Code'], ['family', 'Product Family'], ['price', 'List Price', 'money'], ['active', 'Active']],
     views: [['All Products', () => true], ['Active Products', r => r.active === 'Yes'], ['Services', r => r.family === 'Services']],
     rel: [['Deals Including This Product', 'opps', (x, r) => (x.items || []).some(i => i.prod === r.id), [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
 };
-const TABS = [['home', 'Home', '#3a6ea5'], ['accounts'], ['contacts'], ['leads'], ['opps'], ['cases'], ['campaigns'], ['products'], ['forecasts', 'Forecasts', '#2e7d6b'], ['reports', 'Reports', '#4b6584']];
+const TABS = [['home', 'Home', '#3a6ea5'], ['accounts'], ['contacts'], ['leads'], ['opps'], ['cases'], ['campaigns'], ['products'], ['forecasts', 'Forecasts', '#2b6c9e'], ['reports', 'Reports', '#4b6584']];
 const tabLabel = t => (OBJ[t] ? OBJ[t].label : TABS.find(x => x[0] === t)[1]);
 const tabColor = t => (OBJ[t] ? OBJ[t].color : TABS.find(x => x[0] === t)[2]);
 
@@ -552,7 +552,7 @@ function dialog(titleText, bodyHtml, buttons = ['OK'], primary = 0) {
 function render() {
   const t = S.tab, app = $('#app');
   app.style.setProperty('--tabc', tabColor(t));
-  app.style.setProperty('--tabink', t === 'opps' ? '#222' : '#fff');
+  app.style.setProperty('--tabink', '#fff');
   $('#tabs').innerHTML = TABS.map(([k]) => `<button data-tab="${k}" class="${k === t ? 'on' : ''}">${esc(tabLabel(k))}</button>`).join('') + `<button data-act="sheet" title="Open Spreadsheet">Spreadsheet</button>`;
   $('#b-appr').textContent = db.approvals.length;
   $('#hdr-date').textContent = today().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
@@ -602,13 +602,13 @@ function viewHome() {
   <div class="cols2">
     <div class="pb" style="--oc:#3a6ea5"><div class="pbh"><h3>Calendar</h3><div class="btns"><button class="cbtn" data-act="newevent">New Event</button></div></div>
       <div class="pbb"><table class="lt"><tbody>${db.events.map(e => `<tr><td style="width:70px"><b>${esc(e.time)}</b></td><td>${esc(e.subject)}${e.who ? ' - ' + refLink(e.who) : ''}</td></tr>`).join('')}</tbody></table></div></div>
-    <div class="pb" style="--oc:#c0504d"><div class="pbh"><h3>Items to Approve</h3><div class="r"><a data-act="noop">Manage All</a></div></div>
+    <div class="pb" style="--oc:#1f5f99"><div class="pbh"><h3>Items to Approve</h3><div class="r"><a data-act="noop">Manage All</a></div></div>
       <div class="pbb">${db.approvals.length ? `<table class="lt"><thead><tr><th>Action</th><th>Related To</th><th>Type</th><th>Detail</th><th>Submitted By</th><th>Date</th></tr></thead><tbody>${db.approvals.map(a => `<tr><td><a data-appr="${a.id}" data-ok="1">Approve</a> | <a data-appr="${a.id}">Reject</a></td><td>${refLink(a.opp)}</td><td>${esc(a.type)}</td><td>${esc(a.detail)}</td><td>${esc(a.by)}</td><td>${mdY(a.date)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No records to display.</div>'}</div></div>
   </div>
   <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>My Open Deals</h3><div class="btns"><button class="cbtn" data-new="opps">New Deal</button></div><div class="r"><a data-tab="opps">View All »</a></div></div>
     <div class="pbb">${table('opps', openDeals, OBJ.opps.cols)}</div></div>
   <div class="cols2">
-    <div class="pb" style="--oc:#2e7d6b"><div class="pbh"><h3>Recent Activity</h3><div class="r">As of ${mdY(tstr)} ${hhmm(new Date())}</div></div>
+    <div class="pb" style="--oc:#2b6c9e"><div class="pbh"><h3>Recent Activity</h3><div class="r">As of ${mdY(tstr)} ${hhmm(new Date())}</div></div>
       <div class="pbb"><table class="lt"><thead><tr><th>Date</th><th>Type</th><th>Subject</th><th>Name</th><th>Account</th><th>Assigned To</th></tr></thead><tbody>${recentActs.map(x => `<tr><td>${mdY(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.subject)}</td><td>${refLink(x.who)}</td><td>${refLink(x.what)}</td><td>${esc(x.owner)}</td></tr>`).join('')}</tbody></table></div></div>
     <div class="pb" style="--oc:${OBJ.cases.color}"><div class="pbh"><h3>High Priority Cases</h3><div class="r"><a data-tab="cases">View All »</a></div></div>
       <div class="pbb">${table('cases', hiCases, [['number', 'Case', 'link'], ['subject', 'Subject'], ['account', 'Account', 'ref'], ['priority', 'Priority', 'prio'], ['status', 'Status']])}</div></div>
@@ -667,7 +667,7 @@ function relLists(o, r) {
   for (const rl of OBJ[o].rel) {
     if (rl === 'history') {
       const rows = db.acts.filter(x => x.who === r.id || x.what === r.id);
-      out.push(['Activity History', '#2e7d6b', rows.length, `<button class="cbtn" data-act="logcall">Log a Call</button><button class="cbtn" data-act="email">Send an Email</button>`,
+      out.push(['Activity History', '#2b6c9e', rows.length, `<button class="cbtn" data-act="logcall">Log a Call</button><button class="cbtn" data-act="email">Send an Email</button>`,
         rows.length ? `<table class="lt"><thead><tr><th>Subject</th><th>Type</th><th>Name</th><th>Date</th><th>Assigned To</th><th>Comments</th></tr></thead><tbody>${rows.map(x => `<tr><td>${esc(x.subject)}</td><td>${esc(x.type)}</td><td>${refLink(x.who)}</td><td>${mdY(x.date)}</td><td>${esc(x.owner)}</td><td>${esc(x.comments)}</td></tr>`).join('')}</tbody></table>` : '']);
     } else if (rl === 'items') {
       const rows = r.items || [];
@@ -732,8 +732,8 @@ function viewEdit(o, id) {
   const btns = `<button class="cbtn pri" data-act="save">Save</button><button class="cbtn" data-act="savenew">Save &amp; New</button><button class="cbtn" data-act="cancel">Cancel</button>`;
   return `
   <div class="ph"><div class="ic" style="background:${cfg.color}">${cfg.ic}</div><div><div class="ot">${esc(cfg.one)} Edit</div><h2>${isNew ? 'New ' + esc(cfg.one) : esc(title(r, o))}</h2></div><div class="right"><a data-act="help">Help for this Page</a></div></div>
-  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>${esc(cfg.one)} Edit</h3><div class="btns">${btns}</div><div class="r"><span style="color:var(--red)">|</span> = Required Information</div></div>
-    <div id="editerr" class="alert" hidden style="margin:0 8px 6px;background:#ffe9e7;border-color:#e3a39c;color:#900"></div>
+  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>${esc(cfg.one)} Edit</h3><div class="btns">${btns}</div><div class="r"><span style="color:var(--req)">|</span> = Required Information</div></div>
+    <div id="editerr" class="alert" hidden style="margin:0 8px 6px;background:#e6f0fb;border-color:#a9c8e8;color:#0d3a66"></div>
     ${cfg.sections.map(([sn, fields]) => `<div class="sech">${esc(sn)}</div><div class="dt">${fields.map(input).join('')}</div>`).join('')}
     <div class="pbh" style="justify-content:center"><div class="btns">${btns}</div></div></div>`;
 }
@@ -795,7 +795,7 @@ function viewForecasts() {
   <div class="alert">Forecast submissions are due Friday at 5:00 PM. Last submitted: ${mdY(dAgo(7))} by ${esc(ME)}.</div>
   <div class="pb"><div class="pbh"><h3>Forecast Summary (${mdY(q0)} - ${mdY(q1)})</h3><div class="btns"><button class="cbtn" data-act="exportfc">Open in Spreadsheet</button></div></div>
     <div class="pbb"><table class="lt"><thead><tr><th>Name</th><th class="n">Quota</th><th class="n">Closed</th><th class="n">Commit</th><th class="n">Best Case</th><th class="n">Pipeline</th><th>Attainment</th></tr></thead><tbody>
-    ${rows.map(r => `<tr><td>${esc(r.owner)}</td><td class="n">${money0(r.quota)}</td><td class="n">${money0(r.closed)}</td><td class="n">${money0(r.commit)}</td><td class="n">${money0(r.best)}</td><td class="n">${money0(r.pipe)}</td><td><div style="display:flex;gap:6px;align-items:center"><div style="width:90px;height:10px;background:#e3e3e3;border:1px solid #ccc"><div style="height:100%;width:${Math.min(100, r.att)}%;background:${r.att >= 70 ? '#3c9a4f' : r.att >= 40 ? '#e0a020' : '#c0504d'}"></div></div>${r.att}%</div></td></tr>`).join('')}
+    ${rows.map(r => `<tr><td>${esc(r.owner)}</td><td class="n">${money0(r.quota)}</td><td class="n">${money0(r.closed)}</td><td class="n">${money0(r.commit)}</td><td class="n">${money0(r.best)}</td><td class="n">${money0(r.pipe)}</td><td><div style="display:flex;gap:6px;align-items:center"><div style="width:90px;height:10px;background:#e3e3e3;border:1px solid #ccc"><div style="height:100%;width:${Math.min(100, r.att)}%;background:${r.att >= 70 ? '#1f5f99' : r.att >= 40 ? '#4a8fd0' : '#9cc3ea'}"></div></div>${r.att}%</div></td></tr>`).join('')}
     <tr class="sub"><td>Total</td><td class="n">${money0(tot('quota'))}</td><td class="n">${money0(tot('closed'))}</td><td class="n">${money0(tot('commit'))}</td><td class="n">${money0(tot('best'))}</td><td class="n">${money0(tot('pipe'))}</td><td>${Math.round(tot('closed') / tot('quota') * 100)}%</td></tr></tbody></table></div></div>
   <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Deals in this Forecast</h3></div><div class="pbb">${table('opps', db.opps.filter(o => o.close >= q0 && o.close <= q1 && !o.stage.startsWith('Closed Lost')).sort((a, b) => b.amount - a.amount).slice(0, 40), OBJ.opps.cols)}</div></div>`;
 }
@@ -934,7 +934,7 @@ function buildSheets() {
   const n = pipe.length + 1;
   pipe.push([], ['', 'TOTAL', '', '', '', `=AVERAGE(F2:F${n})`, `=SUM(G2:G${n})`, `=SUM(H2:H${n})`, `=COUNT(G2:G${n}) & " opps"`]);
   const s1 = mkSheet('Pipeline', ['Deal ID', 'Deal Name', 'Account Name', 'Owner', 'Stage', 'Probability (%)', 'Amount', 'Expected Revenue', 'Close Date', 'Type', 'Lead Source', 'Next Step', 'Created Date', 'Fiscal Period', 'State'], pipe, { 6: 'money', 7: 'money' }, { 1: 260, 2: 190, 11: 180 });
-  s1.sortEnd = n - 1; s1.style[`${n + 1},1`] = { b: 1 }; for (let c = 5; c <= 8; c++) s1.style[`${n + 1},${c}`] = { b: 1, fill: '#fff2a8' };
+  s1.sortEnd = n - 1; s1.style[`${n + 1},1`] = { b: 1 }; for (let c = 5; c <= 8; c++) s1.style[`${n + 1},${c}`] = { b: 1, fill: '#dbeafc' };
   const s2 = mkSheet('Contacts', ['Contact ID', 'First Name', 'Last Name', 'Title', 'Account Name', 'Phone', 'Mobile', 'Email', 'Mailing City', 'Mailing State', 'Contact Owner', 'Lead Source', 'Created Date'], db.contacts.map(c => [c.id, c.first, c.last, c.title, title(get(c.account)), c.phone, c.mobile, c.email, c.city, c.state, c.owner, c.source, mdY(c.created)]), {}, { 4: 190, 7: 230 });
   const s3 = mkSheet('Accounts', ['Account ID', 'Account Name', 'Type', 'Industry', 'Employees', 'Annual Revenue', 'Phone', 'Website', 'Billing City', 'Billing State', 'Owner', 'Rating'], db.accounts.map(a => [a.id, a.name, a.type, a.industry, a.employees, a.revenue, a.phone, a.website, a.city, a.state, a.owner, a.rating]), { 5: 'money' }, { 1: 190, 7: 200 });
   const [q0, q1] = qRange();
@@ -942,7 +942,7 @@ function buildSheets() {
   const fe = fc.length + 1;
   fc.push([], ['TOTAL', `=SUM(B2:B${fe})`, `=SUM(C2:C${fe})`, `=SUM(D2:D${fe})`, `=SUM(E2:E${fe})`, `=C${fe + 2}/B${fe + 2}`, `=SUM(G2:G${fe})`, `=SUM(H2:H${fe})`]);
   const s4 = mkSheet('Forecast Q' + quarter(today()), ['Sales Rep', 'Quota', 'Closed Won', 'Commit (excl. closed)', 'Open Pipeline', 'Attainment', 'Gap to Quota', 'Closed + Commit'], fc, { 1: 'money', 2: 'money', 3: 'money', 4: 'money', 5: 'pct', 6: 'money', 7: 'money' }, { 0: 140, 3: 150 });
-  s4.sortEnd = fc.length - 2; for (let c = 0; c < 8; c++) s4.style[`${fe + 1},${c}`] = { b: 1, fill: '#cdeccf' };
+  s4.sortEnd = fc.length - 2; for (let c = 0; c < 8; c++) s4.style[`${fe + 1},${c}`] = { b: 1, fill: '#cfe3f7' };
   const s5 = mkSheet('Activity Log', ['Activity ID', 'Date', 'Type', 'Subject', 'Contact', 'Account', 'Assigned To'], db.acts.map(a => [a.id, mdY(a.date), a.type, a.subject, title(get(a.who)), title(get(a.what)), a.owner]), {}, { 3: 180, 4: 150, 5: 190 });
   X.sheets = [s1, s4, s2, s3, s5];
 }
@@ -1107,7 +1107,7 @@ function exportRows(name, o, rows, cols) {
   const data = rows.map(r => cols.map(([k, , t]) => t === 'ref' ? title(get(r[k])) : t === 'link' && k === 'first' ? title(r, o) : t === 'date' ? mdY(r[k]) : r[k] ?? ''));
   const sh = mkSheet(name.slice(0, 28), header, data, fmtm, { 0: 220 });
   const mc = cols.findIndex(c => c[2] === 'money');
-  if (mc >= 0 && data.length) { const L = colName(mc); data.push([], ['TOTAL']); data[data.length - 1][mc] = `=SUM(${L}2:${L}${data.length - 1})`; sh.data = [header, ...data]; sh.sortEnd = data.length - 2; sh.style[`${data.length},0`] = { b: 1 }; sh.style[`${data.length},${mc}`] = { b: 1, fill: '#fff2a8' }; }
+  if (mc >= 0 && data.length) { const L = colName(mc); data.push([], ['TOTAL']); data[data.length - 1][mc] = `=SUM(${L}2:${L}${data.length - 1})`; sh.data = [header, ...data]; sh.sortEnd = data.length - 2; sh.style[`${data.length},0`] = { b: 1 }; sh.style[`${data.length},${mc}`] = { b: 1, fill: '#dbeafc' }; }
   openSheet(sh, name.replace(/\W+/g, '_') + '.xlsx');
 }
 
