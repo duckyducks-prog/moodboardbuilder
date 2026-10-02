@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Halvora CRM</title>
+<style>
+/* Layout: an older enterprise web app. Gradient header, coloured object tabs, grey sidebar, dense list tables. One deliberate light look. */
+:root {
+  --page: #ffffff;
+  --chrome: #f3f3ec;
+  --ink: #222222;
+  --muted: #5a5f66;
+  --line: #d4dadc;
+  --link: #015ba7;
+  --hdr1: #f6f8fb;
+  --hdr2: #d9e3ee;
+  --brand: #1d4f7c;
+  --hover: #e3f3ff;
+  --warn-bg: #fff9d6;
+  --warn-line: #f0d878;
+  --red: #c00000;
+  --font-ui: Arial, Helvetica, sans-serif;
+  --font-head: Verdana, Geneva, Tahoma, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 12px/1.35 var(--font-ui); }
+a { color: var(--link); text-decoration: none; cursor: pointer; }
+a:hover { text-decoration: underline; }
+input, select, textarea, button, table { font: inherit; color: inherit; }
+input[type=text], input[type=password], input[type=number], select, textarea {
+  border: 1px solid #a5acb2; border-top-color: #7f8890; padding: 2px 4px; background: #fff; border-radius: 0; min-width: 0;
+}
+:focus-visible { outline: 2px solid #f8a51b; outline-offset: 1px; }
+.cbtn {
+  font: bold 11px var(--font-ui); padding: 3px 8px; border: 1px solid #b5b5b5; border-bottom-color: #7f7f7f; border-radius: 3px;
+  background: linear-gradient(#ffffff, #e5e5e5); color: #333; cursor: pointer; white-space: nowrap;
+}
+.cbtn:hover { background: linear-gradient(#ffffff, #d8d8d8); }
+.cbtn:active { background: #d8d8d8; }
+.cbtn.pri { color: #fff; border-color: #2a5d8a; background: linear-gradient(#5b93c7, #2f6aa3); }
+.req { border-left: 3px solid var(--red) !important; }
+
+/* ---------- login ---------- */
+#login { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding-inline: 16px; background: linear-gradient(#e9eff5, #ffffff 380px); box-sizing: border-box; }
+#login .box { margin-top: 9vh; width: 340px; max-width: 100%; background: #fff; border: 1px solid #b9c6d2; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.12); padding: 22px 24px; box-sizing: border-box; }
+#login h1 { margin: 0 0 4px; }
+#login .sub { color: var(--muted); margin: 0 0 16px; }
+#login label { display: block; font-weight: bold; margin: 10px 0 3px; }
+#login input[type=text], #login input[type=password] { width: 100%; box-sizing: border-box; padding: 6px; font-size: 13px; }
+#login .row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; }
+#login .go { width: 100%; margin-top: 14px; padding: 7px; font-size: 13px; }
+#login footer { margin-top: auto; padding-block: 18px; color: var(--muted); font-size: 11px; text-align: center; }
+.logo { display: flex; align-items: center; gap: 6px; font: bold 20px var(--font-head); color: var(--brand); letter-spacing: -.5px; }
+.logo svg { width: 26px; height: 26px; flex: none; }
+.logo small { font: normal 11px var(--font-ui); color: var(--muted); letter-spacing: 0; align-self: flex-end; padding-bottom: 3px; }
+
+/* ---------- app shell ---------- */
+#app { min-height: 100%; display: flex; flex-direction: column; --tabc: #3a6ea5; --tabink: #fff; }
+.topbar { display: flex; justify-content: flex-end; gap: 12px; padding: 3px 10px; background: #2b3a4a; color: #cfd8e2; font-size: 11px; flex-wrap: wrap; }
+.topbar a { color: #fff; }
+.topbar .sep { color: #6c7d8f; }
+.hdr { display: flex; align-items: center; gap: 14px; padding: 7px 10px; background: linear-gradient(var(--hdr1), var(--hdr2)); border-bottom: 1px solid #a9b9c9; flex-wrap: wrap; }
+.gsearch { display: flex; gap: 4px; align-items: center; }
+.gsearch input { width: 220px; padding: 4px 6px; }
+.hdr .msgs { margin-left: auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 11px; }
+.badge { display: inline-block; min-width: 14px; padding: 0 4px; border-radius: 8px; background: var(--red); color: #fff; font-size: 10px; font-weight: bold; text-align: center; }
+.tabs { display: flex; gap: 2px; padding: 5px 8px 0; background: var(--page); border-bottom: 5px solid var(--tabc); overflow-x: auto; scrollbar-width: thin; }
+.tabs button { border: 0; padding: 6px 11px; border-radius: 7px 7px 0 0; background: linear-gradient(#f1f4f7, #dfe5eb); color: #333; font: bold 11px var(--font-ui); cursor: pointer; white-space: nowrap; }
+.tabs button:hover { background: #cfd9e3; }
+.tabs button.on { background: var(--tabc); color: var(--tabink); }
+.body { flex: 1; display: flex; min-height: 0; }
+.side { width: 205px; flex: none; background: var(--chrome); border-right: 1px solid #d6d6c8; padding: 8px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+.sbox h4 { margin: 0 0 5px; font: bold 11px var(--font-ui); color: #333; border-bottom: 2px solid var(--tabc); padding-bottom: 2px; }
+.sbox ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.sbox li { display: flex; gap: 5px; align-items: center; min-width: 0; }
+.sbox li a { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sq { width: 9px; height: 9px; flex: none; border: 1px solid rgba(0,0,0,.3); }
+.qc { display: grid; gap: 4px; }
+.qc label { font-size: 11px; color: var(--muted); }
+.qc input, .qc select { width: 100%; box-sizing: border-box; }
+.alert { background: var(--warn-bg); border: 1px solid var(--warn-line); padding: 5px 7px; font-size: 11px; }
+.cal { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; font-variant-numeric: tabular-nums; background: #fff; border: 1px solid var(--line); }
+.cal th { background: #e5e9ee; font-weight: bold; padding: 2px 0; }
+.cal td { padding: 2px 0; color: #444; }
+.cal td.o { color: #bbb; }
+.cal td.ev { font-weight: bold; color: var(--link); }
+.cal td.td { background: var(--tabc); color: #fff; font-weight: bold; }
+.main { flex: 1; min-width: 0; padding: 10px 12px 24px; display: flex; flex-direction: column; gap: 12px; }
+.foot { padding: 10px; text-align: center; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); background: var(--chrome); }
+
+/* ---------- page parts ---------- */
+.ph { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ph .ic { width: 34px; height: 34px; border-radius: 4px; display: grid; place-items: center; color: #fff; font: bold 16px var(--font-head); flex: none; }
+.ph .ot { color: var(--muted); font-size: 11px; }
+.ph h2 { margin: 0; font: bold 19px var(--font-ui); text-wrap: balance; }
+.ph .right { margin-left: auto; font-size: 11px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.crumb { font-size: 11px; }
+.rlinks { font-size: 11px; display: flex; flex-wrap: wrap; gap: 2px 0; padding: 4px 6px; background: #f6f6f6; border: 1px solid #e5e5e5; }
+.rlinks a { padding: 0 6px; border-right: 1px solid #ccc; }
+.pb { border: 1px solid #c7ccce; border-top: 3px solid var(--oc, var(--tabc)); background: #f8f8f8; border-radius: 0 0 4px 4px; min-width: 0; }
+.pbh { display: flex; align-items: center; gap: 10px; padding: 5px 8px; flex-wrap: wrap; }
+.pbh h3 { margin: 0; font: bold 12px var(--font-ui); min-width: 140px; }
+.pbh .btns { display: flex; gap: 3px; flex-wrap: wrap; }
+.pbh .r { margin-left: auto; font-size: 11px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pbb { background: #fff; overflow-x: auto; }
+.pbf { padding: 5px 8px; font-size: 11px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.pbf .r { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+table.lt { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 11.5px; }
+table.lt th { background: linear-gradient(#f2f3f3, #dfe2e3); border-right: 1px solid var(--line); border-bottom: 1px solid #c4cacc; text-align: left; padding: 4px 5px; white-space: nowrap; }
+table.lt th[data-sort] { cursor: pointer; }
+table.lt th[data-sort]:hover { background: #d4dade; }
+table.lt td { padding: 3px 5px; border-bottom: 1px solid #ebe7cf; white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+table.lt tbody tr:hover td { background: var(--hover); }
+table.lt .n { text-align: right; }
+table.lt td.act { color: #999; }
+.empty { padding: 8px; color: var(--muted); }
+.alpha { display: flex; flex-wrap: wrap; font-size: 11px; }
+.alpha a { padding: 0 3px; border-right: 1px solid #ccc; }
+.alpha a.on { background: #cfeef8; font-weight: bold; color: #000; }
+.dt { display: grid; grid-template-columns: 17% 33% 17% 33%; background: #fff; }
+.dt .l { text-align: right; font-weight: bold; color: #4a4a56; padding: 4px 10px 4px 4px; border-bottom: 1px solid #ececec; font-size: 11px; }
+.dt .v { padding: 4px 6px; border-bottom: 1px solid #ececec; white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.dt .wide { grid-column: span 3; }
+.sech { font: bold 12px var(--font-ui); padding: 4px 8px; border-top: 2px solid var(--oc, var(--tabc)); background: #f2f2f2; }
+.dt input, .dt select, .dt textarea { width: 100%; max-width: 320px; box-sizing: border-box; }
+.dt textarea { max-width: 100%; }
+.pill { display: inline-block; padding: 0 5px; border-radius: 8px; font-size: 10.5px; font-weight: bold; }
+.p-hot { background: #ffd9d4; color: #9c1c0b; } .p-warm { background: #ffecc2; color: #7a5000; } .p-cold { background: #dbe9f7; color: #1b4f86; }
+.p-high, .p-critical { background: #ffd9d4; color: #9c1c0b; } .p-medium { background: #ffecc2; color: #7a5000; } .p-low { background: #e4f1dc; color: #2f6b12; }
+.overdue { color: var(--red); font-weight: bold; }
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.cols2 > *, .cols3 > * { min-width: 0; }
+.hb { display: grid; grid-template-columns: minmax(70px, 34%) 1fr auto; gap: 4px 8px; align-items: center; padding: 8px; font-size: 11px; background: #fff; font-variant-numeric: tabular-nums; }
+.hb .lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb .bar { height: 14px; background: linear-gradient(var(--bc, #4f8fd1), color-mix(in srgb, var(--bc, #4f8fd1) 70%, #000)); border: 1px solid rgba(0,0,0,.25); min-width: 2px; }
+.gauge { display: grid; place-items: center; padding: 10px; background: #fff; gap: 4px; }
+.gauge .g { width: 140px; aspect-ratio: 2 / 1; max-width: 100%; border-radius: 140px 140px 0 0; position: relative; overflow: hidden; }
+.gauge .g::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: 0; height: 56%; background: #fff; border-radius: 80px 80px 0 0; }
+.gauge b { font: bold 18px var(--font-ui); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 8px; background: #fff; }
+.kpis div { border: 1px solid #e0e0e0; padding: 6px 8px; background: linear-gradient(#fff, #f5f7f9); }
+.kpis b { display: block; font: bold 17px var(--font-ui); color: var(--brand); font-variant-numeric: tabular-nums; }
+.kpis span { font-size: 11px; color: var(--muted); }
+.rep-left a { display: block; padding: 2px 0; }
+.rep-left h5 { margin: 8px 0 3px; font-size: 11px; color: #333; }
+tr.grp td { background: #e9eef3 !important; font-weight: bold; }
+tr.sub td { background: #f6f6f6 !important; font-weight: bold; border-bottom: 2px solid #ccc; }
+.addr { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+
+/* ---------- modal ---------- */
+#modal { position: fixed; inset: 0; z-index: 900; background: rgba(30,40,50,.45); display: flex; align-items: flex-start; justify-content: center; padding: 10vh 16px 16px; }
+.dlg { width: 420px; max-width: 100%; background: #fff; border: 1px solid #7d8b99; border-radius: 4px; box-shadow: 0 6px 24px rgba(0,0,0,.35); overflow: hidden; }
+.dlg .dh { display: flex; align-items: center; padding: 6px 10px; background: linear-gradient(#5b93c7, #2f6aa3); color: #fff; font-weight: bold; }
+.dlg .dh button { margin-left: auto; background: none; border: 0; color: #fff; font-size: 15px; cursor: pointer; }
+.dlg .db { padding: 14px 14px 6px; }
+.dlg .db p { margin: 0 0 8px; }
+.dlg .df { display: flex; justify-content: flex-end; gap: 5px; padding: 8px 12px; background: #f3f3f3; border-top: 1px solid #ddd; }
+.dlg .fm { display: grid; grid-template-columns: 90px 1fr; gap: 6px; align-items: center; }
+.dlg .fm label { text-align: right; font-weight: bold; font-size: 11px; color: #444; }
+.term { background: #10161d; color: #8fe39b; font: 12px/1.4 var(--font-mono); padding: 8px; height: 110px; overflow: auto; white-space: pre-wrap; margin-top: 8px; }
+#toast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 950; background: #fff9d6; border: 1px solid #e0c34a; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+
+/* ---------- spreadsheet ---------- */
+#sheet { position: fixed; inset: 0; z-index: 800; background: #fff; display: flex; flex-direction: column; font: 12px var(--font-ui); }
+.xh { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: linear-gradient(#2f7a4b, #1d5c35); color: #fff; flex-wrap: wrap; }
+.xh .fn { font-weight: bold; font-size: 14px; }
+.xh .meta { font-size: 11px; opacity: .85; }
+.xh .r { margin-left: auto; display: flex; gap: 6px; }
+.xmenu { display: flex; gap: 0; padding: 2px 6px; background: #f3f3f3; border-bottom: 1px solid #ddd; flex-wrap: wrap; position: relative; }
+.xmenu > div { position: relative; }
+.xmenu > div > button { background: none; border: 0; padding: 3px 8px; cursor: pointer; }
+.xmenu > div > button:hover, .xmenu > div.open > button { background: #dde6dd; }
+.xmenu .dd { position: absolute; top: 100%; left: 0; z-index: 30; background: #fff; border: 1px solid #aaa; box-shadow: 2px 2px 6px rgba(0,0,0,.2); min-width: 190px; padding: 3px 0; display: none; }
+.xmenu > div.open .dd { display: block; }
+.xmenu .dd button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 4px 16px; cursor: pointer; white-space: nowrap; }
+.xmenu .dd button:hover { background: #e3f0e6; }
+.xtool { display: flex; gap: 3px; align-items: center; padding: 4px 6px; background: #fafafa; border-bottom: 1px solid #ddd; flex-wrap: wrap; }
+.xtool .tb { min-width: 24px; height: 22px; border: 1px solid transparent; background: none; cursor: pointer; padding: 0 5px; border-radius: 2px; }
+.xtool .tb:hover { border-color: #b7c9b9; background: #eaf3ec; }
+.xtool .vs { width: 1px; height: 18px; background: #ccc; margin: 0 3px; }
+.xfx { display: flex; gap: 4px; align-items: center; padding: 3px 6px; border-bottom: 1px solid #ccc; }
+.xfx #xname { width: 70px; text-align: center; }
+.xfx .fx { font-style: italic; font-weight: bold; color: #666; padding: 0 4px; font-family: Georgia, serif; }
+.xfx #xbar { flex: 1; font-family: var(--font-mono); }
+.xgrid { flex: 1; overflow: auto; background: #fff; outline: none; position: relative; }
+table.xt { border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; font-size: 11.5px; }
+table.xt th { position: sticky; top: 0; z-index: 2; background: #eef0f2; color: #444; font-weight: normal; border-right: 1px solid #c8ccd0; border-bottom: 1px solid #c8ccd0; height: 20px; padding: 0; cursor: pointer; }
+table.xt th.rn, table.xt td.rn { position: sticky; left: 0; z-index: 1; background: #eef0f2; color: #444; text-align: center; border-right: 1px solid #c8ccd0; border-bottom: 1px solid #dde0e3; width: 44px; cursor: pointer; }
+table.xt th.rn { z-index: 3; }
+table.xt td { border-right: 1px solid #e2e4e6; border-bottom: 1px solid #e2e4e6; padding: 0 4px; height: 19px; white-space: nowrap; overflow: hidden; text-overflow: clip; cursor: cell; }
+table.xt td.num { text-align: right; }
+table.xt td.s { background: #d7e8fb; }
+table.xt td.c { outline: 2px solid #1d6f3d; outline-offset: -2px; background: #fff; }
+table.xt th.hs, table.xt td.rn.hs { background: #c9dfcf; color: #000; font-weight: bold; }
+table.xt td.b { font-weight: bold; } table.xt td.i { font-style: italic; } table.xt td.u { text-decoration: underline; }
+table.xt td.al { text-align: left; } table.xt td.ac { text-align: center; } table.xt td.ar { text-align: right; }
+table.xt td input { width: 100%; height: 17px; border: 0; padding: 0; outline: none; font: inherit; background: #fff; }
+table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
+.xtabs { display: flex; gap: 2px; padding: 0 6px; background: #eef0f2; border-top: 1px solid #ccc; overflow-x: auto; align-items: flex-end; min-height: 26px; }
+.xtabs button { border: 1px solid #c3c3c3; border-top: 0; background: #e1e3e5; padding: 3px 12px; cursor: pointer; white-space: nowrap; border-radius: 0 0 4px 4px; }
+.xtabs button.on { background: #fff; color: #1d5c35; font-weight: bold; border-bottom: 2px solid #1d6f3d; }
+.xstat { display: flex; gap: 16px; padding: 3px 10px; background: #1d5c35; color: #fff; font-size: 11px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.xstat span:first-child { margin-right: auto; }
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 760px) {
+  .side { display: none; }
+  .gsearch input { width: 140px; }
+  .dt { grid-template-columns: 38% 62%; }
+  .dt .wide { grid-column: span 1; }
+  .cols2, .cols3 { grid-template-columns: 1fr; }
+  .main { padding-inline: 8px; }
+}
+@media (max-width: 480px) {
+  .hdr .msgs { display: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#1d4f7c"/><path d="M9 9v14M23 9v14M9 16h14" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><circle cx="25.5" cy="7" r="4" fill="#f8a51b" stroke="#fff" stroke-width="1.5"/></symbol>
+</defs></svg>
+
+<!-- ===================== login ===================== -->
+<div id="login">
+  <form class="box" id="loginform">
+    <h1 class="logo"><svg><use href="#logo"/></svg>Halvora<small>CRM</small></h1>
+    <p class="sub">Sign in to your account</p>
+    <label for="lg-user">Username</label><input type="text" id="lg-user" value="admin@brightwatersales.example" autocomplete="off">
+    <label for="lg-pass">Password</label><input type="password" id="lg-pass" value="halvora2026" autocomplete="off">
+    <div class="row"><label style="margin:0;font-weight:normal"><input type="checkbox" id="lg-rem" checked> Remember me</label><a id="lg-forgot">Forgot your password?</a></div>
+    <button class="cbtn pri go" type="submit">Log In</button>
+  </form>
+  <footer>© 2026 Halvora, Inc. All rights reserved. · Privacy Statement · Security Statement · Terms of Use</footer>
+</div>
+
+<!-- ===================== app ===================== -->
+<div id="app" hidden>
+  <div class="topbar">
+    <span id="tb-user">Admin User</span><span class="sep">|</span>
+    <a data-act="setup">Setup</a><span class="sep">|</span>
+    <a data-act="help">Help &amp; Training</a><span class="sep">|</span>
+    <a data-act="reset">Reset Sample Data</a><span class="sep">|</span>
+    <a data-act="logout">Logout</a>
+  </div>
+  <div class="hdr">
+    <div class="logo"><svg><use href="#logo"/></svg>Halvora<small>CRM · Enterprise Edition</small></div>
+    <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, opportunities..."><button class="cbtn" type="submit">Search</button></form>
+    <div class="msgs">
+      <a data-act="sheet">Open Spreadsheet</a>
+      <a data-tab="home">Approvals <span class="badge" id="b-appr">0</span></a>
+      <a data-tab="home">Tasks <span class="badge" id="b-task">0</span></a>
+      <span id="hdr-date"></span>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="body">
+    <aside class="side" id="side"></aside>
+    <main class="main" id="main"></main>
+  </div>
+  <div class="foot">Copyright © 2000-2026 Halvora, Inc. All rights reserved. | <a data-act="help">Privacy Statement</a> | <a data-act="help">Security Statement</a> | <a data-act="help">Terms of Use</a> | <span class="addr" id="addr"></span></div>
+</div>
+
+<!-- ===================== spreadsheet ===================== -->
+<div id="sheet" hidden>
+  <div class="xh"><span class="fn" id="xfile">Pipeline_Export.xlsx</span><span class="meta" id="xmeta">Halvora Sheets · Last saved just now</span>
+    <div class="r"><button class="cbtn" id="xsave">Save</button><button class="cbtn" id="xclose">Close Spreadsheet</button></div></div>
+  <div class="xmenu" id="xmenu">
+    <div><button>File</button><div class="dd"><button data-x="newsheet">New Sheet</button><button data-x="save">Save</button><button data-x="close">Close</button></div></div>
+    <div><button>Edit</button><div class="dd"><button data-x="clear">Clear Contents</button><button data-x="selall">Select All</button></div></div>
+    <div><button>View</button><div class="dd"><button data-x="grid">Toggle Gridlines</button></div></div>
+    <div><button>Insert</button><div class="dd"><button data-x="autosum">AutoSum</button><button data-x="today">Today's Date</button></div></div>
+    <div><button>Format</button><div class="dd"><button data-x="b">Bold</button><button data-x="i">Italic</button><button data-x="u">Underline</button><button data-x="money">Currency</button><button data-x="plain">Plain Number</button></div></div>
+    <div><button>Data</button><div class="dd"><button data-x="asc">Sort A → Z</button><button data-x="desc">Sort Z → A</button></div></div>
+    <div><button>Help</button><div class="dd"><button data-x="xhelp">Spreadsheet Help</button></div></div>
+  </div>
+  <div class="xtool">
+    <select id="xfont" aria-label="Font"><option>Arial</option><option>Verdana</option><option>Courier New</option><option>Georgia</option></select>
+    <select id="xsize" aria-label="Font size"><option>10</option><option selected>11</option><option>12</option><option>14</option><option>18</option></select>
+    <span class="vs"></span>
+    <button class="tb" data-x="b" title="Bold"><b>B</b></button><button class="tb" data-x="i" title="Italic"><i>I</i></button><button class="tb" data-x="u" title="Underline"><u>U</u></button>
+    <span class="vs"></span>
+    <button class="tb" data-x="al" title="Align left">⫷</button><button class="tb" data-x="ac" title="Center">≡</button><button class="tb" data-x="ar" title="Align right">⫸</button>
+    <span class="vs"></span>
+    <button class="tb" data-x="money" title="Currency">$</button><button class="tb" data-x="pct" title="Percent">%</button><button class="tb" data-x="plain" title="Plain number">.0</button>
+    <span class="vs"></span>
+    <button class="tb" data-x="autosum" title="AutoSum">Σ</button><button class="tb" data-x="asc" title="Sort A to Z">A↓Z</button><button class="tb" data-x="desc" title="Sort Z to A">Z↓A</button>
+    <span class="vs"></span>
+    <label for="xfill" style="font-size:11px">Fill</label><select id="xfill"><option value="">None</option><option value="#fff2a8">Yellow</option><option value="#cdeccf">Green</option><option value="#ffd3cf">Red</option><option value="#d6e6fb">Blue</option></select>
+  </div>
+  <div class="xfx"><input type="text" id="xname" readonly aria-label="Cell name"><span class="fx">fx</span><input type="text" id="xbar" aria-label="Formula bar"></div>
+  <div class="xgrid" id="xgrid" tabindex="0"></div>
+  <div class="xtabs" id="xtabs"></div>
+  <div class="xstat"><span id="xmsg">Ready</span><span id="xsum"></span><span id="xcount"></span><span>100%</span></div>
+</div>
+
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const money = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money0 = n => '$' + Math.round(Number(n || 0)).toLocaleString('en-US');
+const kmoney = n => n >= 1e6 ? '$' + (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'K' : '$' + n;
+
+// ---------------- dates (real, current) ----------------
+const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dAgo = n => { const d = today(); d.setDate(d.getDate() - n); return iso(d); };
+const mdY = s => { if (!s) return ''; const [y, m, d] = s.split('-'); return `${m}/${d}/${y}`; };
+const parseMdY = s => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((s || '').trim()); return m ? `${m[3]}-${pad(m[1])}-${pad(m[2])}` : null; };
+const ageDays = s => Math.round((today() - new Date(s + 'T00:00:00')) / 864e5);
+const hhmm = d => { let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${pad(d.getMinutes())} ${ap}`; };
+// Fiscal year starts February 1 and is named for the year it ends in.
+const quarter = d => Math.floor(((d.getMonth() + 11) % 12) / 3) + 1;
+const fy = d => d.getMonth() === 0 ? d.getFullYear() : d.getFullYear() + 1;
+const qRange = (d = today()) => { const q = quarter(d), y = fy(d) - 1, sm = 1 + (q - 1) * 3; return [iso(new Date(y, sm, 1)), iso(new Date(y, sm + 3, 0))]; };
+
+// ---------------- seeded sample data (all fictional) ----------------
+let seed = 7341;
+const rnd = () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const int = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+const pick = a => a[Math.floor(rnd() * a.length)];
+const wpick = pairs => { const t = pairs.reduce((s, p) => s + p[1], 0); let x = rnd() * t; for (const p of pairs) { if ((x -= p[1]) < 0) return p[0]; } return pairs[0][0]; };
+
+const ME = 'Admin User';
+const OWNERS = [ME, 'Alex Rivera', 'Jordan Chen', 'Maya Okafor', 'Sam Lindqvist', 'Dana Brooks', 'Priya Shah', 'Tom Becker'];
+const FIRST = ['James', 'Maria', 'Robert', 'Linda', 'Michael', 'Sarah', 'David', 'Karen', 'Daniel', 'Nancy', 'Kevin', 'Laura', 'Brian', 'Emily', 'Jason', 'Megan', 'Ryan', 'Rachel', 'Eric', 'Olivia', 'Marcus', 'Aisha', 'Luis', 'Hannah', 'Ethan', 'Grace', 'Noah', 'Chloe', 'Omar', 'Sofia', 'Wei', 'Ines', 'Tariq', 'Elena', 'Victor', 'Naomi', 'Andre', 'Julia', 'Felix', 'Priscilla', 'Diego', 'Yuki', 'Connor', 'Fatima', 'Isaac', 'Leah'];
+const LAST = ['Anderson', 'Martinez', 'Thompson', 'Garcia', 'Robinson', 'Clark', 'Lewis', 'Walker', 'Hall', 'Young', 'Hernandez', 'King', 'Wright', 'Lopez', 'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Nelson', 'Carter', 'Mitchell', 'Perez', 'Roberts', 'Turner', 'Phillips', 'Campbell', 'Parker', 'Evans', 'Edwards', 'Collins', 'Stewart', 'Morales', 'Nguyen', 'Patel', 'Kowalski', 'Okonkwo', 'Fischer', 'Tanaka', 'Haddad', 'Sullivan', 'Reyes', 'Brennan', 'Larsen', 'Moreau', 'Ivanova'];
+const CO_A = ['Northfield', 'Harbor', 'Crestview', 'Brightline', 'Meridian', 'Atlas', 'Silverleaf', 'Oakridge', 'Fernway', 'Lumen', 'Summit', 'Bluewater', 'Redstone', 'Pinecrest', 'Ironwood', 'Clearpath', 'Westgate', 'Evergreen', 'Stonebridge', 'Highland', 'Riverbend', 'Keystone', 'Granite', 'Lakeside', 'Sterling', 'Cobalt', 'Maplecroft', 'Horizon', 'Vantage', 'Beacon', 'Copperfield', 'Tidewater', 'Ashgrove', 'Kingsley', 'Elmstead', 'Larkspur'];
+const CO_B = ['Logistics', 'Health Partners', 'Software', 'Dental Group', 'Property Group', 'Accounting', 'Fitness', 'Outdoor Co.', 'Hotels', 'Freight Systems', 'Manufacturing', 'Foods', 'Energy', 'Financial', 'Labs', 'Media', 'Construction', 'Insurance Group', 'Retail', 'Analytics', 'Robotics', 'Biosciences', 'Learning', 'Consulting', 'Medical Supply', 'Packaging', 'Capital', 'Telecom'];
+const CITIES = [['Chicago', 'IL', '312', '606'], ['Dallas', 'TX', '214', '752'], ['San Francisco', 'CA', '415', '941'], ['Seattle', 'WA', '206', '981'], ['Boston', 'MA', '617', '021'], ['Denver', 'CO', '303', '802'], ['Atlanta', 'GA', '404', '303'], ['Portland', 'OR', '503', '972'], ['Austin', 'TX', '512', '787'], ['New York', 'NY', '212', '100'], ['Miami', 'FL', '305', '331'], ['Phoenix', 'AZ', '602', '850'], ['Minneapolis', 'MN', '612', '554'], ['Raleigh', 'NC', '919', '276'], ['Columbus', 'OH', '614', '432'], ['San Diego', 'CA', '619', '921'], ['Nashville', 'TN', '615', '372'], ['Philadelphia', 'PA', '215', '191']];
+const STREETS = ['Market St', 'Main St', 'Oak Ave', 'Commerce Dr', 'Lake Shore Blvd', 'Industrial Pkwy', 'Park Ave', 'Harbor Way', 'Technology Dr', 'Elm St', '5th Ave', 'Riverside Dr', 'Corporate Blvd', 'Mission St'];
+const INDUSTRIES = ['Technology', 'Healthcare', 'Manufacturing', 'Retail', 'Financial Services', 'Hospitality', 'Transportation', 'Education', 'Construction', 'Energy', 'Media', 'Consulting', 'Biotechnology', 'Telecommunications'];
+const ACC_TYPES = ['Customer - Direct', 'Customer - Channel', 'Prospect', 'Partner', 'Reseller', 'Other'];
+const RATINGS = ['Hot', 'Warm', 'Cold'];
+const SOURCES = ['Web', 'Phone Inquiry', 'Partner Referral', 'Trade Show', 'Webinar', 'Email Campaign', 'Employee Referral', 'LinkedIn', 'Purchased List', 'Advertisement'];
+const TITLES = ['CEO', 'CFO', 'COO', 'VP Sales', 'VP Operations', 'Director of IT', 'IT Manager', 'Procurement Manager', 'Head of Procurement', 'Office Manager', 'Controller', 'Marketing Director', 'Operations Manager', 'Senior Buyer', 'CTO', 'HR Director', 'Account Manager', 'Project Manager', 'Facilities Manager', 'General Manager'];
+const DEPTS = ['Executive', 'Finance', 'Operations', 'IT', 'Procurement', 'Marketing', 'Sales', 'HR', 'Facilities'];
+const STAGES = [['Prospecting', 10], ['Qualification', 20], ['Discovery', 30], ['Solution Fit', 50], ['Decision Makers', 60], ['Proposal Sent', 75], ['Negotiation', 90], ['Closed Won', 100], ['Closed Lost', 0]];
+const STAGE_P = Object.fromEntries(STAGES);
+const OPP_TYPES = ['New Business', 'Existing Business - Upgrade', 'Existing Business - Renewal', 'Existing Business - Expansion'];
+const OPP_SUFFIX = ['New Business', 'Renewal', 'Expansion', 'Upsell', 'Pilot', 'Add-on Seats', 'Platform Upgrade', 'Services', 'Multi-year Renewal', 'Analytics Add-on'];
+const NEXT_STEPS = ['Send revised proposal', 'Schedule demo with IT', 'Legal review of MSA', 'Security questionnaire', 'Pricing call with CFO', 'Waiting on PO', 'Contract out for signature', 'Technical deep dive', 'Reference call', 'Budget approval pending', ''];
+const LEAD_STATUS = ['Open - Not Contacted', 'Working - Contacted', 'Nurturing', 'Qualified', 'Unqualified'];
+const CASE_STATUS = ['New', 'Working', 'Escalated', 'Waiting on Customer', 'Closed'];
+const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
+const ORIGINS = ['Phone', 'Email', 'Web', 'Chat'];
+const CASE_TYPES = ['Problem', 'Question', 'Feature Request', 'Billing'];
+const CASE_SUBJ = ['Unable to log in after password reset', 'Invoice amount does not match quote', 'Feature request: export dashboard to PDF', 'Data sync failing with ERP integration', 'Need to add 5 user licenses', 'SSO configuration with identity provider', 'Report runs slowly for large date ranges', 'Import error on CSV upload', 'Change billing contact', 'Mobile app notifications not arriving', 'API rate limit reached', 'Duplicate records after import', 'Question about renewal terms', 'Email-to-case not routing correctly', 'Request for onboarding session', 'Permission error on shared reports'];
+const CASE_COMMENTS = ['Customer confirmed issue on their side as well.', 'Escalated to Tier 2 support.', 'Sent knowledge article KB-1042.', 'Reproduced in sandbox. Engineering ticket opened.', 'Waiting on customer to send log files.', 'Workaround provided, monitoring.', 'Called customer, left voicemail.'];
+const TASK_SUBJ = ['Call to follow up on proposal', 'Send pricing sheet', 'Prepare QBR deck', 'Schedule product demo', 'Email contract redlines', 'Confirm renewal terms', 'Send case study', 'Introduce solutions engineer', 'Update opportunity next steps', 'Book onsite visit', 'Review security questionnaire', 'Send meeting recap'];
+const TASK_STATUS = ['Not Started', 'In Progress', 'Waiting on someone else', 'Deferred'];
+const ACT_SUBJ = { Call: ['Intro call', 'Follow-up call', 'Pricing discussion', 'Check-in call', 'Renewal call'], Email: ['Sent proposal', 'Sent pricing', 'Follow-up email', 'Meeting recap', 'Sent case study'], Meeting: ['Discovery meeting', 'Product demo', 'QBR', 'Onsite visit', 'Executive briefing'] };
+const PRODUCTS = [['Halvora Platform License - Standard', 'Software', 1200], ['Halvora Platform License - Enterprise', 'Software', 2400], ['Analytics Add-on', 'Software', 600], ['Premium Support (Annual)', 'Support', 4800], ['Implementation Services', 'Services', 15000], ['Training Day (Onsite)', 'Services', 2200], ['API Access Tier 2', 'Software', 3600], ['Additional Storage 1 TB', 'Infrastructure', 900], ['Mobile Seats (10-pack)', 'Software', 1500], ['SSO Module', 'Software', 1800], ['Data Migration Package', 'Services', 7500], ['Sandbox Environment', 'Infrastructure', 3000], ['Marketing Automation Add-on', 'Software', 4200], ['Field Service Module', 'Software', 3900], ['CPQ Module', 'Software', 5400], ['Health Check (Quarterly)', 'Services', 3500], ['Dedicated Success Manager', 'Support', 12000], ['E-signature Integration', 'Software', 800]];
+const CAMP_TYPES = ['Webinar', 'Trade Show', 'Email', 'Conference', 'Direct Mail', 'Paid Search', 'Partner Event'];
+const CAMP_NAMES = ['Q4 Product Launch Webinar', 'Spring Customer Summit', 'Retail Ops Roundtable', 'Healthcare IT Expo', 'Year-End Renewal Push', 'Analytics Add-on Promo', 'Partner Kickoff', 'Manufacturing Tour', 'New Logo Email Nurture', 'Executive Dinner Series', 'Mid-Market Paid Search', 'Fintech Forum', 'Customer Advisory Board', 'West Coast Roadshow', 'Security Webinar Series', 'Field Service Launch', 'Holiday Direct Mail', 'Trial Conversion Drip', 'Logistics Leaders Meetup', 'CPQ Early Access'];
+
+const PREFIX = { ACC: 'accounts', CON: 'contacts', LEA: 'leads', OPP: 'opps', CAS: 'cases', CMP: 'campaigns', PRD: 'products', TSK: 'tasks', ACT: 'acts' };
+const PRE_OF = Object.fromEntries(Object.entries(PREFIX).map(([k, v]) => [v, k]));
+let db;
+const nid = (p) => `${p}-${++db.seq[p]}`;
+const slug = s => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '').slice(0, 22);
+
+function generate() {
+  seed = 7341;
+  db = { seq: { ACC: 10200, CON: 30500, LEA: 50100, OPP: 60400, CAS: 1048, CMP: 7000, PRD: 900, TSK: 80000, ACT: 90000 }, accounts: [], contacts: [], leads: [], opps: [], cases: [], campaigns: [], products: [], tasks: [], acts: [], events: [], approvals: [], bin: [], recent: [] };
+  PRODUCTS.forEach(([name, family, price]) => db.products.push({ id: nid('PRD'), name, code: 'HV-' + family.slice(0, 3).toUpperCase() + '-' + int(100, 999), family, price, active: 'Yes', description: '' }));
+  CAMP_NAMES.forEach(name => {
+    const st = int(-60, 200), len = int(1, 45), budget = int(5, 80) * 1000;
+    db.campaigns.push({ id: nid('CMP'), name, type: pick(CAMP_TYPES), status: st > len + 5 ? 'Completed' : st > 0 ? 'In Progress' : 'Planned', start: dAgo(st), end: dAgo(st - len), budget, cost: st > 0 ? Math.round(budget * (0.6 + rnd() * .5)) : 0, expected: budget * int(3, 9), owner: pick(OWNERS), description: '' });
+  });
+  const used = new Set();
+  for (let i = 0; i < 260; i++) {
+    let name; do { name = pick(CO_A) + ' ' + pick(CO_B); } while (used.has(name)); used.add(name);
+    const [city, state, area, zip] = pick(CITIES), owner = rnd() < .22 ? ME : pick(OWNERS);
+    const created = dAgo(int(20, 1600));
+    const a = { id: nid('ACC'), name, owner, phone: `(${area}) 555-0${int(100, 199)}`, website: 'www.' + slug(name) + '.com', type: wpick([['Customer - Direct', 5], ['Customer - Channel', 2], ['Prospect', 5], ['Partner', 1], ['Reseller', 1], ['Other', .5]]), industry: pick(INDUSTRIES), employees: pick([25, 60, 120, 250, 480, 900, 1500, 3200, 7800, 12000]), revenue: int(2, 900) * 1e6, rating: pick(RATINGS), source: pick(SOURCES), street: `${int(10, 9800)} ${pick(STREETS)}`, city, state, zip: zip + pad(int(1, 99)), description: rnd() < .3 ? 'Strategic account. Multi-site rollout under discussion.' : '', created, modified: dAgo(int(0, Math.min(90, ageDays(created)))) };
+    db.accounts.push(a);
+    const dom = slug(name) + '.com';
+    const nc = int(1, 5), contacts = [];
+    for (let j = 0; j < nc; j++) {
+      const first = pick(FIRST), last = pick(LAST);
+      const c = { id: nid('CON'), first, last, account: a.id, title: pick(TITLES), department: pick(DEPTS), phone: `(${area}) 555-0${int(100, 199)}`, mobile: `(${area}) 555-0${int(100, 199)}`, email: `${first[0].toLowerCase()}${last.toLowerCase()}@${dom}`, source: pick(SOURCES), owner, city, state, description: '', created: dAgo(int(5, ageDays(created))) };
+      db.contacts.push(c); contacts.push(c);
+    }
+    const no = wpick([[0, 2], [1, 4], [2, 3], [3, 1]]);
+    for (let j = 0; j < no; j++) {
+      const stage = wpick([['Prospecting', 4], ['Qualification', 4], ['Discovery', 3], ['Solution Fit', 3], ['Decision Makers', 2], ['Proposal Sent', 3], ['Negotiation', 2], ['Closed Won', 5], ['Closed Lost', 3]]);
+      const closed = stage.startsWith('Closed'), qtd = Math.max(1, ageDays(qRange()[0]));
+      const items = []; const ni = int(1, 4);
+      for (let k = 0; k < ni; k++) { const p = pick(db.products); items.push({ prod: p.id, qty: p.family === 'Services' ? int(1, 3) : int(5, 120), price: p.price, disc: pick([0, 0, 0, 5, 10, 15]) }); }
+      const amount = items.reduce((s, it) => s + it.qty * it.price * (1 - it.disc / 100), 0);
+      db.opps.push({ id: nid('OPP'), name: `${name} - ${pick(OPP_SUFFIX)}`, account: a.id, contact: contacts.length ? pick(contacts).id : '', amount: Math.round(amount), stage, prob: STAGE_P[stage], close: stage === 'Closed Won' && rnd() < .45 ? dAgo(int(0, qtd)) : closed ? dAgo(int(1, 240)) : dAgo(-int(-20, 160)), type: pick(OPP_TYPES), source: pick(SOURCES), next: closed ? '' : pick(NEXT_STEPS), owner, items, campaign: rnd() < .3 ? pick(db.campaigns).id : '', description: '', created: dAgo(int(30, 300)) });
+    }
+  }
+  for (let i = 0; i < 230; i++) {
+    const first = pick(FIRST), last = pick(LAST), company = pick(CO_A) + ' ' + pick(CO_B), [city, state, area] = pick(CITIES);
+    db.leads.push({ id: nid('LEA'), first, last, company, title: pick(TITLES), status: wpick([[LEAD_STATUS[0], 4], [LEAD_STATUS[1], 4], [LEAD_STATUS[2], 2], [LEAD_STATUS[3], 1], [LEAD_STATUS[4], 1]]), source: pick(SOURCES), rating: pick(RATINGS), industry: pick(INDUSTRIES), email: `${first.toLowerCase()}.${last.toLowerCase()}@${slug(company)}.com`, phone: `(${area}) 555-0${int(100, 199)}`, city, state, owner: rnd() < .3 ? ME : pick(OWNERS), campaign: rnd() < .55 ? pick(db.campaigns).id : '', description: '', created: dAgo(int(0, 150)) });
+  }
+  for (let i = 0; i < 190; i++) {
+    const a = pick(db.accounts), cs = db.contacts.filter(c => c.account === a.id), status = wpick([['New', 3], ['Working', 4], ['Escalated', 1], ['Waiting on Customer', 2], ['Closed', 6]]);
+    const comments = []; const nc = int(0, 3); for (let k = 0; k < nc; k++) comments.push({ text: pick(CASE_COMMENTS), by: pick(OWNERS), date: dAgo(int(0, 30)) });
+    db.cases.push({ id: nid('CAS'), number: '0000' + db.seq.CAS, subject: pick(CASE_SUBJ), account: a.id, contact: cs.length ? pick(cs).id : '', status, priority: wpick([['Critical', 1], ['High', 3], ['Medium', 5], ['Low', 3]]), origin: pick(ORIGINS), type: pick(CASE_TYPES), owner: pick(OWNERS), opened: dAgo(int(0, 120)), description: 'Customer reported: ' + pick(CASE_SUBJ).toLowerCase() + '.', comments });
+  }
+  for (let i = 0; i < 46; i++) {
+    const c = pick(db.contacts);
+    db.tasks.push({ id: nid('TSK'), subject: pick(TASK_SUBJ), due: dAgo(int(-12, 6)), status: pick(TASK_STATUS), priority: wpick([['High', 2], ['Normal', 5], ['Low', 1]]), who: c.id, what: c.account, owner: rnd() < .7 ? ME : pick(OWNERS) });
+  }
+  for (let i = 0; i < 1100; i++) {
+    const c = pick(db.contacts), type = wpick([['Call', 5], ['Email', 6], ['Meeting', 2]]);
+    db.acts.push({ id: nid('ACT'), type, subject: pick(ACT_SUBJ[type]), date: dAgo(int(1, 240)), who: c.id, what: c.account, owner: c.owner, comments: '' });
+  }
+  db.acts.sort((a, b) => b.date.localeCompare(a.date));
+  [['8:30 AM', 'Pipeline review (internal)'], ['10:00 AM', 'Product demo'], ['11:30 AM', 'Pricing call'], ['1:00 PM', 'Lunch with customer'], ['3:00 PM', 'QBR'], ['4:30 PM', 'Forecast call with VP Sales']].forEach(([time, subject]) => {
+    const c = pick(db.contacts); db.events.push({ time, subject, who: subject.includes('internal') || subject.includes('Forecast') ? '' : c.id });
+  });
+  const open = db.opps.filter(o => !o.stage.startsWith('Closed'));
+  for (let i = 0; i < 6; i++) { const o = pick(open); db.approvals.push({ id: 'APR-' + (4400 + i), opp: o.id, type: pick(['Discount Approval', 'Discount Approval', 'Non-standard Terms', 'Extended Payment Terms']), detail: pick(['18% discount', '22% discount', 'Net 60 payment terms', '3-year price lock', '15% discount', 'Custom SLA']), by: pick(OWNERS.slice(1)), date: dAgo(int(0, 6)) }); }
+}
+
+const STORE = 'halvora-crm-v2';
+function persist() { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }
+function loadDb() { try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.accounts) { db = s; return true; } } catch (e) {} return false; }
+if (!loadDb()) generate();
+
+// ---------------- record helpers ----------------
+const objOf = id => PREFIX[String(id).split('-')[0]];
+const get = id => { const o = objOf(id); return o && db[o] ? db[o].find(r => r.id === id) : null; };
+const OPT = { owners: OWNERS };
+function title(r, o = objOf(r.id)) { if (!r) return ''; if (o === 'contacts' || o === 'leads') return `${r.first} ${r.last}`; if (o === 'cases') return r.number; return r.name; }
+const refLink = id => { const r = id && get(id); return r ? `<a data-go="${r.id}">${esc(title(r))}</a>` : ''; };
+
+// ---------------- object configuration ----------------
+// field: [key, label, type, options?, required?]
+const OBJ = {
+  accounts: { label: 'Accounts', one: 'Account', color: '#236fbd', ic: 'A',
+    sections: [['Account Information', [['name', 'Account Name', 'text', 0, 1], ['owner', 'Account Owner', 'pick', OWNERS], ['phone', 'Phone'], ['website', 'Website'], ['type', 'Type', 'pick', ACC_TYPES], ['industry', 'Industry', 'pick', INDUSTRIES], ['employees', 'Employees', 'num'], ['revenue', 'Annual Revenue', 'money'], ['rating', 'Rating', 'pick', RATINGS], ['source', 'Account Source', 'pick', SOURCES]]],
+      ['Address Information', [['street', 'Billing Street'], ['city', 'Billing City'], ['state', 'Billing State'], ['zip', 'Billing Zip']]],
+      ['Description Information', [['description', 'Description', 'area']]],
+      ['System Information', [['created', 'Created Date', 'date', 0, 0, 1], ['modified', 'Last Modified Date', 'date', 0, 0, 1]]]],
+    cols: [['name', 'Account Name', 'link'], ['city', 'Billing City'], ['state', 'State'], ['phone', 'Phone'], ['type', 'Type'], ['industry', 'Industry'], ['rating', 'Rating', 'rating'], ['owner', 'Account Owner'], ['modified', 'Last Modified', 'date']],
+    views: [['All Accounts', () => true], ['My Accounts', r => r.owner === ME], ['Hot Accounts', r => r.rating === 'Hot'], ['Customers', r => r.type.startsWith('Customer')], ['New This Month', r => ageDays(r.created) <= 30], ['Recently Viewed', r => db.recent.includes(r.id)]],
+    rel: [['Contacts', 'contacts', (x, r) => x.account === r.id, [['first', 'Contact Name', 'link'], ['title', 'Title'], ['email', 'Email'], ['phone', 'Phone']]],
+      ['Opportunities', 'opps', (x, r) => x.account === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
+      ['Cases', 'cases', (x, r) => x.account === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['priority', 'Priority', 'prio'], ['status', 'Status'], ['opened', 'Date Opened', 'date']]],
+      'open', 'history'] },
+  contacts: { label: 'Contacts', one: 'Contact', color: '#56458c', ic: 'C',
+    sections: [['Contact Information', [['first', 'First Name'], ['owner', 'Contact Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['phone', 'Phone'], ['account', 'Account Name', 'ref', 'accounts'], ['mobile', 'Mobile'], ['title', 'Title'], ['email', 'Email'], ['department', 'Department', 'pick', DEPTS], ['source', 'Lead Source', 'pick', SOURCES]]],
+      ['Address Information', [['city', 'Mailing City'], ['state', 'Mailing State']]],
+      ['Description Information', [['description', 'Description', 'area']]],
+      ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
+    cols: [['first', 'Name', 'link'], ['account', 'Account Name', 'ref'], ['title', 'Title'], ['phone', 'Phone'], ['email', 'Email'], ['city', 'Mailing City'], ['owner', 'Contact Owner']],
+    views: [['All Contacts', () => true], ['My Contacts', r => r.owner === ME], ['Executives', r => /^(C.O|VP)/.test(r.title)], ['New This Month', r => ageDays(r.created) <= 30], ['Recently Viewed', r => db.recent.includes(r.id)]],
+    rel: [['Opportunities', 'opps', (x, r) => x.contact === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
+      ['Cases', 'cases', (x, r) => x.contact === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio']]],
+      'open', 'history'] },
+  leads: { label: 'Leads', one: 'Lead', color: '#e08a1e', ic: 'L',
+    sections: [['Lead Information', [['first', 'First Name'], ['owner', 'Lead Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['status', 'Lead Status', 'pick', LEAD_STATUS], ['company', 'Company', 'text', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['title', 'Title'], ['rating', 'Rating', 'pick', RATINGS], ['email', 'Email'], ['industry', 'Industry', 'pick', INDUSTRIES], ['phone', 'Phone'], ['campaign', 'Campaign', 'ref', 'campaigns']]],
+      ['Address Information', [['city', 'City'], ['state', 'State']]],
+      ['Description Information', [['description', 'Description', 'area']]],
+      ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
+    cols: [['first', 'Name', 'link'], ['company', 'Company'], ['state', 'State'], ['email', 'Email'], ['status', 'Lead Status'], ['source', 'Lead Source'], ['rating', 'Rating', 'rating'], ['owner', 'Owner'], ['created', 'Created', 'date']],
+    views: [['All Open Leads', r => !['Qualified', 'Unqualified'].includes(r.status)], ['My Unread Leads', r => r.owner === ME && r.status === LEAD_STATUS[0]], ['Today\'s Leads', r => ageDays(r.created) <= 1], ['Hot Leads', r => r.rating === 'Hot'], ['All Leads', () => true]],
+    rel: ['open', 'history'] },
+  opps: { label: 'Opportunities', one: 'Opportunity', color: '#c9a400', ic: 'O',
+    sections: [['Opportunity Information', [['name', 'Opportunity Name', 'text', 0, 1], ['owner', 'Opportunity Owner', 'pick', OWNERS], ['account', 'Account Name', 'ref', 'accounts', 1], ['amount', 'Amount', 'money'], ['type', 'Type', 'pick', OPP_TYPES], ['close', 'Close Date', 'date', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['stage', 'Stage', 'pick', STAGES.map(s => s[0])], ['contact', 'Primary Contact', 'ref', 'contacts'], ['prob', 'Probability (%)', 'pct'], ['campaign', 'Primary Campaign', 'ref', 'campaigns'], ['next', 'Next Step']]],
+      ['Description Information', [['description', 'Description', 'area']]],
+      ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
+    cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date'], ['stage', 'Stage'], ['prob', 'Prob (%)', 'pct'], ['owner', 'Owner'], ['next', 'Next Step']],
+    views: [['All Opportunities', () => true], ['My Opportunities', r => r.owner === ME], ['Open Opportunities', r => !r.stage.startsWith('Closed')], ['Closing This Month', r => !r.stage.startsWith('Closed') && r.close.slice(0, 7) === iso(today()).slice(0, 7)], ['Won', r => r.stage === 'Closed Won'], ['Recently Viewed', r => db.recent.includes(r.id)]],
+    rel: ['items', 'stagehist', 'open', 'history'] },
+  cases: { label: 'Cases', one: 'Case', color: '#a2903a', ic: '!',
+    sections: [['Case Information', [['number', 'Case Number', 'text', 0, 0, 1], ['owner', 'Case Owner', 'pick', OWNERS], ['contact', 'Contact Name', 'ref', 'contacts'], ['status', 'Status', 'pick', CASE_STATUS], ['account', 'Account Name', 'ref', 'accounts'], ['priority', 'Priority', 'pick', PRIORITIES], ['origin', 'Case Origin', 'pick', ORIGINS], ['type', 'Type', 'pick', CASE_TYPES], ['opened', 'Date/Time Opened', 'date', 0, 0, 1]]],
+      ['Description Information', [['subject', 'Subject', 'text', 0, 1], ['description', 'Description', 'area']]]],
+    cols: [['number', 'Case', 'link'], ['contact', 'Contact Name', 'ref'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio'], ['opened', 'Date Opened', 'date'], ['owner', 'Case Owner']],
+    views: [['All Open Cases', r => r.status !== 'Closed'], ['My Open Cases', r => r.owner === ME && r.status !== 'Closed'], ['Escalated', r => r.status === 'Escalated'], ['High Priority', r => ['Critical', 'High'].includes(r.priority) && r.status !== 'Closed'], ['All Cases', () => true]],
+    rel: ['comments', 'open', 'history'] },
+  campaigns: { label: 'Campaigns', one: 'Campaign', color: '#d0632b', ic: 'M',
+    sections: [['Campaign Information', [['name', 'Campaign Name', 'text', 0, 1], ['owner', 'Campaign Owner', 'pick', OWNERS], ['type', 'Type', 'pick', CAMP_TYPES], ['status', 'Status', 'pick', ['Planned', 'In Progress', 'Completed', 'Aborted']], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['expected', 'Expected Revenue', 'money']]],
+      ['Description Information', [['description', 'Description', 'area']]]],
+    cols: [['name', 'Campaign Name', 'link'], ['type', 'Type'], ['status', 'Status'], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['owner', 'Owner']],
+    views: [['All Campaigns', () => true], ['Active Campaigns', r => r.status === 'In Progress'], ['My Campaigns', r => r.owner === ME]],
+    rel: [['Campaign Leads', 'leads', (x, r) => x.campaign === r.id, [['first', 'Name', 'link'], ['company', 'Company'], ['status', 'Lead Status'], ['email', 'Email']]],
+      ['Influenced Opportunities', 'opps', (x, r) => x.campaign === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
+  products: { label: 'Products', one: 'Product', color: '#5f8a3a', ic: 'P',
+    sections: [['Product Detail', [['name', 'Product Name', 'text', 0, 1], ['code', 'Product Code'], ['family', 'Product Family', 'pick', ['Software', 'Services', 'Support', 'Infrastructure']], ['price', 'List Price', 'money'], ['active', 'Active', 'pick', ['Yes', 'No']], ['description', 'Product Description', 'area']]]],
+    cols: [['name', 'Product Name', 'link'], ['code', 'Product Code'], ['family', 'Product Family'], ['price', 'List Price', 'money'], ['active', 'Active']],
+    views: [['All Products', () => true], ['Active Products', r => r.active === 'Yes'], ['Services', r => r.family === 'Services']],
+    rel: [['Opportunities Including This Product', 'opps', (x, r) => (x.items || []).some(i => i.prod === r.id), [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
+};
+const TABS = [['home', 'Home', '#3a6ea5'], ['accounts'], ['contacts'], ['leads'], ['opps'], ['cases'], ['campaigns'], ['products'], ['forecasts', 'Forecasts', '#2e7d6b'], ['reports', 'Reports', '#4b6584'], ['dashboards', 'Dashboards', '#7a4a8c']];
+const tabLabel = t => (OBJ[t] ? OBJ[t].label : TABS.find(x => x[0] === t)[1]);
+const tabColor = t => (OBJ[t] ? OBJ[t].color : TABS.find(x => x[0] === t)[2]);
+
+// ---------------- formatting ----------------
+function fmt(r, key, type, o) {
+  const v = r[key];
+  switch (type) {
+    case 'link': return `<a data-go="${r.id}">${esc(key === 'first' ? title(r, o) : v)}</a>`;
+    case 'ref': return refLink(v);
+    case 'money': return v === '' || v == null ? '' : money(v);
+    case 'pct': return v === '' || v == null ? '' : v + '%';
+    case 'date': return mdY(v);
+    case 'num': return v === '' || v == null ? '' : Number(v).toLocaleString('en-US');
+    case 'rating': return v ? `<span class="pill p-${v.toLowerCase()}">${esc(v)}</span>` : '';
+    case 'prio': return v ? `<span class="pill p-${v.toLowerCase()}">${esc(v)}</span>` : '';
+    default: return esc(v);
+  }
+}
+const isNum = t => ['money', 'pct', 'num'].includes(t);
+
+// ---------------- state + navigation ----------------
+const S = { tab: 'home', view: 'home', id: null, obj: null, q: '', report: 0, hideDetails: false, expand: {}, lists: {} };
+const hist = [];
+const LS = o => (S.lists[o] ||= { view: 0, sort: OBJ[o].cols[0][0], dir: 1, page: 0, size: 25, letter: 'All', sel: new Set() });
+function nav(next, push = true) {
+  if (push) hist.push({ ...S });
+  Object.assign(S, next);
+  render();
+  window.scrollTo(0, 0);
+}
+const goTab = t => nav({ tab: t, view: OBJ[t] ? 'list' : t, id: null, obj: OBJ[t] ? t : null });
+const goRec = id => { const o = objOf(id); if (!OBJ[o]) return; nav({ tab: o, view: 'detail', id, obj: o }); };
+const goEdit = (o, id, clone) => nav({ tab: o, view: 'edit', obj: o, id: id || null, clone: clone || null });
+
+// ---------------- toast + modal ----------------
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2200); }
+function dialog(titleText, bodyHtml, buttons = ['OK'], primary = 0) {
+  return new Promise(res => {
+    const m = $('#modal');
+    m.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(titleText)}"><div class="dh">${esc(titleText)}<button data-r="__x" aria-label="Close">✕</button></div><div class="db">${bodyHtml}</div>
+      <div class="df">${buttons.map((b, i) => `<button class="cbtn ${i === primary ? 'pri' : ''}" data-r="${esc(b)}">${esc(b)}</button>`).join('')}</div></div>`;
+    m.hidden = false;
+    const f = m.querySelector('input, select, textarea') || m.querySelector('.df .cbtn'); if (f) f.focus();
+    m.onclick = e => {
+      const b = e.target.closest('[data-r]'); if (!b && e.target !== m) return;
+      const vals = {}; $$('[id]', m).forEach(el => { if ('value' in el) vals[el.id] = el.type === 'checkbox' ? el.checked : el.value; });
+      if (b && b.dataset.r !== '__x' && m._validate && !m._validate(b.dataset.r, vals)) return;
+      m.hidden = true; m.innerHTML = ''; m._validate = null; m.onclick = null;
+      res({ btn: b ? b.dataset.r : null, vals });
+    };
+  });
+}
+
+// ---------------- render: shell ----------------
+function render() {
+  const t = S.tab, app = $('#app');
+  app.style.setProperty('--tabc', tabColor(t));
+  app.style.setProperty('--tabink', t === 'opps' ? '#222' : '#fff');
+  $('#tabs').innerHTML = TABS.map(([k]) => `<button data-tab="${k}" class="${k === t ? 'on' : ''}">${esc(tabLabel(k))}</button>`).join('') + `<button data-act="sheet" title="Open Spreadsheet">Spreadsheet</button>`;
+  $('#b-appr').textContent = db.approvals.length;
+  $('#b-task').textContent = db.tasks.filter(x => x.owner === ME).length;
+  $('#hdr-date').textContent = today().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const v = S.view, main = $('#main');
+  main.innerHTML = v === 'home' ? viewHome() : v === 'list' ? viewList(S.obj) : v === 'detail' ? viewDetail(S.id) : v === 'edit' ? viewEdit(S.obj, S.id) : v === 'search' ? viewSearch(S.q) : v === 'forecasts' ? viewForecasts() : v === 'reports' ? viewReports() : v === 'dashboards' ? viewDash() : '';
+  renderSide();
+  const path = v === 'detail' ? '/' + S.id : v === 'list' ? '/' + PRE_OF[S.obj].toLowerCase() + '/o' : v === 'edit' ? '/' + (S.id || PRE_OF[S.obj].toLowerCase()) + '/e' : '/' + v;
+  $('#addr').textContent = 'https://brightwater.halvora.example' + path;
+}
+
+function renderSide() {
+  const rec = db.recent.map(get).filter(Boolean).slice(0, 10);
+  const t = today(), y = t.getFullYear(), m = t.getMonth(), first = new Date(y, m, 1), start = first.getDay(), dim = new Date(y, m + 1, 0).getDate();
+  const evDays = new Set(db.tasks.filter(x => x.due.slice(0, 7) === iso(t).slice(0, 7)).map(x => +x.due.slice(8)));
+  let cal = '<tr>' + ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<th>${d}</th>`).join('') + '</tr><tr>';
+  const prevDim = new Date(y, m, 0).getDate();
+  for (let i = 0; i < start; i++) cal += `<td class="o">${prevDim - start + 1 + i}</td>`;
+  for (let d = 1; d <= dim; d++) { cal += `<td class="${d === t.getDate() ? 'td' : evDays.has(d) ? 'ev' : ''}">${d}</td>`; if ((start + d) % 7 === 0 && d < dim) cal += '</tr><tr>'; }
+  for (let i = 1; (start + dim + i - 1) % 7 !== 0; i++) cal += `<td class="o">${i}</td>`;
+  cal += '</tr>';
+  $('#side').innerHTML = `
+    <div class="sbox"><h4>Create New...</h4><select id="createnew" style="width:100%"><option value="">-- Select --</option>${Object.keys(OBJ).map(o => `<option value="${o}">${OBJ[o].one}</option>`).join('')}</select></div>
+    <div class="sbox"><h4>Recent Items</h4><ul>${rec.length ? rec.map(r => `<li><span class="sq" style="background:${OBJ[objOf(r.id)].color}"></span><a data-go="${r.id}" title="${esc(title(r))}">${esc(title(r))}</a></li>`).join('') : '<li>No recent items.</li>'}</ul></div>
+    <div class="sbox"><h4>Quick Create: Contact</h4><form class="qc" id="qc">
+      <label for="qc-first">First Name</label><input type="text" id="qc-first">
+      <label for="qc-last">Last Name *</label><input type="text" id="qc-last" class="req">
+      <label for="qc-email">Email</label><input type="text" id="qc-email">
+      <label for="qc-phone">Phone</label><input type="text" id="qc-phone">
+      <button class="cbtn" type="submit">Save</button></form></div>
+    <div class="sbox"><h4>${t.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4><table class="cal">${cal}</table></div>
+    <div class="sbox"><h4>Messages &amp; Alerts</h4><div style="display:grid;gap:6px">
+      <div class="alert"><b>Scheduled maintenance:</b> Saturday 11:00 PM - 1:00 AM ET. Halvora will be read-only.</div>
+      <div class="alert">FY${fy(t)} Q${quarter(t)} pricing guide updated. See Documents &gt; Sales Collateral.</div>
+      <div class="alert">Forecast submissions due Friday 5:00 PM.</div></div></div>
+    <div class="sbox"><h4>Recycle Bin</h4><a data-act="bin">Recycle Bin (${db.bin.length})</a></div>`;
+}
+
+// ---------------- render: home ----------------
+function viewHome() {
+  const mine = db.tasks.filter(x => x.owner === ME).sort((a, b) => a.due.localeCompare(b.due));
+  const tstr = iso(today());
+  const openOpps = db.opps.filter(o => o.owner === ME && !o.stage.startsWith('Closed')).sort((a, b) => a.close.localeCompare(b.close)).slice(0, 8);
+  const [q0, q1] = qRange();
+  const won = db.opps.filter(o => o.stage === 'Closed Won' && o.close >= q0 && o.close <= q1);
+  const wonSum = won.reduce((s, o) => s + o.amount, 0), quota = 2400000, pct = Math.min(100, Math.round(wonSum / quota * 100));
+  const byStage = STAGES.slice(0, 7).map(([s]) => [s, db.opps.filter(o => o.stage === s).reduce((a, o) => a + o.amount, 0)]);
+  return `
+  <div class="ph"><div class="ic" style="background:${tabColor('home')}">H</div><div><div class="ot">Welcome, ${esc(ME)}</div><h2>Home</h2></div>
+    <div class="right">${today().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · <a data-act="customize">Customize Page</a></div></div>
+  <div class="pb" style="--oc:#7a4a8c"><div class="pbh"><h3>Dashboard: Sales Overview</h3><div class="r">As of ${mdY(tstr)} ${hhmm(new Date())} · <a data-tab="dashboards">Go to Dashboards »</a></div></div>
+    <div class="cols3" style="padding:8px;background:#fff">
+      <div><b>Pipeline by Stage</b>${hbars(byStage, '#4f8fd1', kmoney)}</div>
+      <div><b>Closed Won This Quarter</b>${gauge(pct, money0(wonSum) + ' of ' + money0(quota))}</div>
+      <div><b>Open Cases by Priority</b>${hbars(PRIORITIES.map(p => [p, db.cases.filter(c => c.priority === p && c.status !== 'Closed').length]), '#c0504d', v => v)}</div>
+    </div></div>
+  <div class="cols2">
+    <div class="pb" style="--oc:#3a6ea5"><div class="pbh"><h3>Calendar</h3><div class="btns"><button class="cbtn" data-act="newevent">New Event</button></div></div>
+      <div class="pbb"><table class="lt"><tbody>${db.events.map(e => `<tr><td style="width:70px"><b>${esc(e.time)}</b></td><td>${esc(e.subject)}${e.who ? ' - ' + refLink(e.who) : ''}</td></tr>`).join('')}</tbody></table></div></div>
+    <div class="pb" style="--oc:#c0504d"><div class="pbh"><h3>Items to Approve</h3><div class="r"><a data-act="noop">Manage All</a></div></div>
+      <div class="pbb">${db.approvals.length ? `<table class="lt"><thead><tr><th>Action</th><th>Related To</th><th>Type</th><th>Detail</th><th>Submitted By</th><th>Date</th></tr></thead><tbody>${db.approvals.map(a => `<tr><td><a data-appr="${a.id}" data-ok="1">Approve</a> | <a data-appr="${a.id}">Reject</a></td><td>${refLink(a.opp)}</td><td>${esc(a.type)}</td><td>${esc(a.detail)}</td><td>${esc(a.by)}</td><td>${mdY(a.date)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No records to display.</div>'}</div></div>
+  </div>
+  <div class="pb" style="--oc:#2e7d6b"><div class="pbh"><h3>My Tasks</h3><div class="btns"><button class="cbtn" data-act="newtask">New Task</button></div><div class="r"><select id="taskfilter" aria-label="Task filter"><option>All Open</option><option>Overdue</option><option>Today</option><option>Next 7 Days</option></select></div></div>
+    <div class="pbb"><table class="lt"><thead><tr><th>Complete</th><th>Due Date</th><th>Status</th><th>Subject</th><th>Name</th><th>Related To</th><th>Priority</th></tr></thead><tbody id="tasktbody">${taskRows(mine, 'All Open')}</tbody></table></div></div>
+  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>My Open Opportunities</h3><div class="btns"><button class="cbtn" data-new="opps">New</button></div><div class="r"><a data-tab="opps">View All »</a></div></div>
+    <div class="pbb">${table('opps', openOpps, OBJ.opps.cols)}</div></div>`;
+}
+function taskRows(list, f) {
+  const t = iso(today()), wk = dAgo(-7);
+  const rows = list.filter(x => f === 'Overdue' ? x.due < t : f === 'Today' ? x.due === t : f === 'Next 7 Days' ? x.due >= t && x.due <= wk : true);
+  return rows.map(x => `<tr><td><input type="checkbox" data-done="${x.id}" aria-label="Complete task"></td><td class="${x.due < t ? 'overdue' : ''}">${mdY(x.due)}</td><td>${esc(x.status)}</td><td><a data-taskopen="${x.id}">${esc(x.subject)}</a></td><td>${refLink(x.who)}</td><td>${refLink(x.what)}</td><td>${esc(x.priority)}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">No open tasks.</td></tr>';
+}
+function hbars(items, color, f) {
+  const max = Math.max(1, ...items.map(i => i[1]));
+  return `<div class="hb" style="--bc:${color}">${items.map(([l, v]) => `<span class="lab" title="${esc(l)}">${esc(l)}</span><div><div class="bar" style="width:${Math.max(1, v / max * 100)}%"></div></div><span>${f(v)}</span>`).join('')}</div>`;
+}
+function gauge(pct, label) {
+  const deg = pct * 1.8;
+  return `<div class="gauge"><div class="g" style="background:conic-gradient(from -90deg at 50% 100%, #3c9a4f 0deg ${deg}deg, #e3e3e3 ${deg}deg 180deg, transparent 180deg)"></div><b>${pct}%</b><span>${label}</span></div>`;
+}
+
+// ---------------- render: list view ----------------
+function sortVal(r, k, o) {
+  if (k === 'first') return (r.last + ' ' + r.first).toLowerCase();
+  const v = r[k];
+  if (typeof v === 'number') return v;
+  if (k === 'account' || k === 'contact' || k === 'campaign') return title(get(v)).toLowerCase();
+  return String(v ?? '').toLowerCase();
+}
+function filtered(o) {
+  const cfg = OBJ[o], st = LS(o);
+  let rows = db[o].filter(cfg.views[st.view][1]);
+  if (st.letter !== 'All') rows = rows.filter(r => { const c = (o === 'contacts' || o === 'leads' ? r.last : title(r, o)).charAt(0).toUpperCase(); return st.letter === 'Other' ? !/[A-Z]/.test(c) : c === st.letter; });
+  const k = st.sort;
+  rows.sort((a, b) => { const x = sortVal(a, k, o), y = sortVal(b, k, o); return (x > y ? 1 : x < y ? -1 : 0) * st.dir; });
+  return rows;
+}
+function table(o, rows, cols, opts = {}) {
+  if (!rows.length) return '<div class="empty">No records to display.</div>';
+  const st = opts.sortable ? LS(o) : null;
+  return `<table class="lt"><thead><tr>${opts.check ? `<th style="width:18px"><input type="checkbox" id="chkall" aria-label="Select all"></th><th>Action</th>` : ''}${cols.map(([k, l, t]) => `<th ${st ? `data-sort="${k}"` : ''} class="${isNum(t) ? 'n' : ''}">${esc(l)}${st && st.sort === k ? (st.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${opts.check ? `<td><input type="checkbox" data-chk="${r.id}" ${st.sel.has(r.id) ? 'checked' : ''} aria-label="Select row"></td><td class="act"><a data-edit="${r.id}">Edit</a> | <a data-del="${r.id}">Del</a></td>` : ''}${cols.map(([k, , t]) => `<td class="${isNum(t) ? 'n' : ''}">${fmt(r, k, t, o)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function viewList(o) {
+  const cfg = OBJ[o], st = LS(o), rows = filtered(o), total = rows.length;
+  const pages = Math.max(1, Math.ceil(total / st.size)); st.page = Math.min(st.page, pages - 1);
+  const slice = rows.slice(st.page * st.size, st.page * st.size + st.size);
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Other', 'All'];
+  const recent = db.recent.map(get).filter(r => r && objOf(r.id) === o).slice(0, 5);
+  return `
+  <div class="ph"><div class="ic" style="background:${cfg.color}">${cfg.ic}</div><div><div class="ot">${esc(cfg.label)}</div><h2>Home</h2></div><div class="right"><a data-act="help">Help for this Page</a></div></div>
+  <div class="row" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><label for="lv"><b>View:</b></label>
+    <select id="lv">${cfg.views.map((v, i) => `<option value="${i}" ${i === st.view ? 'selected' : ''}>${esc(v[0])}</option>`).join('')}</select>
+    <button class="cbtn" id="lvgo">Go!</button> <a data-act="editview">Edit</a> | <a data-act="editview">Create New View</a></div>
+  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>${esc(cfg.views[st.view][0])}</h3>
+    <div class="btns"><button class="cbtn" data-new="${o}">New ${esc(cfg.one)}</button><button class="cbtn" data-act="massdel">Delete</button><button class="cbtn" data-act="owner">Change Owner</button><button class="cbtn" data-act="exportlist">Open in Spreadsheet</button></div>
+    <div class="r"><div class="alpha">${letters.map(l => `<a data-letter="${l}" class="${l === st.letter ? 'on' : ''}">${l}</a>`).join('')}</div></div></div>
+    <div class="pbb">${table(o, slice, cfg.cols, { check: true, sortable: true })}</div>
+    <div class="pbf"><span>${total ? st.page * st.size + 1 : 0}-${Math.min(total, (st.page + 1) * st.size)} of ${total}</span><span>${st.sel.size} selected</span>
+      <label>Display <select id="psize">${[10, 25, 50, 100, 200].map(n => `<option ${n === st.size ? 'selected' : ''}>${n}</option>`).join('')}</select> records per page</label>
+      <div class="r">${st.page > 0 ? '<a data-page="-1">◄ Previous</a>' : '<span style="color:#aaa">◄ Previous</span>'}<span>Page ${st.page + 1} of ${pages}</span>${st.page < pages - 1 ? '<a data-page="1">Next ►</a>' : '<span style="color:#aaa">Next ►</span>'}</div></div></div>
+  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>Recent ${esc(cfg.label)}</h3></div><div class="pbb">${table(o, recent, cfg.cols.slice(0, 5))}</div></div>
+  <div class="cols2"><div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>Reports</h3></div><div class="pbb" style="padding:6px 8px;display:grid;gap:3px">${REPORTS.filter(r => r.obj === o).map(r => `<a data-report="${REPORTS.indexOf(r)}">${esc(r.name)}</a>`).join('') || '<span class="empty">No reports.</span>'}</div></div>
+    <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>Tools</h3></div><div class="pbb" style="padding:6px 8px;display:grid;gap:3px"><a data-act="exportlist">Open list in Spreadsheet</a><a data-act="import">Import ${esc(cfg.label)}</a><a data-act="massdel">Mass Delete ${esc(cfg.label)}</a><a data-act="owner">Mass Transfer ${esc(cfg.label)}</a></div></div></div>`;
+}
+
+// ---------------- render: detail ----------------
+function pushRecent(id) { db.recent = [id, ...db.recent.filter(x => x !== id)].slice(0, 15); persist(); }
+function relLists(o, r) {
+  const out = [];
+  for (const rl of OBJ[o].rel) {
+    if (rl === 'open') {
+      const rows = db.tasks.filter(x => x.who === r.id || x.what === r.id);
+      out.push(['Open Activities', '#2e7d6b', rows.length, `<button class="cbtn" data-act="newtask">New Task</button><button class="cbtn" data-act="newevent">New Event</button>`,
+        rows.length ? `<table class="lt"><thead><tr><th>Subject</th><th>Name</th><th>Due Date</th><th>Status</th><th>Priority</th><th>Assigned To</th></tr></thead><tbody>${rows.map(x => `<tr><td>${esc(x.subject)}</td><td>${refLink(x.who)}</td><td class="${x.due < iso(today()) ? 'overdue' : ''}">${mdY(x.due)}</td><td>${esc(x.status)}</td><td>${esc(x.priority)}</td><td>${esc(x.owner)}</td></tr>`).join('')}</tbody></table>` : '']);
+    } else if (rl === 'history') {
+      const rows = db.acts.filter(x => x.who === r.id || x.what === r.id);
+      out.push(['Activity History', '#2e7d6b', rows.length, `<button class="cbtn" data-act="logcall">Log a Call</button><button class="cbtn" data-act="email">Send an Email</button>`,
+        rows.length ? `<table class="lt"><thead><tr><th>Subject</th><th>Type</th><th>Name</th><th>Date</th><th>Assigned To</th><th>Comments</th></tr></thead><tbody>${rows.map(x => `<tr><td>${esc(x.subject)}</td><td>${esc(x.type)}</td><td>${refLink(x.who)}</td><td>${mdY(x.date)}</td><td>${esc(x.owner)}</td><td>${esc(x.comments)}</td></tr>`).join('')}</tbody></table>` : '']);
+    } else if (rl === 'items') {
+      const rows = r.items || [];
+      out.push(['Products', OBJ.products.color, rows.length, `<button class="cbtn" data-act="noop">Add Product</button>`,
+        rows.length ? `<table class="lt"><thead><tr><th>Product</th><th class="n">Quantity</th><th class="n">Sales Price</th><th class="n">Discount</th><th class="n">Total Price</th></tr></thead><tbody>${rows.map(i => `<tr><td>${refLink(i.prod)}</td><td class="n">${i.qty}</td><td class="n">${money(i.price)}</td><td class="n">${i.disc}%</td><td class="n">${money(i.qty * i.price * (1 - i.disc / 100))}</td></tr>`).join('')}</tbody></table>` : '']);
+    } else if (rl === 'stagehist') {
+      const idx = STAGES.findIndex(s => s[0] === r.stage), steps = r.stage === 'Closed Lost' ? [0, 1, 2, 8] : STAGES.slice(0, idx + 1).map((_, i) => i);
+      const span = Math.max(steps.length, 1), age = Math.max(1, ageDays(r.created));
+      const rows = steps.map((si, i) => ({ stage: STAGES[si][0], prob: STAGES[si][1], date: dAgo(Math.round(age - age * (i / span))) })).reverse();
+      out.push(['Stage History', '#888', rows.length, '', `<table class="lt"><thead><tr><th>Stage</th><th class="n">Amount</th><th class="n">Probability (%)</th><th>Close Date</th><th>Last Modified</th></tr></thead><tbody>${rows.map(h => `<tr><td>${esc(h.stage)}</td><td class="n">${money(r.amount)}</td><td class="n">${h.prob}%</td><td>${mdY(r.close)}</td><td>${mdY(h.date)}</td></tr>`).join('')}</tbody></table>`]);
+    } else if (rl === 'comments') {
+      const rows = r.comments || [];
+      out.push(['Case Comments', OBJ.cases.color, rows.length, `<button class="cbtn" data-act="comment">New</button>`,
+        rows.length ? `<table class="lt"><thead><tr><th>Comment</th><th>Created By</th><th>Date</th></tr></thead><tbody>${rows.map(c => `<tr><td style="white-space:normal">${esc(c.text)}</td><td>${esc(c.by)}</td><td>${mdY(c.date)}</td></tr>`).join('')}</tbody></table>` : '']);
+    } else {
+      const [name, ro, where, cols] = rl;
+      const rows = db[ro].filter(x => where(x, r));
+      out.push([name, OBJ[ro].color, rows.length, `<button class="cbtn" data-new="${ro}">New ${OBJ[ro].one}</button>`, table(ro, rows, cols)]);
+    }
+  }
+  return out;
+}
+function viewDetail(id) {
+  const r = get(id), o = objOf(id), cfg = OBJ[o];
+  if (!r) return `<div class="pb"><div class="pbh"><h3>Record not found</h3></div><div class="pbb empty">This record has been deleted or you don't have access to it. <a data-tab="${o}">Back to ${esc(cfg.label)}</a></div></div>`;
+  pushRecent(id);
+  const rls = relLists(o, r);
+  const extra = o === 'contacts' || o === 'leads' ? `<button class="cbtn" data-act="call">Call</button><button class="cbtn" data-act="logcall">Log a Call</button><button class="cbtn" data-act="email">Send Email</button>` : o === 'leads' ? '' : '';
+  const convert = o === 'leads' ? `<button class="cbtn" data-act="convert">Convert</button>` : '';
+  const btns = `<button class="cbtn" data-edit="${id}">Edit</button><button class="cbtn" data-del="${id}">Delete</button><button class="cbtn" data-clone="${id}">Clone</button>${convert}${extra}<button class="cbtn" data-act="sharing">Sharing</button>`;
+  return `
+  <div class="crumb"><a data-tab="${o}">« Back to List: ${esc(cfg.label)}</a></div>
+  <div class="ph"><div class="ic" style="background:${cfg.color}">${cfg.ic}</div><div><div class="ot">${esc(cfg.one)}</div><h2>${esc(title(r, o))}</h2></div><div class="right"><a data-act="customize">Customize Page</a> | <a data-act="printable">Printable View</a> | <a data-act="help">Help for this Page</a></div></div>
+  <div class="rlinks">${rls.map(([n, , c]) => `<a data-jump="${esc(n)}">${esc(n)} [${c}]</a>`).join('')}</div>
+  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>${esc(cfg.one)} Detail</h3><div class="btns">${btns}</div></div>
+    ${cfg.sections.map(([sn, fields]) => `<div class="sech">${esc(sn)}</div><div class="dt">${fields.map(([k, l, t]) => `<div class="l">${esc(l)}</div><div class="v ${t === 'area' ? 'wide' : ''}">${fmt(r, k, t === 'pick' || !t ? 'text' : t, o) || '&nbsp;'}</div>`).join('')}</div>`).join('')}
+    <div class="pbh" style="justify-content:center"><div class="btns">${btns}</div></div></div>
+  ${rls.map(([n, c, count, b, html]) => {
+    const key = id + n, open = S.expand[key];
+    let body = html || '<div class="empty">No records to display.</div>';
+    if (count > 5 && !open) body = body.replace(/<tbody>((?:<tr>.*?<\/tr>){5}).*<\/tbody>/s, '<tbody>$1</tbody>');
+    return `<div class="pb" style="--oc:${c}" data-rl="${esc(n)}"><div class="pbh"><h3>${esc(n)}</h3><div class="btns">${b}</div></div><div class="pbb">${body}</div>
+      ${count > 5 ? `<div class="pbf"><a data-expand="${esc(key)}">${open ? 'Show fewer «' : `Show ${count - 5} more »`}</a> | <a data-expand="${esc(key)}">Go to list (${count}) »</a></div>` : ''}</div>`;
+  }).join('')}`;
+}
+
+// ---------------- render: edit ----------------
+function viewEdit(o, id) {
+  const cfg = OBJ[o], r = id ? get(id) : (S.clone ? { ...get(S.clone), id: null } : { owner: ME });
+  const isNew = !id;
+  const input = ([k, l, t, opts, req, ro]) => {
+    const v = r[k] ?? '', cls = req ? 'req' : '', fid = 'e-' + k;
+    if (ro) return `<div class="l">${esc(l)}</div><div class="v">${isNew ? '<i style="color:#888">Auto</i>' : fmt(r, k, t, o)}</div>`;
+    let ctl;
+    if (t === 'pick') ctl = `<select id="${fid}" class="${cls}"><option value="">--None--</option>${opts.map(x => `<option ${x === v ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
+    else if (t === 'ref') ctl = `<select id="${fid}" class="${cls}"><option value="">--None--</option>${db[opts].slice().sort((a, b) => title(a, opts).localeCompare(title(b, opts))).map(x => `<option value="${x.id}" ${x.id === v ? 'selected' : ''}>${esc(title(x, opts))}</option>`).join('')}</select>`;
+    else if (t === 'area') ctl = `<textarea id="${fid}" rows="4" class="${cls}">${esc(v)}</textarea>`;
+    else if (t === 'date') ctl = `<input type="text" id="${fid}" class="${cls}" value="${esc(mdY(v))}" placeholder="MM/DD/YYYY"> <span style="color:#888;font-size:11px">[ ${mdY(iso(today()))} ]</span>`;
+    else ctl = `<input type="text" id="${fid}" class="${cls}" value="${esc(v)}">`;
+    return `<div class="l"><label for="${fid}">${esc(l)}</label></div><div class="v ${t === 'area' ? 'wide' : ''}">${ctl}</div>`;
+  };
+  const btns = `<button class="cbtn pri" data-act="save">Save</button><button class="cbtn" data-act="savenew">Save &amp; New</button><button class="cbtn" data-act="cancel">Cancel</button>`;
+  return `
+  <div class="ph"><div class="ic" style="background:${cfg.color}">${cfg.ic}</div><div><div class="ot">${esc(cfg.one)} Edit</div><h2>${isNew ? 'New ' + esc(cfg.one) : esc(title(r, o))}</h2></div><div class="right"><a data-act="help">Help for this Page</a></div></div>
+  <div class="pb" style="--oc:${cfg.color}"><div class="pbh"><h3>${esc(cfg.one)} Edit</h3><div class="btns">${btns}</div><div class="r"><span style="color:var(--red)">|</span> = Required Information</div></div>
+    <div id="editerr" class="alert" hidden style="margin:0 8px 6px;background:#ffe9e7;border-color:#e3a39c;color:#900"></div>
+    ${cfg.sections.map(([sn, fields]) => `<div class="sech">${esc(sn)}</div><div class="dt">${fields.map(input).join('')}</div>`).join('')}
+    <div class="pbh" style="justify-content:center"><div class="btns">${btns}</div></div></div>`;
+}
+function saveEdit(andNew) {
+  const o = S.obj, cfg = OBJ[o], isNew = !S.id;
+  const r = isNew ? (S.clone ? { ...get(S.clone) } : {}) : get(S.id);
+  const errs = [], data = {};
+  cfg.sections.forEach(([, fields]) => fields.forEach(([k, l, t, , req, ro]) => {
+    if (ro) return;
+    const el = $('#e-' + k); if (!el) return;
+    let v = el.value.trim();
+    if (req && !v) errs.push(`${l}: You must enter a value`);
+    if (t === 'date' && v) { const p = parseMdY(v); if (!p) errs.push(`${l}: Invalid date. Use MM/DD/YYYY`); v = p || ''; }
+    if (['money', 'num', 'pct'].includes(t)) v = v === '' ? '' : Number(v.replace(/[$,%\s]/g, ''));
+    if (typeof v === 'number' && isNaN(v)) { errs.push(`${l}: Invalid number`); v = ''; }
+    data[k] = v;
+  }));
+  if (errs.length) { const e = $('#editerr'); e.innerHTML = '<b>Error: Invalid Data.</b><br>Review all error messages below to correct your data.<br>' + errs.map(esc).join('<br>'); e.hidden = false; e.scrollIntoView({ block: 'center' }); return; }
+  if (o === 'opps' && data.stage && (data.prob === '' || data.prob == null)) data.prob = STAGE_P[data.stage];
+  Object.assign(r, data);
+  if (isNew) {
+    r.id = nid(PRE_OF[o]);
+    r.created = r.opened = iso(today());
+    if (o === 'cases') r.number = '0000' + db.seq.CAS, r.comments = [];
+    if (o === 'opps') r.items = [];
+    db[o].unshift(r);
+  }
+  r.modified = iso(today());
+  persist();
+  toast(isNew ? `${cfg.one} created` : `${cfg.one} saved`);
+  if (andNew) nav({ view: 'edit', id: null, clone: null }, false); else nav({ view: 'detail', id: r.id, clone: null }, false);
+}
+
+// ---------------- render: search ----------------
+function viewSearch(q) {
+  const s = q.toLowerCase();
+  const sections = Object.keys(OBJ).map(o => {
+    const rows = db[o].filter(r => [title(r, o), r.email, r.phone, r.company, r.subject].some(v => v && String(v).toLowerCase().includes(s))).slice(0, 25);
+    return `<div class="pb" style="--oc:${OBJ[o].color}"><div class="pbh"><h3>${esc(OBJ[o].label)} (${rows.length}${rows.length === 25 ? '+' : ''})</h3></div><div class="pbb">${table(o, rows, OBJ[o].cols.slice(0, 6))}</div></div>`;
+  }).join('');
+  return `<div class="ph"><div class="ic" style="background:#555">?</div><div><div class="ot">Search Results</div><h2>“${esc(q)}”</h2></div></div>${sections}`;
+}
+
+// ---------------- render: forecasts ----------------
+function viewForecasts() {
+  const [q0, q1] = qRange(), t = today();
+  const rows = OWNERS.map((owner, i) => {
+    const os = db.opps.filter(o => o.owner === owner && o.close >= q0 && o.close <= q1);
+    const sum = f => os.filter(f).reduce((s, o) => s + o.amount, 0);
+    const quota = [2400000, 1800000, 1650000, 1900000, 1500000, 1400000, 1750000, 1300000][i];
+    const closed = sum(o => o.stage === 'Closed Won'), commit = closed + sum(o => ['Negotiation', 'Proposal Sent'].includes(o.stage));
+    const best = commit + sum(o => ['Decision Makers', 'Solution Fit'].includes(o.stage)), pipe = sum(o => !o.stage.startsWith('Closed'));
+    return { owner, quota, closed, commit, best, pipe, att: Math.round(closed / quota * 100) };
+  });
+  const tot = k => rows.reduce((s, r) => s + r[k], 0);
+  return `
+  <div class="ph"><div class="ic" style="background:${tabColor('forecasts')}">F</div><div><div class="ot">Forecasts</div><h2>FY${fy(t)} Q${quarter(t)} - Sales Team</h2></div>
+    <div class="right">Forecast Range: <select aria-label="Forecast range"><option>Current Quarter</option><option>Next Quarter</option><option>Current and Next Quarter</option></select> <button class="cbtn" data-act="submitfc">Submit Forecast</button></div></div>
+  <div class="alert">Forecast submissions are due Friday at 5:00 PM. Last submitted: ${mdY(dAgo(7))} by ${esc(ME)}.</div>
+  <div class="pb"><div class="pbh"><h3>Forecast Summary (${mdY(q0)} - ${mdY(q1)})</h3><div class="btns"><button class="cbtn" data-act="exportfc">Open in Spreadsheet</button></div></div>
+    <div class="pbb"><table class="lt"><thead><tr><th>Name</th><th class="n">Quota</th><th class="n">Closed</th><th class="n">Commit</th><th class="n">Best Case</th><th class="n">Pipeline</th><th>Attainment</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${esc(r.owner)}</td><td class="n">${money0(r.quota)}</td><td class="n">${money0(r.closed)}</td><td class="n">${money0(r.commit)}</td><td class="n">${money0(r.best)}</td><td class="n">${money0(r.pipe)}</td><td><div style="display:flex;gap:6px;align-items:center"><div style="width:90px;height:10px;background:#e3e3e3;border:1px solid #ccc"><div style="height:100%;width:${Math.min(100, r.att)}%;background:${r.att >= 70 ? '#3c9a4f' : r.att >= 40 ? '#e0a020' : '#c0504d'}"></div></div>${r.att}%</div></td></tr>`).join('')}
+    <tr class="sub"><td>Total</td><td class="n">${money0(tot('quota'))}</td><td class="n">${money0(tot('closed'))}</td><td class="n">${money0(tot('commit'))}</td><td class="n">${money0(tot('best'))}</td><td class="n">${money0(tot('pipe'))}</td><td>${Math.round(tot('closed') / tot('quota') * 100)}%</td></tr></tbody></table></div></div>
+  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Opportunities in this Forecast</h3></div><div class="pbb">${table('opps', db.opps.filter(o => o.close >= q0 && o.close <= q1 && !o.stage.startsWith('Closed Lost')).sort((a, b) => b.amount - a.amount).slice(0, 40), OBJ.opps.cols)}</div></div>`;
+}
+
+// ---------------- reports ----------------
+const REPORTS = [
+  { folder: 'Sales Reports', name: 'Opportunity Pipeline', obj: 'opps', where: o => !o.stage.startsWith('Closed'), group: 'stage', cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['owner', 'Owner'], ['close', 'Close Date', 'date'], ['prob', 'Probability (%)', 'pct'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Sales Reports', name: 'Closed Won Opportunities', obj: 'opps', where: o => o.stage === 'Closed Won', group: 'owner', cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['close', 'Close Date', 'date'], ['type', 'Type'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Sales Reports', name: 'Opportunities Closing Next 30 Days', obj: 'opps', where: o => !o.stage.startsWith('Closed') && o.close >= iso(today()) && o.close <= dAgo(-30), group: 'owner', cols: [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['close', 'Close Date', 'date'], ['next', 'Next Step'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Account & Contact Reports', name: 'Accounts by Industry', obj: 'accounts', where: () => true, group: 'industry', cols: [['name', 'Account Name', 'link'], ['type', 'Type'], ['city', 'City'], ['state', 'State'], ['owner', 'Owner'], ['revenue', 'Annual Revenue', 'money']], sum: 'revenue' },
+  { folder: 'Account & Contact Reports', name: 'Contact Mailing List', obj: 'contacts', where: () => true, group: null, cols: [['first', 'Name', 'link'], ['title', 'Title'], ['account', 'Account Name', 'ref'], ['email', 'Email'], ['phone', 'Phone'], ['city', 'City'], ['state', 'State']] },
+  { folder: 'Lead Reports', name: 'Leads by Source', obj: 'leads', where: () => true, group: 'source', cols: [['first', 'Name', 'link'], ['company', 'Company'], ['status', 'Lead Status'], ['rating', 'Rating', 'rating'], ['created', 'Created', 'date']] },
+  { folder: 'Lead Reports', name: 'Lead Status Report', obj: 'leads', where: () => true, group: 'status', cols: [['first', 'Name', 'link'], ['company', 'Company'], ['source', 'Lead Source'], ['owner', 'Owner'], ['created', 'Created', 'date']] },
+  { folder: 'Support Reports', name: 'Open Cases by Priority', obj: 'cases', where: c => c.status !== 'Closed', group: 'priority', cols: [['number', 'Case', 'link'], ['subject', 'Subject'], ['account', 'Account', 'ref'], ['status', 'Status'], ['opened', 'Opened', 'date'], ['owner', 'Owner']] },
+  { folder: 'Support Reports', name: 'Cases by Origin', obj: 'cases', where: () => true, group: 'origin', cols: [['number', 'Case', 'link'], ['subject', 'Subject'], ['priority', 'Priority', 'prio'], ['status', 'Status'], ['opened', 'Opened', 'date']] },
+  { folder: 'Marketing Reports', name: 'Campaign ROI Analysis', obj: 'campaigns', where: () => true, group: 'type', cols: [['name', 'Campaign Name', 'link'], ['status', 'Status'], ['start', 'Start Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['expected', 'Expected Revenue', 'money']], sum: 'expected' },
+];
+function reportRows(rep) {
+  const rows = db[rep.obj].filter(rep.where);
+  if (rep.group) rows.sort((a, b) => String(a[rep.group]).localeCompare(String(b[rep.group])) || (rep.sum ? b[rep.sum] - a[rep.sum] : 0));
+  return rows;
+}
+function viewReports() {
+  const rep = REPORTS[S.report], rows = reportRows(rep), cols = rep.cols;
+  const folders = [...new Set(REPORTS.map(r => r.folder))];
+  let body = '';
+  if (rep.group) {
+    const groups = {}; rows.forEach(r => (groups[r[rep.group]] ||= []).push(r));
+    for (const [g, list] of Object.entries(groups)) {
+      body += `<tr class="grp"><td colspan="${cols.length}">${esc(OBJ[rep.obj].sections.flatMap(s => s[1]).find(f => f[0] === rep.group)?.[1] || rep.group)}: ${esc(g)} (${list.length} records)</td></tr>`;
+      if (!S.hideDetails) body += list.map(r => `<tr>${cols.map(([k, , t]) => `<td class="${isNum(t) ? 'n' : ''}">${fmt(r, k, t, rep.obj)}</td>`).join('')}</tr>`).join('');
+      if (rep.sum) body += `<tr class="sub">${cols.map(([k], i) => `<td class="${k === rep.sum ? 'n' : ''}">${k === rep.sum ? 'Sum: ' + money(list.reduce((s, r) => s + Number(r[k] || 0), 0)) : i === 0 ? 'Subtotal' : ''}</td>`).join('')}</tr>`;
+    }
+  } else body = rows.map(r => `<tr>${cols.map(([k, , t]) => `<td class="${isNum(t) ? 'n' : ''}">${fmt(r, k, t, rep.obj)}</td>`).join('')}</tr>`).join('');
+  const grand = rep.sum ? rows.reduce((s, r) => s + Number(r[rep.sum] || 0), 0) : null;
+  return `
+  <div class="ph"><div class="ic" style="background:${tabColor('reports')}">R</div><div><div class="ot">Reports</div><h2>${esc(rep.name)}</h2></div><div class="right">Generated ${mdY(iso(today()))} ${hhmm(new Date())} · ${esc(ME)}</div></div>
+  <div class="cols2" style="grid-template-columns:200px 1fr">
+    <div class="pb rep-left" style="--oc:${tabColor('reports')}"><div class="pbh"><h3>Report Folders</h3></div><div class="pbb" style="padding:4px 8px 8px">${folders.map(f => `<h5>${esc(f)}</h5>${REPORTS.map((r, i) => r.folder === f ? `<a data-report="${i}" style="${i === S.report ? 'font-weight:bold;color:#000' : ''}">${esc(r.name)}</a>` : '').join('')}`).join('')}</div></div>
+    <div class="pb" style="--oc:${tabColor('reports')}"><div class="pbh"><h3>Report Results</h3><div class="btns"><button class="cbtn" data-act="runrep">Run Report</button><button class="cbtn" data-act="hidedet">${S.hideDetails ? 'Show' : 'Hide'} Details</button><button class="cbtn pri" data-act="exportrep">Export to Spreadsheet</button></div>
+      <div class="r">Total Records: <b>${rows.length}</b>${grand != null ? ` · Total: <b>${money(grand)}</b>` : ''}</div></div>
+      <div class="pbf" style="background:#fff;border-bottom:1px solid #ddd">Filtered By: ${esc(OBJ[rep.obj].label)} · ${rep.group ? 'Grouped by ' + esc(rep.group) : 'Tabular'} · Date Field: Created Date · Range: All Time</div>
+      <div class="pbb"><table class="lt"><thead><tr>${cols.map(([, l, t]) => `<th class="${isNum(t) ? 'n' : ''}">${esc(l)}</th>`).join('')}</tr></thead><tbody>${body || `<tr><td class="empty" colspan="${cols.length}">No records match this report.</td></tr>`}</tbody></table></div></div>
+  </div>`;
+}
+
+// ---------------- dashboards ----------------
+function viewDash() {
+  const open = db.opps.filter(o => !o.stage.startsWith('Closed')), won = db.opps.filter(o => o.stage === 'Closed Won');
+  const sum = a => a.reduce((s, o) => s + o.amount, 0);
+  const byOwner = OWNERS.map(w => [w, sum(won.filter(o => o.owner === w))]).sort((a, b) => b[1] - a[1]);
+  const bySource = SOURCES.map(s => [s, db.leads.filter(l => l.source === s).length]).sort((a, b) => b[1] - a[1]);
+  const byInd = INDUSTRIES.map(s => [s, sum(open.filter(o => get(o.account)?.industry === s))]).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const [q0, q1] = qRange(), wonQ = sum(won.filter(o => o.close >= q0 && o.close <= q1)), quota = 13700000;
+  const top = open.slice().sort((a, b) => b.amount - a.amount).slice(0, 10);
+  const winRate = Math.round(won.length / Math.max(1, won.length + db.opps.filter(o => o.stage === 'Closed Lost').length) * 100);
+  return `
+  <div class="ph"><div class="ic" style="background:${tabColor('dashboards')}">D</div><div><div class="ot">Dashboard</div><h2>Executive Sales Dashboard</h2></div>
+    <div class="right">View dashboard as: <b>${esc(ME)}</b> · As of ${mdY(iso(today()))} ${hhmm(new Date())} <button class="cbtn" data-act="refreshdash">Refresh</button></div></div>
+  <div class="kpis pb"><div><b>${kmoney(sum(open))}</b><span>Open Pipeline</span></div><div><b>${open.length}</b><span>Open Opportunities</span></div><div><b>${kmoney(wonQ)}</b><span>Closed Won (QTD)</span></div><div><b>${winRate}%</b><span>Win Rate</span></div><div><b>${db.cases.filter(c => c.status !== 'Closed').length}</b><span>Open Cases</span></div><div><b>${db.leads.filter(l => ageDays(l.created) <= 30).length}</b><span>New Leads (30d)</span></div></div>
+  <div class="cols3">
+    <div class="pb"><div class="pbh"><h3>Pipeline by Stage</h3></div>${hbars(STAGES.slice(0, 7).map(([s]) => [s, sum(open.filter(o => o.stage === s))]), '#4f8fd1', kmoney)}</div>
+    <div class="pb"><div class="pbh"><h3>Quarterly Attainment</h3></div>${gauge(Math.min(100, Math.round(wonQ / quota * 100)), money0(wonQ) + ' of ' + money0(quota))}</div>
+    <div class="pb"><div class="pbh"><h3>Closed Won by Rep</h3></div>${hbars(byOwner, '#3c9a4f', kmoney)}</div>
+    <div class="pb"><div class="pbh"><h3>Leads by Source</h3></div>${hbars(bySource, '#e08a1e', v => v)}</div>
+    <div class="pb"><div class="pbh"><h3>Open Pipeline by Industry</h3></div>${hbars(byInd, '#7a4a8c', kmoney)}</div>
+    <div class="pb"><div class="pbh"><h3>Cases by Status</h3></div>${hbars(CASE_STATUS.map(s => [s, db.cases.filter(c => c.status === s).length]), '#a2903a', v => v)}</div>
+  </div>
+  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Top 10 Open Opportunities</h3></div><div class="pbb">${table('opps', top, OBJ.opps.cols)}</div></div>`;
+}
+
+// ---------------- calls / email / tasks ----------------
+let audio = null;
+function tone(freqs, ms, at = 0) {
+  try {
+    const a = (audio ||= new (window.AudioContext || window.webkitAudioContext)()), t = a.currentTime + at / 1000, g = a.createGain();
+    g.gain.setValueAtTime(.05, t); g.gain.setValueAtTime(0, t + ms / 1000); g.connect(a.destination);
+    freqs.forEach(f => { const o = a.createOscillator(); o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + ms / 1000); });
+  } catch (e) {}
+}
+const DTMF = { 1: [697, 1209], 2: [697, 1336], 3: [697, 1477], 4: [770, 1209], 5: [770, 1336], 6: [770, 1477], 7: [852, 1209], 8: [852, 1336], 9: [852, 1477], 0: [941, 1336] };
+let soundOn = false;
+async function callRec() {
+  const r = get(S.id); if (!r) return;
+  const num = r.phone || r.mobile;
+  if (!num) return dialog('Call', `<p>${esc(title(r))} has no phone number on file.</p>`);
+  const m = $('#modal');
+  m.innerHTML = `<div class="dlg" role="dialog" aria-label="Call"><div class="dh">Halvora Dialer</div><div class="db"><p><b>${esc(title(r))}</b><br>${esc(r.title || '')}${r.account ? ', ' + esc(title(get(r.account))) : r.company ? ', ' + esc(r.company) : ''}<br>${esc(num)}</p>
+    <label><input type="checkbox" id="dsnd" ${soundOn ? 'checked' : ''}> Play call sounds</label><div class="term" id="dterm"></div></div><div class="df"><button class="cbtn pri" id="dend">End Call</button></div></div>`;
+  m.hidden = false; m.onclick = null;
+  $('#dsnd').onchange = e => soundOn = e.target.checked;
+  let done = false, timer;
+  const out = $('#dterm'), line = (s, ms) => new Promise(res => setTimeout(() => { if (!done) { out.textContent += s + '\n'; out.scrollTop = 1e9; } res(); }, ms));
+  const finish = outcome => { done = true; clearInterval(timer); m.hidden = true; m.innerHTML = ''; if (outcome) logCall(outcome); };
+  $('#dend').onclick = () => finish(null);
+  await line('Dialing ' + num + ' ...', 100);
+  if (soundOn) [...num.replace(/\D/g, '')].forEach((d, i) => tone(DTMF[d], 90, i * 130));
+  await line('Ringing ...', 1500);
+  if (soundOn) tone([440, 480], 900);
+  await line('Ringing ...', 1600);
+  if (done) return;
+  if (Math.random() < .4) { await line('No answer. Forwarded to voicemail.', 1500); if (!done) { $('#dend').textContent = 'Log Voicemail'; $('#dend').onclick = () => finish('Left voicemail'); } }
+  else {
+    await line('Connected.', 1300); if (done) return;
+    const t0 = Date.now(); out.textContent += 'Call time 00:00';
+    timer = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); out.textContent = out.textContent.replace(/Call time \d\d:\d\d$/, `Call time ${pad(Math.floor(s / 60))}:${pad(s % 60)}`); }, 1000);
+    $('#dend').textContent = 'End Call & Log'; $('#dend').onclick = () => finish('Connected');
+  }
+}
+async function logCall(subject = 'Call') {
+  const r = get(S.id); if (!r) return;
+  const res = await dialog('Log a Call', `<div class="fm"><label for="lc-subj">Subject</label><input type="text" id="lc-subj" value="${esc(subject)}"><label for="lc-res">Result</label><select id="lc-res"><option>Connected - interested</option><option>Connected - follow up</option><option>Left voicemail</option><option>No answer</option><option>Meeting booked</option></select><label for="lc-com">Comments</label><textarea id="lc-com" rows="4"></textarea></div>`, ['Save', 'Cancel']);
+  if (res.btn !== 'Save') return;
+  addAct(r, 'Call', res.vals['lc-subj'] || 'Call', [res.vals['lc-res'], res.vals['lc-com']].filter(Boolean).join(' - '));
+  toast('Call logged');
+}
+async function sendEmail() {
+  const r = get(S.id); if (!r) return;
+  if (!r.email) return dialog('Send an Email', `<p>${esc(title(r))} has no email address on file.</p>`);
+  const res = await dialog('Send an Email', `<div class="fm"><label>To</label><span>${esc(title(r))} &lt;${esc(r.email)}&gt;</span><label for="em-subj">Subject</label><input type="text" id="em-subj" value="Following up"><label for="em-body">Body</label><textarea id="em-body" rows="7">Hi ${esc(r.first || '')},\n\nThanks for your time today. As discussed, I've attached our proposal and pricing.\n\nBest regards,\n${esc(ME)}</textarea></div>`, ['Send', 'Cancel']);
+  if (res.btn !== 'Send') return;
+  addAct(r, 'Email', 'Email: ' + (res.vals['em-subj'] || '(no subject)'), '');
+  toast('Email sent and logged to Activity History');
+}
+function addAct(r, type, subject, comments) {
+  const o = objOf(r.id);
+  db.acts.unshift({ id: nid('ACT'), type, subject, date: iso(today()), who: o === 'contacts' || o === 'leads' ? r.id : r.contact || '', what: o === 'accounts' ? r.id : r.account || '', owner: ME, comments });
+  persist(); render();
+}
+async function newTask() {
+  const r = S.view === 'detail' ? get(S.id) : null;
+  const res = await dialog('New Task', `<div class="fm"><label for="nt-subj">Subject</label><input type="text" id="nt-subj" class="req" value="Follow up"><label for="nt-due">Due Date</label><input type="text" id="nt-due" value="${mdY(dAgo(-3))}" placeholder="MM/DD/YYYY"><label for="nt-pri">Priority</label><select id="nt-pri"><option>Normal</option><option>High</option><option>Low</option></select><label>Related To</label><span>${r ? esc(title(r)) : '--'}</span></div>`, ['Save', 'Cancel']);
+  if (res.btn !== 'Save') return;
+  const o = r && objOf(r.id);
+  db.tasks.push({ id: nid('TSK'), subject: res.vals['nt-subj'] || 'Follow up', due: parseMdY(res.vals['nt-due']) || dAgo(-3), status: 'Not Started', priority: res.vals['nt-pri'], who: r && (o === 'contacts' || o === 'leads') ? r.id : r?.contact || '', what: r ? (o === 'accounts' ? r.id : r.account || '') : '', owner: ME });
+  persist(); render(); toast('Task created');
+}
+
+// ---------------- delete / bin ----------------
+async function delRecs(ids) {
+  if (!ids.length) return dialog('Delete', '<p>Select at least one record.</p>');
+  const one = ids.length === 1 ? get(ids[0]) : null;
+  const res = await dialog('Confirm Delete', `<p>${one ? `Are you sure you want to delete <b>${esc(title(one))}</b>?` : `Are you sure you want to delete ${ids.length} records?`}</p><p style="color:#666">Deleted records go to the Recycle Bin for 15 days.</p>`, ['OK', 'Cancel']);
+  if (res.btn !== 'OK') return;
+  ids.forEach(id => { const o = objOf(id), r = get(id); if (!r) return; db[o] = db[o].filter(x => x !== r); db.bin.unshift({ rec: r, date: iso(today()) }); });
+  Object.values(S.lists).forEach(l => l.sel.clear());
+  persist(); toast(ids.length === 1 ? 'Record deleted' : `${ids.length} records deleted`);
+  if (S.view === 'detail') goTab(S.obj); else render();
+}
+async function showBin() {
+  const rows = db.bin.slice(0, 200);
+  const res = await dialog('Recycle Bin', rows.length ? `<div style="max-height:300px;overflow:auto;border:1px solid #ddd"><table class="lt"><thead><tr><th></th><th>Name</th><th>Type</th><th>Deleted</th></tr></thead><tbody>${rows.map((b, i) => `<tr><td><input type="checkbox" id="bin-${i}" aria-label="Select"></td><td>${esc(title(b.rec))}</td><td>${esc(OBJ[objOf(b.rec.id)].one)}</td><td>${mdY(b.date)}</td></tr>`).join('')}</tbody></table></div>` : '<p>Your Recycle Bin is empty.</p>', rows.length ? ['Undelete', 'Empty Recycle Bin', 'Close'] : ['Close']);
+  if (res.btn === 'Undelete') {
+    const keep = [];
+    db.bin.forEach((b, i) => { if (res.vals['bin-' + i]) db[objOf(b.rec.id)].unshift(b.rec); else keep.push(b); });
+    const n = db.bin.length - keep.length; db.bin = keep; persist(); render(); toast(`${n} record(s) restored`);
+  } else if (res.btn === 'Empty Recycle Bin') { db.bin = []; persist(); render(); toast('Recycle Bin emptied'); }
+}
+
+// ---------------- spreadsheet ----------------
+const colName = i => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+const colIdx = s => [...s].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+const X = { sheets: [], cur: 0, r: 1, c: 0, ar: 1, ac: 0, editing: null, grid: true };
+function mkSheet(name, header, rows, fmt = {}, widths = {}) {
+  return { name, data: [header, ...rows], fmt, widths, style: {}, sortEnd: rows.length };
+}
+function buildSheets() {
+  const o = db.opps.slice().sort((a, b) => a.close.localeCompare(b.close));
+  const pipe = o.map((x, i) => [x.id, x.name, title(get(x.account)), x.owner, x.stage, x.prob, x.amount, `=G${i + 2}*F${i + 2}/100`, mdY(x.close), x.type, x.source, x.next, mdY(x.created), (d => `FY${fy(d)} Q${quarter(d)}`)(new Date(x.close + 'T00:00:00')), get(x.account)?.state || '']);
+  const n = pipe.length + 1;
+  pipe.push([], ['', 'TOTAL', '', '', '', `=AVERAGE(F2:F${n})`, `=SUM(G2:G${n})`, `=SUM(H2:H${n})`, `=COUNT(G2:G${n}) & " opps"`]);
+  const s1 = mkSheet('Pipeline', ['Opportunity ID', 'Opportunity Name', 'Account Name', 'Owner', 'Stage', 'Probability (%)', 'Amount', 'Expected Revenue', 'Close Date', 'Type', 'Lead Source', 'Next Step', 'Created Date', 'Fiscal Period', 'State'], pipe, { 6: 'money', 7: 'money' }, { 1: 260, 2: 190, 11: 180 });
+  s1.sortEnd = n - 1; s1.style[`${n + 1},1`] = { b: 1 }; for (let c = 5; c <= 8; c++) s1.style[`${n + 1},${c}`] = { b: 1, fill: '#fff2a8' };
+  const s2 = mkSheet('Contacts', ['Contact ID', 'First Name', 'Last Name', 'Title', 'Account Name', 'Phone', 'Mobile', 'Email', 'Mailing City', 'Mailing State', 'Contact Owner', 'Lead Source', 'Created Date'], db.contacts.map(c => [c.id, c.first, c.last, c.title, title(get(c.account)), c.phone, c.mobile, c.email, c.city, c.state, c.owner, c.source, mdY(c.created)]), {}, { 4: 190, 7: 230 });
+  const s3 = mkSheet('Accounts', ['Account ID', 'Account Name', 'Type', 'Industry', 'Employees', 'Annual Revenue', 'Phone', 'Website', 'Billing City', 'Billing State', 'Owner', 'Rating'], db.accounts.map(a => [a.id, a.name, a.type, a.industry, a.employees, a.revenue, a.phone, a.website, a.city, a.state, a.owner, a.rating]), { 5: 'money' }, { 1: 190, 7: 200 });
+  const [q0, q1] = qRange();
+  const fc = OWNERS.map((w, i) => { const os = db.opps.filter(x => x.owner === w && x.close >= q0 && x.close <= q1); const s = f => os.filter(f).reduce((t, x) => t + x.amount, 0); const r = i + 2; return [w, [2400000, 1800000, 1650000, 1900000, 1500000, 1400000, 1750000, 1300000][i], s(x => x.stage === 'Closed Won'), s(x => ['Negotiation', 'Proposal Sent'].includes(x.stage)), s(x => !x.stage.startsWith('Closed')), `=C${r}/B${r}`, `=B${r}-C${r}`, `=C${r}+D${r}`]; });
+  const fe = fc.length + 1;
+  fc.push([], ['TOTAL', `=SUM(B2:B${fe})`, `=SUM(C2:C${fe})`, `=SUM(D2:D${fe})`, `=SUM(E2:E${fe})`, `=C${fe + 2}/B${fe + 2}`, `=SUM(G2:G${fe})`, `=SUM(H2:H${fe})`]);
+  const s4 = mkSheet('Forecast Q' + quarter(today()), ['Sales Rep', 'Quota', 'Closed Won', 'Commit (excl. closed)', 'Open Pipeline', 'Attainment', 'Gap to Quota', 'Closed + Commit'], fc, { 1: 'money', 2: 'money', 3: 'money', 4: 'money', 5: 'pct', 6: 'money', 7: 'money' }, { 0: 140, 3: 150 });
+  s4.sortEnd = fc.length - 2; for (let c = 0; c < 8; c++) s4.style[`${fe + 1},${c}`] = { b: 1, fill: '#cdeccf' };
+  const s5 = mkSheet('Activity Log', ['Activity ID', 'Date', 'Type', 'Subject', 'Contact', 'Account', 'Assigned To'], db.acts.map(a => [a.id, mdY(a.date), a.type, a.subject, title(get(a.who)), title(get(a.what)), a.owner]), {}, { 3: 180, 4: 150, 5: 190 });
+  X.sheets = [s1, s4, s2, s3, s5];
+}
+const cellRaw = (sh, r, c) => (sh.data[r] || [])[c];
+function cellNum(sh, r, c, depth) { const v = cellVal(sh, r, c, depth); if (typeof v === 'number') return v; const n = parseFloat(String(v ?? '').replace(/[$,]/g, '')); return isNaN(n) ? 0 : n; }
+function cellVal(sh, r, c, depth = 0) {
+  const raw = cellRaw(sh, r, c);
+  if (typeof raw === 'string' && raw.startsWith('=')) return evalF(sh, raw, depth + 1);
+  return raw ?? '';
+}
+function rangeVals(sh, a, b, depth) {
+  const [, c1, r1] = /([A-Z]+)(\d+)/.exec(a), [, c2, r2] = /([A-Z]+)(\d+)/.exec(b);
+  const out = [];
+  for (let r = Math.min(+r1, +r2) - 1; r <= Math.max(+r1, +r2) - 1; r++) for (let c = Math.min(colIdx(c1), colIdx(c2)); c <= Math.max(colIdx(c1), colIdx(c2)); c++) {
+    const raw = cellRaw(sh, r, c); if (raw === '' || raw == null) continue;
+    const v = cellVal(sh, r, c, depth); const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[$,]/g, ''));
+    if (!isNaN(n)) out.push(n);
+  }
+  return out;
+}
+function evalF(sh, f, depth) {
+  if (depth > 30) return '#REF!';
+  const body = f.slice(1), parts = body.split('&');
+  if (parts.length > 1) return parts.map(p => { p = p.trim(); const m = /^"(.*)"$/.exec(p); return m ? m[1] : String(fmtNum(evalF(sh, '=' + p, depth))); }).join('');
+  let e = body.toUpperCase();
+  e = e.replace(/(SUM|AVERAGE|MIN|MAX|COUNT)\(([A-Z]+\d+):([A-Z]+\d+)\)/g, (m, fn, a, b) => {
+    const v = rangeVals(sh, a, b, depth);
+    const r = fn === 'SUM' ? v.reduce((s, x) => s + x, 0) : fn === 'AVERAGE' ? (v.length ? v.reduce((s, x) => s + x, 0) / v.length : 0) : fn === 'MIN' ? Math.min(...v) : fn === 'MAX' ? Math.max(...v) : v.length;
+    return '(' + r + ')';
+  });
+  e = e.replace(/\b([A-Z]{1,2})(\d+)\b/g, (m, c, r) => '(' + cellNum(sh, +r - 1, colIdx(c), depth) + ')');
+  if (!/^[\d+\-*/().\s eE]*$/.test(e)) return '#NAME?';
+  try { const v = Function('"use strict";return (' + e + ')')(); return isFinite(v) ? v : '#DIV/0!'; } catch (err) { return '#ERROR!'; }
+}
+const fmtNum = v => typeof v === 'number' ? Math.round(v * 100) / 100 : v;
+function display(sh, r, c) {
+  const v = cellVal(sh, r, c), f = (sh.style[`${r},${c}`] || {}).fmt || (r > 0 ? sh.fmt[c] : null);
+  if (typeof v !== 'number') return esc(v);
+  if (f === 'money') return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (f === 'pct') return (v * 100).toFixed(1) + '%';
+  return Number.isInteger(v) ? v.toLocaleString('en-US') : v.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+function sheetDims(sh) { return [Math.max(sh.data.length + 40, 60), Math.max(...sh.data.map(r => r.length), 8) + 4]; }
+function renderSheet() {
+  const sh = X.sheets[X.cur], [R, C] = sheetDims(sh);
+  let h = `<table class="xt" style="${X.grid ? '' : '--g:0'}"><colgroup><col style="width:44px">${Array.from({ length: C }, (_, c) => `<col style="width:${sh.widths[c] || 110}px">`).join('')}</colgroup><thead><tr><th class="rn"></th>${Array.from({ length: C }, (_, c) => `<th data-col="${c}">${colName(c)}</th>`).join('')}</tr></thead><tbody>`;
+  for (let r = 0; r < R; r++) {
+    h += `<tr><td class="rn" data-row="${r}">${r + 1}</td>`;
+    for (let c = 0; c < C; c++) h += `<td data-r="${r}" data-c="${c}" class="${cellCls(sh, r, c)}" style="${cellSty(sh, r, c)}">${display(sh, r, c)}</td>`;
+    h += '</tr>';
+  }
+  $('#xgrid').innerHTML = h + '</tbody></table>';
+  if (!X.grid) $$('#xgrid td').forEach(td => td.style.borderColor = 'transparent');
+  $('#xtabs').innerHTML = X.sheets.map((s, i) => `<button data-sheet="${i}" class="${i === X.cur ? 'on' : ''}">${esc(s.name)}</button>`).join('') + '<button data-x="newsheet" title="New sheet">+</button>';
+  $('#xmsg').textContent = `Ready · ${sh.data.length - 1} rows`;
+  select(X.r, X.c, X.ar, X.ac, true);
+}
+function cellCls(sh, r, c) {
+  const st = sh.style[`${r},${c}`] || {}, v = cellVal(sh, r, c);
+  return [r === 0 ? 'hdrrow' : '', typeof v === 'number' ? 'num' : '', st.b ? 'b' : '', st.i ? 'i' : '', st.u ? 'u' : '', st.al ? 'al' : '', st.ac ? 'ac' : '', st.ar ? 'ar' : ''].filter(Boolean).join(' ');
+}
+function cellSty(sh, r, c) { const st = sh.style[`${r},${c}`] || {}; return (st.fill ? `background:${st.fill};` : '') + (st.size ? `font-size:${st.size}px;` : '') + (st.font ? `font-family:${st.font};` : ''); }
+const tdAt = (r, c) => $(`#xgrid td[data-r="${r}"][data-c="${c}"]`);
+function refreshCell(r, c) { const sh = X.sheets[X.cur], td = tdAt(r, c); if (!td) return; td.className = cellCls(sh, r, c); td.style.cssText = cellSty(sh, r, c); td.innerHTML = display(sh, r, c); }
+function refreshFormulas() { const sh = X.sheets[X.cur]; sh.data.forEach((row, r) => row.forEach((v, c) => { if (typeof v === 'string' && v.startsWith('=')) refreshCell(r, c); })); }
+function sel() { return [Math.min(X.r, X.ar), Math.max(X.r, X.ar), Math.min(X.c, X.ac), Math.max(X.c, X.ac)]; }
+function select(r, c, ar = r, ac = c, noScroll) {
+  const sh = X.sheets[X.cur], [R, C] = sheetDims(sh);
+  r = Math.max(0, Math.min(R - 1, r)); c = Math.max(0, Math.min(C - 1, c));
+  $$('#xgrid td.s, #xgrid td.c').forEach(td => td.classList.remove('s', 'c'));
+  $$('#xgrid .hs').forEach(x => x.classList.remove('hs'));
+  X.r = r; X.c = c; X.ar = ar; X.ac = ac;
+  const [r0, r1, c0, c1] = sel(), cells = (r1 - r0 + 1) * (c1 - c0 + 1);
+  if (cells < 6000) for (let i = r0; i <= r1; i++) for (let j = c0; j <= c1; j++) { const td = tdAt(i, j); if (td) td.classList.add('s'); }
+  for (let j = c0; j <= c1; j++) $(`#xgrid th[data-col="${j}"]`)?.classList.add('hs');
+  for (let i = r0; i <= Math.min(r1, r0 + 3000); i++) $(`#xgrid td.rn[data-row="${i}"]`)?.classList.add('hs');
+  const td = tdAt(r, c); if (td) { td.classList.add('c'); if (!noScroll) td.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  $('#xname').value = (r0 !== r1 || c0 !== c1) ? `${colName(c0)}${r0 + 1}:${colName(c1)}${r1 + 1}` : colName(c) + (r + 1);
+  const raw = cellRaw(sh, r, c); $('#xbar').value = raw ?? '';
+  let sum = 0, cnt = 0, nums = 0;
+  for (let i = r0; i <= r1; i++) for (let j = c0; j <= c1; j++) { const raw2 = cellRaw(sh, i, j); if (raw2 === '' || raw2 == null) continue; cnt++; const v = cellVal(sh, i, j); if (typeof v === 'number') { sum += v; nums++; } }
+  $('#xsum').textContent = nums > 1 ? `Sum: ${sum.toLocaleString('en-US', { maximumFractionDigits: 2 })}   Average: ${(sum / nums).toLocaleString('en-US', { maximumFractionDigits: 2 })}` : '';
+  $('#xcount').textContent = cnt > 1 ? `Count: ${cnt}` : '';
+}
+function setCell(r, c, v) {
+  const sh = X.sheets[X.cur];
+  while (sh.data.length <= r) sh.data.push([]);
+  const row = sh.data[r]; while (row.length < c) row.push('');
+  const n = v.trim() !== '' && !v.startsWith('=') && !isNaN(Number(v.replace(/[$,]/g, ''))) ? Number(v.replace(/[$,]/g, '')) : v;
+  row[c] = n;
+  refreshCell(r, c); refreshFormulas();
+  $('#xmeta').textContent = 'Halvora Sheets · Unsaved changes';
+}
+function startEdit(initial) {
+  const td = tdAt(X.r, X.c); if (!td) return;
+  const sh = X.sheets[X.cur], raw = cellRaw(sh, X.r, X.c);
+  X.editing = { r: X.r, c: X.c };
+  td.innerHTML = `<input type="text" id="xin" aria-label="Edit cell">`;
+  const inp = $('#xin'); inp.value = initial != null ? initial : (raw ?? ''); inp.focus();
+  inp.setSelectionRange(inp.value.length, inp.value.length);
+  inp.addEventListener('input', () => $('#xbar').value = inp.value);
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); commitEdit(inp.value); e.key === 'Tab' ? select(X.r, X.c + (e.shiftKey ? -1 : 1)) : select(X.r + (e.shiftKey ? -1 : 1), X.c); $('#xgrid').focus(); }
+    else if (e.key === 'Escape') { X.editing = null; refreshCell(X.r, X.c); select(X.r, X.c); $('#xgrid').focus(); }
+    e.stopPropagation();
+  });
+  inp.addEventListener('blur', () => { if (X.editing) commitEdit(inp.value); });
+}
+function commitEdit(v) { const e = X.editing; if (!e) return; X.editing = null; setCell(e.r, e.c, v); }
+function applyStyle(fn) {
+  const sh = X.sheets[X.cur], [r0, r1, c0, c1] = sel();
+  for (let i = r0; i <= r1; i++) for (let j = c0; j <= c1; j++) { const k = `${i},${j}`; sh.style[k] = fn({ ...(sh.style[k] || {}) }); refreshCell(i, j); }
+  select(X.r, X.c, X.ar, X.ac, true);
+}
+function sortSheet(dir) {
+  const sh = X.sheets[X.cur], c = X.c, end = sh.sortEnd;
+  const val = row => { const v = row[c]; return typeof v === 'string' && v.startsWith('=') ? '' : v ?? ''; };
+  const body = sh.data.slice(1, end + 1).map((row, k) => ({ row, k }));
+  body.sort((a, b) => { const x = val(a.row), y = val(b.row); return (typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true })) * dir; });
+  // formulas that point at their own row move with it
+  const rows = body.map(({ row, k }, j) => row.map(v => typeof v === 'string' && v.startsWith('=') ? v.replace(new RegExp('([A-Z]+)' + (k + 2) + '(?!\\d)', 'g'), '$1' + (j + 2)) : v));
+  sh.data.splice(1, end, ...rows);
+  renderSheet(); $('#xmsg').textContent = `Sorted ${end} rows by column ${colName(c)}`;
+}
+function xAction(a) {
+  const sh = X.sheets[X.cur];
+  switch (a) {
+    case 'b': case 'i': case 'u': { const on = !(sh.style[`${X.r},${X.c}`] || {})[a]; applyStyle(s => (s[a] = on ? 1 : 0, s)); break; }
+    case 'al': case 'ac': case 'ar': applyStyle(s => (s.al = s.ac = s.ar = 0, s[a] = 1, s)); break;
+    case 'money': applyStyle(s => (s.fmt = 'money', s)); break;
+    case 'pct': applyStyle(s => (s.fmt = 'pct', s)); break;
+    case 'plain': applyStyle(s => (s.fmt = 'plain', s)); break;
+    case 'asc': sortSheet(1); break;
+    case 'desc': sortSheet(-1); break;
+    case 'autosum': {
+      const [r0, r1, c0] = sel(); let top = r0, bot = r1;
+      if (r0 === r1) { bot = r0 - 1; top = bot; while (top > 1 && typeof cellVal(sh, top - 1, c0) === 'number') top--; }
+      const target = r0 === r1 ? r0 : r1 + 1;
+      setCell(target, c0, `=SUM(${colName(c0)}${top + 1}:${colName(c0)}${bot + 1})`); select(target, c0); break;
+    }
+    case 'today': setCell(X.r, X.c, mdY(iso(today()))); select(X.r, X.c); break;
+    case 'clear': { const [r0, r1, c0, c1] = sel(); for (let i = r0; i <= r1; i++) for (let j = c0; j <= c1; j++) if (sh.data[i] && sh.data[i][j] !== undefined) sh.data[i][j] = ''; renderSheet(); break; }
+    case 'selall': { const [R, C] = sheetDims(sh); select(0, 0, sh.data.length - 1, C - 1, true); break; }
+    case 'grid': X.grid = !X.grid; renderSheet(); break;
+    case 'newsheet': X.sheets.push(mkSheet('Sheet' + (X.sheets.length + 1), [], [])); X.cur = X.sheets.length - 1; X.r = X.ar = 0; X.c = X.ac = 0; renderSheet(); break;
+    case 'save': $('#xmeta').textContent = 'Halvora Sheets · Saved ' + hhmm(new Date()); break;
+    case 'close': closeSheet(); break;
+    case 'xhelp': $('#xmsg').textContent = 'Tip: type to edit, Enter to confirm, arrows to move, Shift+click to select a range. Formulas: =SUM(A1:A10), =AVERAGE, =MIN, =MAX, =COUNT, + - * /'; break;
+  }
+}
+function openSheet(extra, file) {
+  if (!X.sheets.length) buildSheets();
+  if (extra) { X.sheets = X.sheets.filter(s => s.name !== extra.name); X.sheets.push(extra); X.cur = X.sheets.length - 1; }
+  X.r = X.ar = 1; X.c = X.ac = 0;
+  $('#xfile').textContent = file || 'Pipeline_Export.xlsx';
+  $('#sheet').hidden = false; document.body.style.overflow = 'hidden';
+  renderSheet(); $('#xgrid').focus();
+}
+function closeSheet() { $('#sheet').hidden = true; document.body.style.overflow = ''; }
+function exportRows(name, o, rows, cols) {
+  const header = cols.map(c => c[1]), fmtm = {}; cols.forEach(([, , t], i) => { if (t === 'money') fmtm[i] = 'money'; });
+  const data = rows.map(r => cols.map(([k, , t]) => t === 'ref' ? title(get(r[k])) : t === 'link' && k === 'first' ? title(r, o) : t === 'date' ? mdY(r[k]) : r[k] ?? ''));
+  const sh = mkSheet(name.slice(0, 28), header, data, fmtm, { 0: 220 });
+  const mc = cols.findIndex(c => c[2] === 'money');
+  if (mc >= 0 && data.length) { const L = colName(mc); data.push([], ['TOTAL']); data[data.length - 1][mc] = `=SUM(${L}2:${L}${data.length - 1})`; sh.data = [header, ...data]; sh.sortEnd = data.length - 2; sh.style[`${data.length},0`] = { b: 1 }; sh.style[`${data.length},${mc}`] = { b: 1, fill: '#fff2a8' }; }
+  openSheet(sh, name.replace(/\W+/g, '_') + '.xlsx');
+}
+
+// ---------------- events ----------------
+document.addEventListener('click', async e => {
+  const a = e.target.closest('a, button, [data-done], [data-chk], #chkall'); if (!a) return;
+  if (e.target.closest('#sheet')) return;
+  const d = a.dataset;
+  if (d.go) { e.preventDefault(); goRec(d.go); }
+  else if (d.tab) { e.preventDefault(); goTab(d.tab); }
+  else if (d.new) goEdit(d.new, null);
+  else if (d.edit) goEdit(objOf(d.edit), d.edit);
+  else if (d.clone) goEdit(objOf(d.clone), null, d.clone);
+  else if (d.del) delRecs([d.del]);
+  else if (d.sort) { const st = LS(S.obj); if (st.sort === d.sort) st.dir *= -1; else { st.sort = d.sort; st.dir = 1; } render(); }
+  else if (d.letter) { const st = LS(S.obj); st.letter = d.letter; st.page = 0; render(); }
+  else if (d.page) { LS(S.obj).page += +d.page; render(); }
+  else if (d.chk) { const st = LS(S.obj); a.checked ? st.sel.add(d.chk) : st.sel.delete(d.chk); $('.pbf span:nth-child(2)').textContent = st.sel.size + ' selected'; }
+  else if (a.id === 'chkall') { const st = LS(S.obj); $$('[data-chk]').forEach(c => { c.checked = a.checked; a.checked ? st.sel.add(c.dataset.chk) : st.sel.delete(c.dataset.chk); }); $('.pbf span:nth-child(2)').textContent = st.sel.size + ' selected'; }
+  else if (d.done) { const t = db.tasks.find(x => x.id === d.done); if (t) { db.tasks = db.tasks.filter(x => x !== t); db.acts.unshift({ id: nid('ACT'), type: 'Task', subject: t.subject, date: iso(today()), who: t.who, what: t.what, owner: ME, comments: 'Completed' }); persist(); setTimeout(() => { render(); toast('Task completed'); }, 250); } }
+  else if (d.taskopen) { const t = db.tasks.find(x => x.id === d.taskopen); if (t) dialog('Task Detail', `<div class="fm"><label>Subject</label><span>${esc(t.subject)}</span><label>Due Date</label><span>${mdY(t.due)}</span><label>Status</label><span>${esc(t.status)}</span><label>Priority</label><span>${esc(t.priority)}</span><label>Name</label><span>${refLink(t.who) || '--'}</span><label>Related To</label><span>${refLink(t.what) || '--'}</span><label>Assigned To</label><span>${esc(t.owner)}</span></div>`, ['Close']); }
+  else if (d.appr) { const ap = db.approvals.find(x => x.id === d.appr); db.approvals = db.approvals.filter(x => x !== ap); persist(); render(); toast(d.ok ? 'Request approved' : 'Request rejected'); }
+  else if (d.report) { nav({ tab: 'reports', view: 'reports', report: +d.report, hideDetails: false }); }
+  else if (d.expand) { S.expand[d.expand] = !S.expand[d.expand]; render(); }
+  else if (d.jump) { const el = $$('[data-rl]').find(x => x.dataset.rl === d.jump); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  else if (d.act) act(d.act);
+});
+async function act(k) {
+  const o = S.obj, st = o && OBJ[o] ? LS(o) : null;
+  switch (k) {
+    case 'save': saveEdit(false); break;
+    case 'savenew': saveEdit(true); break;
+    case 'cancel': if (S.id) nav({ view: 'detail' }, false); else goTab(S.obj); break;
+    case 'massdel': delRecs([...(st?.sel || [])]); break;
+    case 'owner': {
+      if (!st || !st.sel.size) return dialog('Change Owner', '<p>Select at least one record from the list first.</p>');
+      const res = await dialog('Change Owner', `<p>Transfer ${st.sel.size} selected record(s) to:</p><div class="fm"><label for="co-new">New Owner</label><select id="co-new">${OWNERS.map(w => `<option>${esc(w)}</option>`).join('')}</select></div><p style="margin-top:8px"><label><input type="checkbox" id="co-mail" checked> Send notification email</label></p>`, ['Save', 'Cancel']);
+      if (res.btn !== 'Save') return;
+      st.sel.forEach(id => { const r = get(id); if (r) r.owner = res.vals['co-new']; }); const n = st.sel.size; st.sel.clear(); persist(); render(); toast(`${n} record(s) transferred to ${res.vals['co-new']}`); break;
+    }
+    case 'exportlist': exportRows(OBJ[o].label + ' - ' + OBJ[o].views[st.view][0], o, filtered(o), OBJ[o].cols); break;
+    case 'exportrep': { const rep = REPORTS[S.report]; exportRows(rep.name, rep.obj, reportRows(rep), rep.cols); break; }
+    case 'exportfc': openSheet(null, 'Forecast_Q' + quarter(today()) + '.xlsx'); X.cur = 1; renderSheet(); break;
+    case 'sheet': X.cur = 0; openSheet(null, 'Pipeline_Export.xlsx'); break;
+    case 'hidedet': S.hideDetails = !S.hideDetails; render(); break;
+    case 'runrep': render(); toast('Report refreshed'); break;
+    case 'refreshdash': render(); toast('Dashboard refreshed'); break;
+    case 'call': callRec(); break;
+    case 'logcall': logCall(); break;
+    case 'email': sendEmail(); break;
+    case 'newtask': newTask(); break;
+    case 'newevent': {
+      const res = await dialog('New Event', `<div class="fm"><label for="ev-subj">Subject</label><input type="text" id="ev-subj" value="Meeting"><label for="ev-time">Start Time</label><select id="ev-time">${['9:00 AM', '9:30 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map(t => `<option>${t}</option>`).join('')}</select></div>`, ['Save', 'Cancel']);
+      if (res.btn !== 'Save') return;
+      const rec = S.view === 'detail' ? get(S.id) : null;
+      db.events.push({ time: res.vals['ev-time'], subject: res.vals['ev-subj'] || 'Meeting', who: rec && ['contacts', 'leads'].includes(objOf(rec.id)) ? rec.id : '' });
+      db.events.sort((a, b) => new Date('1/1/2000 ' + a.time) - new Date('1/1/2000 ' + b.time)); persist(); render(); toast('Event added to calendar'); break;
+    }
+    case 'comment': {
+      const res = await dialog('New Case Comment', `<div class="fm"><label for="cc-t">Comment</label><textarea id="cc-t" rows="5"></textarea><label></label><label style="text-align:left;font-weight:normal"><input type="checkbox" id="cc-pub"> Public (visible to customer)</label></div>`, ['Save', 'Cancel']);
+      if (res.btn !== 'Save' || !res.vals['cc-t']) return;
+      get(S.id).comments.unshift({ text: res.vals['cc-t'], by: ME, date: iso(today()) }); persist(); render(); toast('Comment added'); break;
+    }
+    case 'convert': {
+      const l = get(S.id);
+      const res = await dialog('Convert Lead', `<p>Convert <b>${esc(title(l))}</b> into a new account, contact and opportunity?</p><div class="fm"><label>Account Name</label><span>${esc(l.company)}</span><label for="cv-opp">Opportunity</label><input type="text" id="cv-opp" value="${esc(l.company)} - New Business"><label for="cv-own">Record Owner</label><select id="cv-own">${OWNERS.map(w => `<option ${w === l.owner ? 'selected' : ''}>${esc(w)}</option>`).join('')}</select></div>`, ['Convert', 'Cancel']);
+      if (res.btn !== 'Convert') return;
+      const owner = res.vals['cv-own'];
+      const acc = { id: nid('ACC'), name: l.company, owner, phone: l.phone, website: 'www.' + slug(l.company) + '.com', type: 'Prospect', industry: l.industry, employees: '', revenue: '', rating: l.rating, source: l.source, street: '', city: l.city, state: l.state, zip: '', description: '', created: iso(today()), modified: iso(today()) };
+      const con = { id: nid('CON'), first: l.first, last: l.last, account: acc.id, title: l.title, department: '', phone: l.phone, mobile: '', email: l.email, source: l.source, owner, city: l.city, state: l.state, description: '', created: iso(today()) };
+      db.accounts.unshift(acc); db.contacts.unshift(con);
+      if (res.vals['cv-opp']) db.opps.unshift({ id: nid('OPP'), name: res.vals['cv-opp'], account: acc.id, contact: con.id, amount: 0, stage: 'Qualification', prob: 20, close: dAgo(-60), type: 'New Business', source: l.source, next: 'Discovery call', owner, items: [], campaign: l.campaign, description: '', created: iso(today()) });
+      l.status = 'Qualified'; db.leads = db.leads.filter(x => x !== l);
+      persist(); toast('Lead converted'); goRec(acc.id); break;
+    }
+    case 'bin': showBin(); break;
+    case 'submitfc': toast('Forecast submitted for Q' + quarter(today())); break;
+    case 'reset': { const res = await dialog('Reset Sample Data', '<p>Replace all records with the original sample data? Your changes will be lost.</p>', ['Reset', 'Cancel']); if (res.btn === 'Reset') { generate(); persist(); X.sheets = []; S.lists = {}; goTab('home'); toast('Sample data restored'); } break; }
+    case 'logout': $('#app').hidden = true; $('#login').hidden = false; closeSheet(); break;
+    case 'help': dialog('Help & Training', '<p><b>Halvora CRM Enterprise Edition</b> · Release Winter \'' + String(today().getFullYear() + 1).slice(2) + '</p><p>Click a tab to browse records. Click any name to open its detail page. Use <b>Open in Spreadsheet</b> on any list, report or forecast to work with the data in a grid.</p><p>Support: support@halvora.example</p>'); break;
+    case 'setup': dialog('Setup', '<p><b>Personal Setup</b><br>My Personal Information · Email · Import · Desktop Integration</p><p><b>App Setup</b><br>Customize · Create · Workflow &amp; Approvals · Data Management</p><p style="color:#666">Setup changes are restricted to system administrators in this org.</p>'); break;
+    case 'editview': dialog('List Views', '<p>List view changes are managed by your system administrator.</p>'); break;
+    case 'import': dialog('Import Wizard', '<p>Start the import wizard to add up to 50,000 records from a CSV file.</p><p style="color:#666">Imports are restricted to system administrators in this org.</p>'); break;
+    case 'sharing': dialog('Sharing', `<p>This record is shared with: <b>All Internal Users</b> (Read Only), <b>Sales Managers</b> (Read/Write).</p>`); break;
+    case 'customize': dialog('Customize Page', '<p>Page layouts are managed by your system administrator.</p>'); break;
+    case 'printable': dialog('Printable View', '<p>Printable view opens in a new window in the full product.</p>'); break;
+    case 'noop': break;
+  }
+}
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'lv') { const st = LS(S.obj); st.view = +t.value; st.page = 0; st.sel.clear(); render(); }
+  else if (t.id === 'psize') { const st = LS(S.obj); st.size = +t.value; st.page = 0; render(); }
+  else if (t.id === 'createnew' && t.value) goEdit(t.value, null);
+  else if (t.id === 'taskfilter') $('#tasktbody').innerHTML = taskRows(db.tasks.filter(x => x.owner === ME).sort((a, b) => a.due.localeCompare(b.due)), t.value);
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'gsearch') { const q = $('#gq').value.trim(); if (q.length < 2) return toast('Enter at least 2 characters to search'); nav({ tab: S.tab, view: 'search', q }); }
+  else if (e.target.id === 'qc') {
+    const last = $('#qc-last').value.trim(); if (!last) return toast('Last Name is required');
+    const c = { id: nid('CON'), first: $('#qc-first').value.trim(), last, account: '', title: '', department: '', phone: $('#qc-phone').value.trim(), mobile: '', email: $('#qc-email').value.trim(), source: '', owner: ME, city: '', state: '', description: '', created: iso(today()) };
+    db.contacts.unshift(c); persist(); toast('Contact created'); goRec(c.id);
+  } else if (e.target.id === 'loginform') {
+    soundOn = false; $('#login').hidden = true; $('#app').hidden = false; S.tab = 'home'; S.view = 'home'; render();
+  }
+});
+$('#lg-forgot').addEventListener('click', () => dialog('Forgot Your Password', '<p>Enter your username and we will email you a link to reset your password.</p><div class="fm"><label for="fp-u">Username</label><input type="text" id="fp-u" value="admin@brightwatersales.example"></div>', ['Continue', 'Cancel']).then(r => r.btn === 'Continue' && toast('Password reset email sent')));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) { $('#modal [data-r="__x"], #modal .df .cbtn:last-child')?.click(); } });
+
+// spreadsheet events
+$('#xclose').addEventListener('click', closeSheet);
+$('#xsave').addEventListener('click', () => xAction('save'));
+$('#sheet').addEventListener('click', e => {
+  const m = e.target.closest('.xmenu > div > button');
+  if (m) { const host = m.parentElement, was = host.classList.contains('open'); $$('.xmenu > div.open').forEach(x => x.classList.remove('open')); if (!was) host.classList.add('open'); return; }
+  $$('.xmenu > div.open').forEach(x => x.classList.remove('open'));
+  const x = e.target.closest('[data-x]'); if (x) { xAction(x.dataset.x); return; }
+  const tab = e.target.closest('[data-sheet]'); if (tab) { X.cur = +tab.dataset.sheet; X.r = X.ar = 1; X.c = X.ac = 0; renderSheet(); $('#xgrid').scrollTo(0, 0); return; }
+});
+$('#xgrid').addEventListener('mousedown', e => {
+  if (e.target.closest('input')) return;
+  const td = e.target.closest('td[data-r]'), th = e.target.closest('th[data-col]'), rn = e.target.closest('td.rn');
+  const sh = X.sheets[X.cur], [R, C] = sheetDims(sh);
+  if (X.editing) { const inp = $('#xin'); if (inp) commitEdit(inp.value); }
+  if (td) { const r = +td.dataset.r, c = +td.dataset.c; if (e.shiftKey) select(X.r, X.c, r, c, true); else select(r, c, r, c, true); X.drag = true; }
+  else if (th) { const c = +th.dataset.col; select(0, c, R - 1, c, true); }
+  else if (rn) { const r = +rn.dataset.row; select(r, 0, r, C - 1, true); }
+  setTimeout(() => $('#xgrid').focus(), 0);
+});
+$('#xgrid').addEventListener('mouseover', e => { if (!X.drag || !(e.buttons & 1)) { X.drag = false; return; } const td = e.target.closest('td[data-r]'); if (td) select(X.r, X.c, +td.dataset.r, +td.dataset.c, true); });
+document.addEventListener('mouseup', () => X.drag = false);
+$('#xgrid').addEventListener('dblclick', e => { if (e.target.closest('td[data-r]')) startEdit(); });
+$('#xgrid').addEventListener('keydown', e => {
+  if (X.editing) return;
+  const mv = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+  if (mv) { e.preventDefault(); if (e.shiftKey) select(X.r, X.c, X.ar + mv[0], X.ac + mv[1]); else select(X.r + mv[0], X.c + mv[1]); return; }
+  if (e.key === 'Enter') { e.preventDefault(); select(X.r + (e.shiftKey ? -1 : 1), X.c); return; }
+  if (e.key === 'Tab') { e.preventDefault(); select(X.r, X.c + (e.shiftKey ? -1 : 1)); return; }
+  if (e.key === 'F2') { e.preventDefault(); startEdit(); return; }
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); xAction('clear'); select(X.r, X.c, X.ar, X.ac, true); return; }
+  if ((e.ctrlKey || e.metaKey) && ['b', 'i', 'u'].includes(e.key.toLowerCase())) { e.preventDefault(); xAction(e.key.toLowerCase()); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') { e.preventDefault(); xAction('selall'); return; }
+  if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); startEdit(e.key); }
+});
+$('#xbar').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); setCell(X.r, X.c, $('#xbar').value); select(X.r + 1, X.c); $('#xgrid').focus(); } else if (e.key === 'Escape') { select(X.r, X.c); $('#xgrid').focus(); } });
+$('#xfill').addEventListener('change', e => { const v = e.target.value; applyStyle(s => (s.fill = v, s)); });
+$('#xsize').addEventListener('change', e => { const v = +e.target.value; applyStyle(s => (s.size = v === 11 ? 0 : v + 1, s)); });
+$('#xfont').addEventListener('change', e => { const v = e.target.value; applyStyle(s => (s.font = v === 'Arial' ? '' : `'${v}'`, s)); });
+})();
+</script>
+
+</body>
+</html>
