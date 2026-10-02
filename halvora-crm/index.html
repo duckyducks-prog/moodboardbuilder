@@ -235,7 +235,7 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
     <label for="lg-user">Username</label><input type="text" id="lg-user" value="admin@brightwatersales.example" autocomplete="off">
     <label for="lg-pass">Password</label><input type="password" id="lg-pass" value="halvora2026" autocomplete="off">
     <div class="row"><label style="margin:0;font-weight:normal"><input type="checkbox" id="lg-rem" checked> Remember me</label><a id="lg-forgot">Forgot your password?</a></div>
-    <button class="cbtn pri go" type="submit">Log In</button>
+    <button class="cbtn pri go" type="button" data-submit="loginform">Log In</button>
   </form>
   <footer>© 2026 Halvora, Inc. All rights reserved. · Privacy Statement · Security Statement · Terms of Use</footer>
 </div>
@@ -251,7 +251,7 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
   </div>
   <div class="hdr">
     <div class="logo"><svg><use href="#logo"/></svg>Halvora<small>CRM · Enterprise Edition</small></div>
-    <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, opportunities..."><button class="cbtn" type="submit">Search</button></form>
+    <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, opportunities..."><button class="cbtn" type="button" data-submit="gsearch">Search</button></form>
     <div class="msgs">
       <a data-act="sheet">Open Spreadsheet</a>
       <a data-tab="home">Approvals <span class="badge" id="b-appr">0</span></a>
@@ -589,7 +589,7 @@ function renderSide() {
       <label for="qc-last">Last Name *</label><input type="text" id="qc-last" class="req">
       <label for="qc-email">Email</label><input type="text" id="qc-email">
       <label for="qc-phone">Phone</label><input type="text" id="qc-phone">
-      <button class="cbtn" type="submit">Save</button></form></div>
+      <button class="cbtn" type="button" data-submit="qc">Save</button></form></div>
     <div class="sbox"><h4>${t.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4><table class="cal">${cal}</table></div>
     <div class="sbox"><h4>Messages &amp; Alerts</h4><div style="display:grid;gap:6px">
       <div class="alert"><b>Scheduled maintenance:</b> Saturday 11:00 PM - 1:00 AM ET. Halvora will be read-only.</div>
@@ -1268,17 +1268,23 @@ document.addEventListener('change', e => {
   else if (t.id === 'createnew' && t.value) goEdit(t.value, null);
   else if (t.id === 'taskfilter') $('#tasktbody').innerHTML = taskRows(db.tasks.filter(x => x.owner === ME).sort((a, b) => a.due.localeCompare(b.due)), t.value);
 });
-document.addEventListener('submit', e => {
-  e.preventDefault();
-  if (e.target.id === 'gsearch') { const q = $('#gq').value.trim(); if (q.length < 2) return toast('Enter at least 2 characters to search'); nav({ tab: S.tab, view: 'search', q }); }
-  else if (e.target.id === 'qc') {
+// Forms never submit natively (sandboxed frames block it); buttons and Enter call this directly.
+document.addEventListener('submit', e => e.preventDefault());
+document.addEventListener('click', e => { const b = e.target.closest('[data-submit]'); if (b) { e.preventDefault(); handleForm(b.dataset.submit); } }, true);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  const f = e.target.closest('#loginform, #gsearch, #qc'); if (f) { e.preventDefault(); handleForm(f.id); }
+});
+function handleForm(id) {
+  if (id === 'gsearch') { const q = $('#gq').value.trim(); if (q.length < 2) return toast('Enter at least 2 characters to search'); nav({ tab: S.tab, view: 'search', q }); }
+  else if (id === 'qc') {
     const last = $('#qc-last').value.trim(); if (!last) return toast('Last Name is required');
     const c = { id: nid('CON'), first: $('#qc-first').value.trim(), last, account: '', title: '', department: '', phone: $('#qc-phone').value.trim(), mobile: '', email: $('#qc-email').value.trim(), source: '', owner: ME, city: '', state: '', description: '', created: iso(today()) };
     db.contacts.unshift(c); persist(); toast('Contact created'); goRec(c.id);
-  } else if (e.target.id === 'loginform') {
-    soundOn = false; $('#login').hidden = true; $('#app').hidden = false; S.tab = 'home'; S.view = 'home'; render();
+  } else if (id === 'loginform') {
+    soundOn = false; $('#login').hidden = true; $('#app').hidden = false; S.tab = 'home'; S.view = 'home'; render(); window.scrollTo(0, 0);
   }
-});
+}
 $('#lg-forgot').addEventListener('click', () => dialog('Forgot Your Password', '<p>Enter your username and we will email you a link to reset your password.</p><div class="fm"><label for="fp-u">Username</label><input type="text" id="fp-u" value="admin@brightwatersales.example"></div>', ['Continue', 'Cancel']).then(r => r.btn === 'Continue' && toast('Password reset email sent')));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) { $('#modal [data-r="__x"], #modal .df .cbtn:last-child')?.click(); } });
 
