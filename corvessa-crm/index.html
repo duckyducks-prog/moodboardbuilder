@@ -251,11 +251,10 @@ table.xt td.hdrrow { background: #e8f1ea; font-weight: bold; }
   </div>
   <div class="hdr">
     <div class="logo"><svg><use href="#logo"/></svg>Corvessa<small>CRM · Enterprise Edition</small></div>
-    <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, opportunities..."><button class="cbtn" type="button" data-submit="gsearch">Search</button></form>
+    <form class="gsearch" id="gsearch"><input type="text" id="gq" placeholder="Search accounts, contacts, deals..."><button class="cbtn" type="button" data-submit="gsearch">Search</button></form>
     <div class="msgs">
       <a data-act="sheet">Open Spreadsheet</a>
       <a data-tab="home">Approvals <span class="badge" id="b-appr">0</span></a>
-      <a data-tab="home">Tasks <span class="badge" id="b-task">0</span></a>
       <span id="hdr-date"></span>
     </div>
   </div>
@@ -358,16 +357,14 @@ const CASE_STATUS = ['New', 'Working', 'Escalated', 'Waiting on Customer', 'Clos
 const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
 const ORIGINS = ['Phone', 'Email', 'Web', 'Chat'];
 const CASE_TYPES = ['Problem', 'Question', 'Feature Request', 'Billing'];
-const CASE_SUBJ = ['Unable to log in after password reset', 'Invoice amount does not match quote', 'Feature request: export dashboard to PDF', 'Data sync failing with ERP integration', 'Need to add 5 user licenses', 'SSO configuration with identity provider', 'Report runs slowly for large date ranges', 'Import error on CSV upload', 'Change billing contact', 'Mobile app notifications not arriving', 'API rate limit reached', 'Duplicate records after import', 'Question about renewal terms', 'Email-to-case not routing correctly', 'Request for onboarding session', 'Permission error on shared reports'];
+const CASE_SUBJ = ['Unable to log in after password reset', 'Invoice amount does not match quote', 'Feature request: export reports to PDF', 'Data sync failing with ERP integration', 'Need to add 5 user licenses', 'SSO configuration with identity provider', 'Report runs slowly for large date ranges', 'Import error on CSV upload', 'Change billing contact', 'Mobile app notifications not arriving', 'API rate limit reached', 'Duplicate records after import', 'Question about renewal terms', 'Email-to-case not routing correctly', 'Request for onboarding session', 'Permission error on shared reports'];
 const CASE_COMMENTS = ['Customer confirmed issue on their side as well.', 'Escalated to Tier 2 support.', 'Sent knowledge article KB-1042.', 'Reproduced in sandbox. Engineering ticket opened.', 'Waiting on customer to send log files.', 'Workaround provided, monitoring.', 'Called customer, left voicemail.'];
-const TASK_SUBJ = ['Call to follow up on proposal', 'Send pricing sheet', 'Prepare QBR deck', 'Schedule product demo', 'Email contract redlines', 'Confirm renewal terms', 'Send case study', 'Introduce solutions engineer', 'Update opportunity next steps', 'Book onsite visit', 'Review security questionnaire', 'Send meeting recap'];
-const TASK_STATUS = ['Not Started', 'In Progress', 'Waiting on someone else', 'Deferred'];
 const ACT_SUBJ = { Call: ['Intro call', 'Follow-up call', 'Pricing discussion', 'Check-in call', 'Renewal call'], Email: ['Sent proposal', 'Sent pricing', 'Follow-up email', 'Meeting recap', 'Sent case study'], Meeting: ['Discovery meeting', 'Product demo', 'QBR', 'Onsite visit', 'Executive briefing'] };
 const PRODUCTS = [['Corvessa Platform License - Standard', 'Software', 1200], ['Corvessa Platform License - Enterprise', 'Software', 2400], ['Analytics Add-on', 'Software', 600], ['Premium Support (Annual)', 'Support', 4800], ['Implementation Services', 'Services', 15000], ['Training Day (Onsite)', 'Services', 2200], ['API Access Tier 2', 'Software', 3600], ['Additional Storage 1 TB', 'Infrastructure', 900], ['Mobile Seats (10-pack)', 'Software', 1500], ['SSO Module', 'Software', 1800], ['Data Migration Package', 'Services', 7500], ['Sandbox Environment', 'Infrastructure', 3000], ['Marketing Automation Add-on', 'Software', 4200], ['Field Service Module', 'Software', 3900], ['CPQ Module', 'Software', 5400], ['Health Check (Quarterly)', 'Services', 3500], ['Dedicated Success Manager', 'Support', 12000], ['E-signature Integration', 'Software', 800]];
 const CAMP_TYPES = ['Webinar', 'Trade Show', 'Email', 'Conference', 'Direct Mail', 'Paid Search', 'Partner Event'];
 const CAMP_NAMES = ['Q4 Product Launch Webinar', 'Spring Customer Summit', 'Retail Ops Roundtable', 'Healthcare IT Expo', 'Year-End Renewal Push', 'Analytics Add-on Promo', 'Partner Kickoff', 'Manufacturing Tour', 'New Logo Email Nurture', 'Executive Dinner Series', 'Mid-Market Paid Search', 'Fintech Forum', 'Customer Advisory Board', 'West Coast Roadshow', 'Security Webinar Series', 'Field Service Launch', 'Holiday Direct Mail', 'Trial Conversion Drip', 'Logistics Leaders Meetup', 'CPQ Early Access'];
 
-const PREFIX = { ACC: 'accounts', CON: 'contacts', LEA: 'leads', OPP: 'opps', CAS: 'cases', CMP: 'campaigns', PRD: 'products', TSK: 'tasks', ACT: 'acts' };
+const PREFIX = { ACC: 'accounts', CON: 'contacts', LEA: 'leads', DL: 'opps', CAS: 'cases', CMP: 'campaigns', PRD: 'products', ACT: 'acts' };
 const PRE_OF = Object.fromEntries(Object.entries(PREFIX).map(([k, v]) => [v, k]));
 let db;
 const nid = (p) => `${p}-${++db.seq[p]}`;
@@ -375,7 +372,7 @@ const slug = s => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, ''
 
 function generate() {
   seed = 7341;
-  db = { seq: { ACC: 10200, CON: 30500, LEA: 50100, OPP: 60400, CAS: 1048, CMP: 7000, PRD: 900, TSK: 80000, ACT: 90000 }, accounts: [], contacts: [], leads: [], opps: [], cases: [], campaigns: [], products: [], tasks: [], acts: [], events: [], approvals: [], bin: [], recent: [] };
+  db = { seq: { ACC: 10200, CON: 30500, LEA: 50100, DL: 60400, CAS: 1048, CMP: 7000, PRD: 900, ACT: 90000 }, accounts: [], contacts: [], leads: [], opps: [], cases: [], campaigns: [], products: [], tasks: [], acts: [], events: [], approvals: [], bin: [], recent: [] };
   PRODUCTS.forEach(([name, family, price]) => db.products.push({ id: nid('PRD'), name, code: 'CV-' + family.slice(0, 3).toUpperCase() + '-' + int(100, 999), family, price, active: 'Yes', description: '' }));
   CAMP_NAMES.forEach(name => {
     const st = int(-60, 200), len = int(1, 45), budget = int(5, 80) * 1000;
@@ -402,7 +399,7 @@ function generate() {
       const items = []; const ni = int(1, 4);
       for (let k = 0; k < ni; k++) { const p = pick(db.products); items.push({ prod: p.id, qty: p.family === 'Services' ? int(1, 3) : int(5, 120), price: p.price, disc: pick([0, 0, 0, 5, 10, 15]) }); }
       const amount = items.reduce((s, it) => s + it.qty * it.price * (1 - it.disc / 100), 0);
-      db.opps.push({ id: nid('OPP'), name: `${name} - ${pick(OPP_SUFFIX)}`, account: a.id, contact: contacts.length ? pick(contacts).id : '', amount: Math.round(amount), stage, prob: STAGE_P[stage], close: stage === 'Closed Won' && rnd() < .45 ? dAgo(int(0, qtd)) : closed ? dAgo(int(1, 240)) : dAgo(-int(-20, 160)), type: pick(OPP_TYPES), source: pick(SOURCES), next: closed ? '' : pick(NEXT_STEPS), owner, items, campaign: rnd() < .3 ? pick(db.campaigns).id : '', description: '', created: dAgo(int(30, 300)) });
+      db.opps.push({ id: nid('DL'), name: `${name} - ${pick(OPP_SUFFIX)}`, account: a.id, contact: contacts.length ? pick(contacts).id : '', amount: Math.round(amount), stage, prob: STAGE_P[stage], close: stage === 'Closed Won' && rnd() < .45 ? dAgo(int(0, qtd)) : closed ? dAgo(int(1, 240)) : dAgo(-int(-20, 160)), type: pick(OPP_TYPES), source: pick(SOURCES), next: closed ? '' : pick(NEXT_STEPS), owner, items, campaign: rnd() < .3 ? pick(db.campaigns).id : '', description: '', created: dAgo(int(30, 300)) });
     }
   }
   for (let i = 0; i < 230; i++) {
@@ -413,10 +410,6 @@ function generate() {
     const a = pick(db.accounts), cs = db.contacts.filter(c => c.account === a.id), status = wpick([['New', 3], ['Working', 4], ['Escalated', 1], ['Waiting on Customer', 2], ['Closed', 6]]);
     const comments = []; const nc = int(0, 3); for (let k = 0; k < nc; k++) comments.push({ text: pick(CASE_COMMENTS), by: pick(OWNERS), date: dAgo(int(0, 30)) });
     db.cases.push({ id: nid('CAS'), number: '0000' + db.seq.CAS, subject: pick(CASE_SUBJ), account: a.id, contact: cs.length ? pick(cs).id : '', status, priority: wpick([['Critical', 1], ['High', 3], ['Medium', 5], ['Low', 3]]), origin: pick(ORIGINS), type: pick(CASE_TYPES), owner: pick(OWNERS), opened: dAgo(int(0, 120)), description: 'Customer reported: ' + pick(CASE_SUBJ).toLowerCase() + '.', comments });
-  }
-  for (let i = 0; i < 46; i++) {
-    const c = pick(db.contacts);
-    db.tasks.push({ id: nid('TSK'), subject: pick(TASK_SUBJ), due: dAgo(int(-12, 6)), status: pick(TASK_STATUS), priority: wpick([['High', 2], ['Normal', 5], ['Low', 1]]), who: c.id, what: c.account, owner: rnd() < .7 ? ME : pick(OWNERS) });
   }
   for (let i = 0; i < 1100; i++) {
     const c = pick(db.contacts), type = wpick([['Call', 5], ['Email', 6], ['Meeting', 2]]);
@@ -430,7 +423,7 @@ function generate() {
   for (let i = 0; i < 6; i++) { const o = pick(open); db.approvals.push({ id: 'APR-' + (4400 + i), opp: o.id, type: pick(['Discount Approval', 'Discount Approval', 'Non-standard Terms', 'Extended Payment Terms']), detail: pick(['18% discount', '22% discount', 'Net 60 payment terms', '3-year price lock', '15% discount', 'Custom SLA']), by: pick(OWNERS.slice(1)), date: dAgo(int(0, 6)) }); }
 }
 
-const STORE = 'corvessa-crm-v2';
+const STORE = 'corvessa-crm-v3';
 function persist() { try { localStorage.setItem(STORE, JSON.stringify(db)); } catch (e) {} }
 function loadDb() { try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.accounts) { db = s; return true; } } catch (e) {} return false; }
 if (!loadDb()) generate();
@@ -453,9 +446,9 @@ const OBJ = {
     cols: [['name', 'Account Name', 'link'], ['city', 'Billing City'], ['state', 'State'], ['phone', 'Phone'], ['type', 'Type'], ['industry', 'Industry'], ['rating', 'Rating', 'rating'], ['owner', 'Account Owner'], ['modified', 'Last Modified', 'date']],
     views: [['All Accounts', () => true], ['My Accounts', r => r.owner === ME], ['Hot Accounts', r => r.rating === 'Hot'], ['Customers', r => r.type.startsWith('Customer')], ['New This Month', r => ageDays(r.created) <= 30], ['Recently Viewed', r => db.recent.includes(r.id)]],
     rel: [['Contacts', 'contacts', (x, r) => x.account === r.id, [['first', 'Contact Name', 'link'], ['title', 'Title'], ['email', 'Email'], ['phone', 'Phone']]],
-      ['Opportunities', 'opps', (x, r) => x.account === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
+      ['Deals', 'opps', (x, r) => x.account === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
       ['Cases', 'cases', (x, r) => x.account === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['priority', 'Priority', 'prio'], ['status', 'Status'], ['opened', 'Date Opened', 'date']]],
-      'open', 'history'] },
+      'history'] },
   contacts: { label: 'Contacts', one: 'Contact', color: '#56458c', ic: 'C',
     sections: [['Contact Information', [['first', 'First Name'], ['owner', 'Contact Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['phone', 'Phone'], ['account', 'Account Name', 'ref', 'accounts'], ['mobile', 'Mobile'], ['title', 'Title'], ['email', 'Email'], ['department', 'Department', 'pick', DEPTS], ['source', 'Lead Source', 'pick', SOURCES]]],
       ['Address Information', [['city', 'Mailing City'], ['state', 'Mailing State']]],
@@ -463,9 +456,9 @@ const OBJ = {
       ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
     cols: [['first', 'Name', 'link'], ['account', 'Account Name', 'ref'], ['title', 'Title'], ['phone', 'Phone'], ['email', 'Email'], ['city', 'Mailing City'], ['owner', 'Contact Owner']],
     views: [['All Contacts', () => true], ['My Contacts', r => r.owner === ME], ['Executives', r => /^(C.O|VP)/.test(r.title)], ['New This Month', r => ageDays(r.created) <= 30], ['Recently Viewed', r => db.recent.includes(r.id)]],
-    rel: [['Opportunities', 'opps', (x, r) => x.contact === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
+    rel: [['Deals', 'opps', (x, r) => x.contact === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date']]],
       ['Cases', 'cases', (x, r) => x.contact === r.id, [['number', 'Case', 'link'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio']]],
-      'open', 'history'] },
+      'history'] },
   leads: { label: 'Leads', one: 'Lead', color: '#e08a1e', ic: 'L',
     sections: [['Lead Information', [['first', 'First Name'], ['owner', 'Lead Owner', 'pick', OWNERS], ['last', 'Last Name', 'text', 0, 1], ['status', 'Lead Status', 'pick', LEAD_STATUS], ['company', 'Company', 'text', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['title', 'Title'], ['rating', 'Rating', 'pick', RATINGS], ['email', 'Email'], ['industry', 'Industry', 'pick', INDUSTRIES], ['phone', 'Phone'], ['campaign', 'Campaign', 'ref', 'campaigns']]],
       ['Address Information', [['city', 'City'], ['state', 'State']]],
@@ -473,34 +466,34 @@ const OBJ = {
       ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
     cols: [['first', 'Name', 'link'], ['company', 'Company'], ['state', 'State'], ['email', 'Email'], ['status', 'Lead Status'], ['source', 'Lead Source'], ['rating', 'Rating', 'rating'], ['owner', 'Owner'], ['created', 'Created', 'date']],
     views: [['All Open Leads', r => !['Qualified', 'Unqualified'].includes(r.status)], ['My Unread Leads', r => r.owner === ME && r.status === LEAD_STATUS[0]], ['Today\'s Leads', r => ageDays(r.created) <= 1], ['Hot Leads', r => r.rating === 'Hot'], ['All Leads', () => true]],
-    rel: ['open', 'history'] },
-  opps: { label: 'Opportunities', one: 'Opportunity', color: '#c9a400', ic: 'O',
-    sections: [['Opportunity Information', [['name', 'Opportunity Name', 'text', 0, 1], ['owner', 'Opportunity Owner', 'pick', OWNERS], ['account', 'Account Name', 'ref', 'accounts', 1], ['amount', 'Amount', 'money'], ['type', 'Type', 'pick', OPP_TYPES], ['close', 'Close Date', 'date', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['stage', 'Stage', 'pick', STAGES.map(s => s[0])], ['contact', 'Primary Contact', 'ref', 'contacts'], ['prob', 'Probability (%)', 'pct'], ['campaign', 'Primary Campaign', 'ref', 'campaigns'], ['next', 'Next Step']]],
+    rel: ['history'] },
+  opps: { label: 'Deals', one: 'Deal', color: '#c9a400', ic: 'D',
+    sections: [['Deal Information', [['name', 'Deal Name', 'text', 0, 1], ['owner', 'Deal Owner', 'pick', OWNERS], ['account', 'Account Name', 'ref', 'accounts', 1], ['amount', 'Amount', 'money'], ['type', 'Type', 'pick', OPP_TYPES], ['close', 'Close Date', 'date', 0, 1], ['source', 'Lead Source', 'pick', SOURCES], ['stage', 'Stage', 'pick', STAGES.map(s => s[0])], ['contact', 'Primary Contact', 'ref', 'contacts'], ['prob', 'Probability (%)', 'pct'], ['campaign', 'Primary Campaign', 'ref', 'campaigns'], ['next', 'Next Step']]],
       ['Description Information', [['description', 'Description', 'area']]],
       ['System Information', [['created', 'Created Date', 'date', 0, 0, 1]]]],
-    cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date'], ['stage', 'Stage'], ['prob', 'Prob (%)', 'pct'], ['owner', 'Owner'], ['next', 'Next Step']],
-    views: [['All Opportunities', () => true], ['My Opportunities', r => r.owner === ME], ['Open Opportunities', r => !r.stage.startsWith('Closed')], ['Closing This Month', r => !r.stage.startsWith('Closed') && r.close.slice(0, 7) === iso(today()).slice(0, 7)], ['Won', r => r.stage === 'Closed Won'], ['Recently Viewed', r => db.recent.includes(r.id)]],
-    rel: ['items', 'stagehist', 'open', 'history'] },
+    cols: [['name', 'Deal Name', 'link'], ['account', 'Account Name', 'ref'], ['amount', 'Amount', 'money'], ['close', 'Close Date', 'date'], ['stage', 'Stage'], ['prob', 'Prob (%)', 'pct'], ['owner', 'Owner'], ['next', 'Next Step']],
+    views: [['All Deals', () => true], ['My Deals', r => r.owner === ME], ['Open Deals', r => !r.stage.startsWith('Closed')], ['Closing This Month', r => !r.stage.startsWith('Closed') && r.close.slice(0, 7) === iso(today()).slice(0, 7)], ['Won', r => r.stage === 'Closed Won'], ['Recently Viewed', r => db.recent.includes(r.id)]],
+    rel: ['items', 'stagehist', 'history'] },
   cases: { label: 'Cases', one: 'Case', color: '#a2903a', ic: '!',
     sections: [['Case Information', [['number', 'Case Number', 'text', 0, 0, 1], ['owner', 'Case Owner', 'pick', OWNERS], ['contact', 'Contact Name', 'ref', 'contacts'], ['status', 'Status', 'pick', CASE_STATUS], ['account', 'Account Name', 'ref', 'accounts'], ['priority', 'Priority', 'pick', PRIORITIES], ['origin', 'Case Origin', 'pick', ORIGINS], ['type', 'Type', 'pick', CASE_TYPES], ['opened', 'Date/Time Opened', 'date', 0, 0, 1]]],
       ['Description Information', [['subject', 'Subject', 'text', 0, 1], ['description', 'Description', 'area']]]],
     cols: [['number', 'Case', 'link'], ['contact', 'Contact Name', 'ref'], ['subject', 'Subject'], ['status', 'Status'], ['priority', 'Priority', 'prio'], ['opened', 'Date Opened', 'date'], ['owner', 'Case Owner']],
     views: [['All Open Cases', r => r.status !== 'Closed'], ['My Open Cases', r => r.owner === ME && r.status !== 'Closed'], ['Escalated', r => r.status === 'Escalated'], ['High Priority', r => ['Critical', 'High'].includes(r.priority) && r.status !== 'Closed'], ['All Cases', () => true]],
-    rel: ['comments', 'open', 'history'] },
+    rel: ['comments', 'history'] },
   campaigns: { label: 'Campaigns', one: 'Campaign', color: '#d0632b', ic: 'M',
     sections: [['Campaign Information', [['name', 'Campaign Name', 'text', 0, 1], ['owner', 'Campaign Owner', 'pick', OWNERS], ['type', 'Type', 'pick', CAMP_TYPES], ['status', 'Status', 'pick', ['Planned', 'In Progress', 'Completed', 'Aborted']], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['expected', 'Expected Revenue', 'money']]],
       ['Description Information', [['description', 'Description', 'area']]]],
     cols: [['name', 'Campaign Name', 'link'], ['type', 'Type'], ['status', 'Status'], ['start', 'Start Date', 'date'], ['end', 'End Date', 'date'], ['budget', 'Budgeted Cost', 'money'], ['cost', 'Actual Cost', 'money'], ['owner', 'Owner']],
     views: [['All Campaigns', () => true], ['Active Campaigns', r => r.status === 'In Progress'], ['My Campaigns', r => r.owner === ME]],
     rel: [['Campaign Leads', 'leads', (x, r) => x.campaign === r.id, [['first', 'Name', 'link'], ['company', 'Company'], ['status', 'Lead Status'], ['email', 'Email']]],
-      ['Influenced Opportunities', 'opps', (x, r) => x.campaign === r.id, [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
+      ['Influenced Deals', 'opps', (x, r) => x.campaign === r.id, [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
   products: { label: 'Products', one: 'Product', color: '#5f8a3a', ic: 'P',
     sections: [['Product Detail', [['name', 'Product Name', 'text', 0, 1], ['code', 'Product Code'], ['family', 'Product Family', 'pick', ['Software', 'Services', 'Support', 'Infrastructure']], ['price', 'List Price', 'money'], ['active', 'Active', 'pick', ['Yes', 'No']], ['description', 'Product Description', 'area']]]],
     cols: [['name', 'Product Name', 'link'], ['code', 'Product Code'], ['family', 'Product Family'], ['price', 'List Price', 'money'], ['active', 'Active']],
     views: [['All Products', () => true], ['Active Products', r => r.active === 'Yes'], ['Services', r => r.family === 'Services']],
-    rel: [['Opportunities Including This Product', 'opps', (x, r) => (x.items || []).some(i => i.prod === r.id), [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
+    rel: [['Deals Including This Product', 'opps', (x, r) => (x.items || []).some(i => i.prod === r.id), [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['amount', 'Amount', 'money']]]] },
 };
-const TABS = [['home', 'Home', '#3a6ea5'], ['accounts'], ['contacts'], ['leads'], ['opps'], ['cases'], ['campaigns'], ['products'], ['forecasts', 'Forecasts', '#2e7d6b'], ['reports', 'Reports', '#4b6584'], ['dashboards', 'Dashboards', '#7a4a8c']];
+const TABS = [['home', 'Home', '#3a6ea5'], ['accounts'], ['contacts'], ['leads'], ['opps'], ['cases'], ['campaigns'], ['products'], ['forecasts', 'Forecasts', '#2e7d6b'], ['reports', 'Reports', '#4b6584']];
 const tabLabel = t => (OBJ[t] ? OBJ[t].label : TABS.find(x => x[0] === t)[1]);
 const tabColor = t => (OBJ[t] ? OBJ[t].color : TABS.find(x => x[0] === t)[2]);
 
@@ -562,10 +555,9 @@ function render() {
   app.style.setProperty('--tabink', t === 'opps' ? '#222' : '#fff');
   $('#tabs').innerHTML = TABS.map(([k]) => `<button data-tab="${k}" class="${k === t ? 'on' : ''}">${esc(tabLabel(k))}</button>`).join('') + `<button data-act="sheet" title="Open Spreadsheet">Spreadsheet</button>`;
   $('#b-appr').textContent = db.approvals.length;
-  $('#b-task').textContent = db.tasks.filter(x => x.owner === ME).length;
   $('#hdr-date').textContent = today().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   const v = S.view, main = $('#main');
-  main.innerHTML = v === 'home' ? viewHome() : v === 'list' ? viewList(S.obj) : v === 'detail' ? viewDetail(S.id) : v === 'edit' ? viewEdit(S.obj, S.id) : v === 'search' ? viewSearch(S.q) : v === 'forecasts' ? viewForecasts() : v === 'reports' ? viewReports() : v === 'dashboards' ? viewDash() : '';
+  main.innerHTML = v === 'home' ? viewHome() : v === 'list' ? viewList(S.obj) : v === 'detail' ? viewDetail(S.id) : v === 'edit' ? viewEdit(S.obj, S.id) : v === 'search' ? viewSearch(S.q) : v === 'forecasts' ? viewForecasts() : v === 'reports' ? viewReports() : '';
   renderSide();
   const path = v === 'detail' ? '/' + S.id : v === 'list' ? '/' + PRE_OF[S.obj].toLowerCase() + '/o' : v === 'edit' ? '/' + (S.id || PRE_OF[S.obj].toLowerCase()) + '/e' : '/' + v;
   $('#addr').textContent = 'https://brightwater.corvessa.example' + path;
@@ -574,7 +566,7 @@ function render() {
 function renderSide() {
   const rec = db.recent.map(get).filter(Boolean).slice(0, 10);
   const t = today(), y = t.getFullYear(), m = t.getMonth(), first = new Date(y, m, 1), start = first.getDay(), dim = new Date(y, m + 1, 0).getDate();
-  const evDays = new Set(db.tasks.filter(x => x.due.slice(0, 7) === iso(t).slice(0, 7)).map(x => +x.due.slice(8)));
+  const evDays = new Set(db.acts.filter(x => x.owner === ME && x.date.slice(0, 7) === iso(t).slice(0, 7)).map(x => +x.date.slice(8)));
   let cal = '<tr>' + ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<th>${d}</th>`).join('') + '</tr><tr>';
   const prevDim = new Date(y, m, 0).getDate();
   for (let i = 0; i < start; i++) cal += `<td class="o">${prevDim - start + 1 + i}</td>`;
@@ -600,45 +592,27 @@ function renderSide() {
 
 // ---------------- render: home ----------------
 function viewHome() {
-  const mine = db.tasks.filter(x => x.owner === ME).sort((a, b) => a.due.localeCompare(b.due));
   const tstr = iso(today());
-  const openOpps = db.opps.filter(o => o.owner === ME && !o.stage.startsWith('Closed')).sort((a, b) => a.close.localeCompare(b.close)).slice(0, 8);
-  const [q0, q1] = qRange();
-  const won = db.opps.filter(o => o.stage === 'Closed Won' && o.close >= q0 && o.close <= q1);
-  const wonSum = won.reduce((s, o) => s + o.amount, 0), quota = 2400000, pct = Math.min(100, Math.round(wonSum / quota * 100));
-  const byStage = STAGES.slice(0, 7).map(([s]) => [s, db.opps.filter(o => o.stage === s).reduce((a, o) => a + o.amount, 0)]);
+  const openDeals = db.opps.filter(o => o.owner === ME && !o.stage.startsWith('Closed')).sort((a, b) => a.close.localeCompare(b.close)).slice(0, 10);
+  const recentActs = db.acts.slice(0, 12);
+  const hiCases = db.cases.filter(c => c.status !== 'Closed' && ['Critical', 'High'].includes(c.priority)).sort((a, b) => b.opened.localeCompare(a.opened)).slice(0, 8);
   return `
   <div class="ph"><div class="ic" style="background:${tabColor('home')}">H</div><div><div class="ot">Welcome, ${esc(ME)}</div><h2>Home</h2></div>
     <div class="right">${today().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })} · <a data-act="customize">Customize Page</a></div></div>
-  <div class="pb" style="--oc:#7a4a8c"><div class="pbh"><h3>Dashboard: Sales Overview</h3><div class="r">As of ${mdY(tstr)} ${hhmm(new Date())} · <a data-tab="dashboards">Go to Dashboards »</a></div></div>
-    <div class="cols3" style="padding:8px;background:#fff">
-      <div><b>Pipeline by Stage</b>${hbars(byStage, '#4f8fd1', kmoney)}</div>
-      <div><b>Closed Won This Quarter</b>${gauge(pct, money0(wonSum) + ' of ' + money0(quota))}</div>
-      <div><b>Open Cases by Priority</b>${hbars(PRIORITIES.map(p => [p, db.cases.filter(c => c.priority === p && c.status !== 'Closed').length]), '#c0504d', v => v)}</div>
-    </div></div>
   <div class="cols2">
     <div class="pb" style="--oc:#3a6ea5"><div class="pbh"><h3>Calendar</h3><div class="btns"><button class="cbtn" data-act="newevent">New Event</button></div></div>
       <div class="pbb"><table class="lt"><tbody>${db.events.map(e => `<tr><td style="width:70px"><b>${esc(e.time)}</b></td><td>${esc(e.subject)}${e.who ? ' - ' + refLink(e.who) : ''}</td></tr>`).join('')}</tbody></table></div></div>
     <div class="pb" style="--oc:#c0504d"><div class="pbh"><h3>Items to Approve</h3><div class="r"><a data-act="noop">Manage All</a></div></div>
       <div class="pbb">${db.approvals.length ? `<table class="lt"><thead><tr><th>Action</th><th>Related To</th><th>Type</th><th>Detail</th><th>Submitted By</th><th>Date</th></tr></thead><tbody>${db.approvals.map(a => `<tr><td><a data-appr="${a.id}" data-ok="1">Approve</a> | <a data-appr="${a.id}">Reject</a></td><td>${refLink(a.opp)}</td><td>${esc(a.type)}</td><td>${esc(a.detail)}</td><td>${esc(a.by)}</td><td>${mdY(a.date)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No records to display.</div>'}</div></div>
   </div>
-  <div class="pb" style="--oc:#2e7d6b"><div class="pbh"><h3>My Tasks</h3><div class="btns"><button class="cbtn" data-act="newtask">New Task</button></div><div class="r"><select id="taskfilter" aria-label="Task filter"><option>All Open</option><option>Overdue</option><option>Today</option><option>Next 7 Days</option></select></div></div>
-    <div class="pbb"><table class="lt"><thead><tr><th>Complete</th><th>Due Date</th><th>Status</th><th>Subject</th><th>Name</th><th>Related To</th><th>Priority</th></tr></thead><tbody id="tasktbody">${taskRows(mine, 'All Open')}</tbody></table></div></div>
-  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>My Open Opportunities</h3><div class="btns"><button class="cbtn" data-new="opps">New</button></div><div class="r"><a data-tab="opps">View All »</a></div></div>
-    <div class="pbb">${table('opps', openOpps, OBJ.opps.cols)}</div></div>`;
-}
-function taskRows(list, f) {
-  const t = iso(today()), wk = dAgo(-7);
-  const rows = list.filter(x => f === 'Overdue' ? x.due < t : f === 'Today' ? x.due === t : f === 'Next 7 Days' ? x.due >= t && x.due <= wk : true);
-  return rows.map(x => `<tr><td><input type="checkbox" data-done="${x.id}" aria-label="Complete task"></td><td class="${x.due < t ? 'overdue' : ''}">${mdY(x.due)}</td><td>${esc(x.status)}</td><td><a data-taskopen="${x.id}">${esc(x.subject)}</a></td><td>${refLink(x.who)}</td><td>${refLink(x.what)}</td><td>${esc(x.priority)}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">No open tasks.</td></tr>';
-}
-function hbars(items, color, f) {
-  const max = Math.max(1, ...items.map(i => i[1]));
-  return `<div class="hb" style="--bc:${color}">${items.map(([l, v]) => `<span class="lab" title="${esc(l)}">${esc(l)}</span><div><div class="bar" style="width:${Math.max(1, v / max * 100)}%"></div></div><span>${f(v)}</span>`).join('')}</div>`;
-}
-function gauge(pct, label) {
-  const deg = pct * 1.8;
-  return `<div class="gauge"><div class="g" style="background:conic-gradient(from -90deg at 50% 100%, #3c9a4f 0deg ${deg}deg, #e3e3e3 ${deg}deg 180deg, transparent 180deg)"></div><b>${pct}%</b><span>${label}</span></div>`;
+  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>My Open Deals</h3><div class="btns"><button class="cbtn" data-new="opps">New Deal</button></div><div class="r"><a data-tab="opps">View All »</a></div></div>
+    <div class="pbb">${table('opps', openDeals, OBJ.opps.cols)}</div></div>
+  <div class="cols2">
+    <div class="pb" style="--oc:#2e7d6b"><div class="pbh"><h3>Recent Activity</h3><div class="r">As of ${mdY(tstr)} ${hhmm(new Date())}</div></div>
+      <div class="pbb"><table class="lt"><thead><tr><th>Date</th><th>Type</th><th>Subject</th><th>Name</th><th>Account</th><th>Assigned To</th></tr></thead><tbody>${recentActs.map(x => `<tr><td>${mdY(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.subject)}</td><td>${refLink(x.who)}</td><td>${refLink(x.what)}</td><td>${esc(x.owner)}</td></tr>`).join('')}</tbody></table></div></div>
+    <div class="pb" style="--oc:${OBJ.cases.color}"><div class="pbh"><h3>High Priority Cases</h3><div class="r"><a data-tab="cases">View All »</a></div></div>
+      <div class="pbb">${table('cases', hiCases, [['number', 'Case', 'link'], ['subject', 'Subject'], ['account', 'Account', 'ref'], ['priority', 'Priority', 'prio'], ['status', 'Status']])}</div></div>
+  </div>`;
 }
 
 // ---------------- render: list view ----------------
@@ -691,11 +665,7 @@ function pushRecent(id) { db.recent = [id, ...db.recent.filter(x => x !== id)].s
 function relLists(o, r) {
   const out = [];
   for (const rl of OBJ[o].rel) {
-    if (rl === 'open') {
-      const rows = db.tasks.filter(x => x.who === r.id || x.what === r.id);
-      out.push(['Open Activities', '#2e7d6b', rows.length, `<button class="cbtn" data-act="newtask">New Task</button><button class="cbtn" data-act="newevent">New Event</button>`,
-        rows.length ? `<table class="lt"><thead><tr><th>Subject</th><th>Name</th><th>Due Date</th><th>Status</th><th>Priority</th><th>Assigned To</th></tr></thead><tbody>${rows.map(x => `<tr><td>${esc(x.subject)}</td><td>${refLink(x.who)}</td><td class="${x.due < iso(today()) ? 'overdue' : ''}">${mdY(x.due)}</td><td>${esc(x.status)}</td><td>${esc(x.priority)}</td><td>${esc(x.owner)}</td></tr>`).join('')}</tbody></table>` : '']);
-    } else if (rl === 'history') {
+    if (rl === 'history') {
       const rows = db.acts.filter(x => x.who === r.id || x.what === r.id);
       out.push(['Activity History', '#2e7d6b', rows.length, `<button class="cbtn" data-act="logcall">Log a Call</button><button class="cbtn" data-act="email">Send an Email</button>`,
         rows.length ? `<table class="lt"><thead><tr><th>Subject</th><th>Type</th><th>Name</th><th>Date</th><th>Assigned To</th><th>Comments</th></tr></thead><tbody>${rows.map(x => `<tr><td>${esc(x.subject)}</td><td>${esc(x.type)}</td><td>${refLink(x.who)}</td><td>${mdY(x.date)}</td><td>${esc(x.owner)}</td><td>${esc(x.comments)}</td></tr>`).join('')}</tbody></table>` : '']);
@@ -827,14 +797,14 @@ function viewForecasts() {
     <div class="pbb"><table class="lt"><thead><tr><th>Name</th><th class="n">Quota</th><th class="n">Closed</th><th class="n">Commit</th><th class="n">Best Case</th><th class="n">Pipeline</th><th>Attainment</th></tr></thead><tbody>
     ${rows.map(r => `<tr><td>${esc(r.owner)}</td><td class="n">${money0(r.quota)}</td><td class="n">${money0(r.closed)}</td><td class="n">${money0(r.commit)}</td><td class="n">${money0(r.best)}</td><td class="n">${money0(r.pipe)}</td><td><div style="display:flex;gap:6px;align-items:center"><div style="width:90px;height:10px;background:#e3e3e3;border:1px solid #ccc"><div style="height:100%;width:${Math.min(100, r.att)}%;background:${r.att >= 70 ? '#3c9a4f' : r.att >= 40 ? '#e0a020' : '#c0504d'}"></div></div>${r.att}%</div></td></tr>`).join('')}
     <tr class="sub"><td>Total</td><td class="n">${money0(tot('quota'))}</td><td class="n">${money0(tot('closed'))}</td><td class="n">${money0(tot('commit'))}</td><td class="n">${money0(tot('best'))}</td><td class="n">${money0(tot('pipe'))}</td><td>${Math.round(tot('closed') / tot('quota') * 100)}%</td></tr></tbody></table></div></div>
-  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Opportunities in this Forecast</h3></div><div class="pbb">${table('opps', db.opps.filter(o => o.close >= q0 && o.close <= q1 && !o.stage.startsWith('Closed Lost')).sort((a, b) => b.amount - a.amount).slice(0, 40), OBJ.opps.cols)}</div></div>`;
+  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Deals in this Forecast</h3></div><div class="pbb">${table('opps', db.opps.filter(o => o.close >= q0 && o.close <= q1 && !o.stage.startsWith('Closed Lost')).sort((a, b) => b.amount - a.amount).slice(0, 40), OBJ.opps.cols)}</div></div>`;
 }
 
 // ---------------- reports ----------------
 const REPORTS = [
-  { folder: 'Sales Reports', name: 'Opportunity Pipeline', obj: 'opps', where: o => !o.stage.startsWith('Closed'), group: 'stage', cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['owner', 'Owner'], ['close', 'Close Date', 'date'], ['prob', 'Probability (%)', 'pct'], ['amount', 'Amount', 'money']], sum: 'amount' },
-  { folder: 'Sales Reports', name: 'Closed Won Opportunities', obj: 'opps', where: o => o.stage === 'Closed Won', group: 'owner', cols: [['name', 'Opportunity Name', 'link'], ['account', 'Account Name', 'ref'], ['close', 'Close Date', 'date'], ['type', 'Type'], ['amount', 'Amount', 'money']], sum: 'amount' },
-  { folder: 'Sales Reports', name: 'Opportunities Closing Next 30 Days', obj: 'opps', where: o => !o.stage.startsWith('Closed') && o.close >= iso(today()) && o.close <= dAgo(-30), group: 'owner', cols: [['name', 'Opportunity Name', 'link'], ['stage', 'Stage'], ['close', 'Close Date', 'date'], ['next', 'Next Step'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Sales Reports', name: 'Deal Pipeline', obj: 'opps', where: o => !o.stage.startsWith('Closed'), group: 'stage', cols: [['name', 'Deal Name', 'link'], ['account', 'Account Name', 'ref'], ['owner', 'Owner'], ['close', 'Close Date', 'date'], ['prob', 'Probability (%)', 'pct'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Sales Reports', name: 'Closed Won Deals', obj: 'opps', where: o => o.stage === 'Closed Won', group: 'owner', cols: [['name', 'Deal Name', 'link'], ['account', 'Account Name', 'ref'], ['close', 'Close Date', 'date'], ['type', 'Type'], ['amount', 'Amount', 'money']], sum: 'amount' },
+  { folder: 'Sales Reports', name: 'Deals Closing Next 30 Days', obj: 'opps', where: o => !o.stage.startsWith('Closed') && o.close >= iso(today()) && o.close <= dAgo(-30), group: 'owner', cols: [['name', 'Deal Name', 'link'], ['stage', 'Stage'], ['close', 'Close Date', 'date'], ['next', 'Next Step'], ['amount', 'Amount', 'money']], sum: 'amount' },
   { folder: 'Account & Contact Reports', name: 'Accounts by Industry', obj: 'accounts', where: () => true, group: 'industry', cols: [['name', 'Account Name', 'link'], ['type', 'Type'], ['city', 'City'], ['state', 'State'], ['owner', 'Owner'], ['revenue', 'Annual Revenue', 'money']], sum: 'revenue' },
   { folder: 'Account & Contact Reports', name: 'Contact Mailing List', obj: 'contacts', where: () => true, group: null, cols: [['first', 'Name', 'link'], ['title', 'Title'], ['account', 'Account Name', 'ref'], ['email', 'Email'], ['phone', 'Phone'], ['city', 'City'], ['state', 'State']] },
   { folder: 'Lead Reports', name: 'Leads by Source', obj: 'leads', where: () => true, group: 'source', cols: [['first', 'Name', 'link'], ['company', 'Company'], ['status', 'Lead Status'], ['rating', 'Rating', 'rating'], ['created', 'Created', 'date']] },
@@ -872,32 +842,7 @@ function viewReports() {
   </div>`;
 }
 
-// ---------------- dashboards ----------------
-function viewDash() {
-  const open = db.opps.filter(o => !o.stage.startsWith('Closed')), won = db.opps.filter(o => o.stage === 'Closed Won');
-  const sum = a => a.reduce((s, o) => s + o.amount, 0);
-  const byOwner = OWNERS.map(w => [w, sum(won.filter(o => o.owner === w))]).sort((a, b) => b[1] - a[1]);
-  const bySource = SOURCES.map(s => [s, db.leads.filter(l => l.source === s).length]).sort((a, b) => b[1] - a[1]);
-  const byInd = INDUSTRIES.map(s => [s, sum(open.filter(o => get(o.account)?.industry === s))]).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const [q0, q1] = qRange(), wonQ = sum(won.filter(o => o.close >= q0 && o.close <= q1)), quota = 13700000;
-  const top = open.slice().sort((a, b) => b.amount - a.amount).slice(0, 10);
-  const winRate = Math.round(won.length / Math.max(1, won.length + db.opps.filter(o => o.stage === 'Closed Lost').length) * 100);
-  return `
-  <div class="ph"><div class="ic" style="background:${tabColor('dashboards')}">D</div><div><div class="ot">Dashboard</div><h2>Executive Sales Dashboard</h2></div>
-    <div class="right">View dashboard as: <b>${esc(ME)}</b> · As of ${mdY(iso(today()))} ${hhmm(new Date())} <button class="cbtn" data-act="refreshdash">Refresh</button></div></div>
-  <div class="kpis pb"><div><b>${kmoney(sum(open))}</b><span>Open Pipeline</span></div><div><b>${open.length}</b><span>Open Opportunities</span></div><div><b>${kmoney(wonQ)}</b><span>Closed Won (QTD)</span></div><div><b>${winRate}%</b><span>Win Rate</span></div><div><b>${db.cases.filter(c => c.status !== 'Closed').length}</b><span>Open Cases</span></div><div><b>${db.leads.filter(l => ageDays(l.created) <= 30).length}</b><span>New Leads (30d)</span></div></div>
-  <div class="cols3">
-    <div class="pb"><div class="pbh"><h3>Pipeline by Stage</h3></div>${hbars(STAGES.slice(0, 7).map(([s]) => [s, sum(open.filter(o => o.stage === s))]), '#4f8fd1', kmoney)}</div>
-    <div class="pb"><div class="pbh"><h3>Quarterly Attainment</h3></div>${gauge(Math.min(100, Math.round(wonQ / quota * 100)), money0(wonQ) + ' of ' + money0(quota))}</div>
-    <div class="pb"><div class="pbh"><h3>Closed Won by Rep</h3></div>${hbars(byOwner, '#3c9a4f', kmoney)}</div>
-    <div class="pb"><div class="pbh"><h3>Leads by Source</h3></div>${hbars(bySource, '#e08a1e', v => v)}</div>
-    <div class="pb"><div class="pbh"><h3>Open Pipeline by Industry</h3></div>${hbars(byInd, '#7a4a8c', kmoney)}</div>
-    <div class="pb"><div class="pbh"><h3>Cases by Status</h3></div>${hbars(CASE_STATUS.map(s => [s, db.cases.filter(c => c.status === s).length]), '#a2903a', v => v)}</div>
-  </div>
-  <div class="pb" style="--oc:${OBJ.opps.color}"><div class="pbh"><h3>Top 10 Open Opportunities</h3></div><div class="pbb">${table('opps', top, OBJ.opps.cols)}</div></div>`;
-}
-
-// ---------------- calls / email / tasks ----------------
+// ---------------- calls / email ----------------
 let audio = null;
 function tone(freqs, ms, at = 0) {
   try {
@@ -955,15 +900,6 @@ function addAct(r, type, subject, comments) {
   db.acts.unshift({ id: nid('ACT'), type, subject, date: iso(today()), who: o === 'contacts' || o === 'leads' ? r.id : r.contact || '', what: o === 'accounts' ? r.id : r.account || '', owner: ME, comments });
   persist(); render();
 }
-async function newTask() {
-  const r = S.view === 'detail' ? get(S.id) : null;
-  const res = await dialog('New Task', `<div class="fm"><label for="nt-subj">Subject</label><input type="text" id="nt-subj" class="req" value="Follow up"><label for="nt-due">Due Date</label><input type="text" id="nt-due" value="${mdY(dAgo(-3))}" placeholder="MM/DD/YYYY"><label for="nt-pri">Priority</label><select id="nt-pri"><option>Normal</option><option>High</option><option>Low</option></select><label>Related To</label><span>${r ? esc(title(r)) : '--'}</span></div>`, ['Save', 'Cancel']);
-  if (res.btn !== 'Save') return;
-  const o = r && objOf(r.id);
-  db.tasks.push({ id: nid('TSK'), subject: res.vals['nt-subj'] || 'Follow up', due: parseMdY(res.vals['nt-due']) || dAgo(-3), status: 'Not Started', priority: res.vals['nt-pri'], who: r && (o === 'contacts' || o === 'leads') ? r.id : r?.contact || '', what: r ? (o === 'accounts' ? r.id : r.account || '') : '', owner: ME });
-  persist(); render(); toast('Task created');
-}
-
 // ---------------- delete / bin ----------------
 async function delRecs(ids) {
   if (!ids.length) return dialog('Delete', '<p>Select at least one record.</p>');
@@ -997,7 +933,7 @@ function buildSheets() {
   const pipe = o.map((x, i) => [x.id, x.name, title(get(x.account)), x.owner, x.stage, x.prob, x.amount, `=G${i + 2}*F${i + 2}/100`, mdY(x.close), x.type, x.source, x.next, mdY(x.created), (d => `FY${fy(d)} Q${quarter(d)}`)(new Date(x.close + 'T00:00:00')), get(x.account)?.state || '']);
   const n = pipe.length + 1;
   pipe.push([], ['', 'TOTAL', '', '', '', `=AVERAGE(F2:F${n})`, `=SUM(G2:G${n})`, `=SUM(H2:H${n})`, `=COUNT(G2:G${n}) & " opps"`]);
-  const s1 = mkSheet('Pipeline', ['Opportunity ID', 'Opportunity Name', 'Account Name', 'Owner', 'Stage', 'Probability (%)', 'Amount', 'Expected Revenue', 'Close Date', 'Type', 'Lead Source', 'Next Step', 'Created Date', 'Fiscal Period', 'State'], pipe, { 6: 'money', 7: 'money' }, { 1: 260, 2: 190, 11: 180 });
+  const s1 = mkSheet('Pipeline', ['Deal ID', 'Deal Name', 'Account Name', 'Owner', 'Stage', 'Probability (%)', 'Amount', 'Expected Revenue', 'Close Date', 'Type', 'Lead Source', 'Next Step', 'Created Date', 'Fiscal Period', 'State'], pipe, { 6: 'money', 7: 'money' }, { 1: 260, 2: 190, 11: 180 });
   s1.sortEnd = n - 1; s1.style[`${n + 1},1`] = { b: 1 }; for (let c = 5; c <= 8; c++) s1.style[`${n + 1},${c}`] = { b: 1, fill: '#fff2a8' };
   const s2 = mkSheet('Contacts', ['Contact ID', 'First Name', 'Last Name', 'Title', 'Account Name', 'Phone', 'Mobile', 'Email', 'Mailing City', 'Mailing State', 'Contact Owner', 'Lead Source', 'Created Date'], db.contacts.map(c => [c.id, c.first, c.last, c.title, title(get(c.account)), c.phone, c.mobile, c.email, c.city, c.state, c.owner, c.source, mdY(c.created)]), {}, { 4: 190, 7: 230 });
   const s3 = mkSheet('Accounts', ['Account ID', 'Account Name', 'Type', 'Industry', 'Employees', 'Annual Revenue', 'Phone', 'Website', 'Billing City', 'Billing State', 'Owner', 'Rating'], db.accounts.map(a => [a.id, a.name, a.type, a.industry, a.employees, a.revenue, a.phone, a.website, a.city, a.state, a.owner, a.rating]), { 5: 'money' }, { 1: 190, 7: 200 });
@@ -1191,8 +1127,6 @@ document.addEventListener('click', async e => {
   else if (d.page) { LS(S.obj).page += +d.page; render(); }
   else if (d.chk) { const st = LS(S.obj); a.checked ? st.sel.add(d.chk) : st.sel.delete(d.chk); $('.pbf span:nth-child(2)').textContent = st.sel.size + ' selected'; }
   else if (a.id === 'chkall') { const st = LS(S.obj); $$('[data-chk]').forEach(c => { c.checked = a.checked; a.checked ? st.sel.add(c.dataset.chk) : st.sel.delete(c.dataset.chk); }); $('.pbf span:nth-child(2)').textContent = st.sel.size + ' selected'; }
-  else if (d.done) { const t = db.tasks.find(x => x.id === d.done); if (t) { db.tasks = db.tasks.filter(x => x !== t); db.acts.unshift({ id: nid('ACT'), type: 'Task', subject: t.subject, date: iso(today()), who: t.who, what: t.what, owner: ME, comments: 'Completed' }); persist(); setTimeout(() => { render(); toast('Task completed'); }, 250); } }
-  else if (d.taskopen) { const t = db.tasks.find(x => x.id === d.taskopen); if (t) dialog('Task Detail', `<div class="fm"><label>Subject</label><span>${esc(t.subject)}</span><label>Due Date</label><span>${mdY(t.due)}</span><label>Status</label><span>${esc(t.status)}</span><label>Priority</label><span>${esc(t.priority)}</span><label>Name</label><span>${refLink(t.who) || '--'}</span><label>Related To</label><span>${refLink(t.what) || '--'}</span><label>Assigned To</label><span>${esc(t.owner)}</span></div>`, ['Close']); }
   else if (d.appr) { const ap = db.approvals.find(x => x.id === d.appr); db.approvals = db.approvals.filter(x => x !== ap); persist(); render(); toast(d.ok ? 'Request approved' : 'Request rejected'); }
   else if (d.report) { nav({ tab: 'reports', view: 'reports', report: +d.report, hideDetails: false }); }
   else if (d.expand) { S.expand[d.expand] = !S.expand[d.expand]; render(); }
@@ -1218,11 +1152,9 @@ async function act(k) {
     case 'sheet': X.cur = 0; openSheet(null, 'Pipeline_Export.xlsx'); break;
     case 'hidedet': S.hideDetails = !S.hideDetails; render(); break;
     case 'runrep': render(); toast('Report refreshed'); break;
-    case 'refreshdash': render(); toast('Dashboard refreshed'); break;
     case 'call': callRec(); break;
     case 'logcall': logCall(); break;
     case 'email': sendEmail(); break;
-    case 'newtask': newTask(); break;
     case 'newevent': {
       const res = await dialog('New Event', `<div class="fm"><label for="ev-subj">Subject</label><input type="text" id="ev-subj" value="Meeting"><label for="ev-time">Start Time</label><select id="ev-time">${['9:00 AM', '9:30 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map(t => `<option>${t}</option>`).join('')}</select></div>`, ['Save', 'Cancel']);
       if (res.btn !== 'Save') return;
@@ -1237,13 +1169,13 @@ async function act(k) {
     }
     case 'convert': {
       const l = get(S.id);
-      const res = await dialog('Convert Lead', `<p>Convert <b>${esc(title(l))}</b> into a new account, contact and opportunity?</p><div class="fm"><label>Account Name</label><span>${esc(l.company)}</span><label for="cv-opp">Opportunity</label><input type="text" id="cv-opp" value="${esc(l.company)} - New Business"><label for="cv-own">Record Owner</label><select id="cv-own">${OWNERS.map(w => `<option ${w === l.owner ? 'selected' : ''}>${esc(w)}</option>`).join('')}</select></div>`, ['Convert', 'Cancel']);
+      const res = await dialog('Convert Lead', `<p>Convert <b>${esc(title(l))}</b> into a new account, contact and deal?</p><div class="fm"><label>Account Name</label><span>${esc(l.company)}</span><label for="cv-opp">Deal</label><input type="text" id="cv-opp" value="${esc(l.company)} - New Business"><label for="cv-own">Record Owner</label><select id="cv-own">${OWNERS.map(w => `<option ${w === l.owner ? 'selected' : ''}>${esc(w)}</option>`).join('')}</select></div>`, ['Convert', 'Cancel']);
       if (res.btn !== 'Convert') return;
       const owner = res.vals['cv-own'];
       const acc = { id: nid('ACC'), name: l.company, owner, phone: l.phone, website: 'www.' + slug(l.company) + '.com', type: 'Prospect', industry: l.industry, employees: '', revenue: '', rating: l.rating, source: l.source, street: '', city: l.city, state: l.state, zip: '', description: '', created: iso(today()), modified: iso(today()) };
       const con = { id: nid('CON'), first: l.first, last: l.last, account: acc.id, title: l.title, department: '', phone: l.phone, mobile: '', email: l.email, source: l.source, owner, city: l.city, state: l.state, description: '', created: iso(today()) };
       db.accounts.unshift(acc); db.contacts.unshift(con);
-      if (res.vals['cv-opp']) db.opps.unshift({ id: nid('OPP'), name: res.vals['cv-opp'], account: acc.id, contact: con.id, amount: 0, stage: 'Qualification', prob: 20, close: dAgo(-60), type: 'New Business', source: l.source, next: 'Discovery call', owner, items: [], campaign: l.campaign, description: '', created: iso(today()) });
+      if (res.vals['cv-opp']) db.opps.unshift({ id: nid('DL'), name: res.vals['cv-opp'], account: acc.id, contact: con.id, amount: 0, stage: 'Qualification', prob: 20, close: dAgo(-60), type: 'New Business', source: l.source, next: 'Discovery call', owner, items: [], campaign: l.campaign, description: '', created: iso(today()) });
       l.status = 'Qualified'; db.leads = db.leads.filter(x => x !== l);
       persist(); toast('Lead converted'); goRec(acc.id); break;
     }
@@ -1266,7 +1198,6 @@ document.addEventListener('change', e => {
   if (t.id === 'lv') { const st = LS(S.obj); st.view = +t.value; st.page = 0; st.sel.clear(); render(); }
   else if (t.id === 'psize') { const st = LS(S.obj); st.size = +t.value; st.page = 0; render(); }
   else if (t.id === 'createnew' && t.value) goEdit(t.value, null);
-  else if (t.id === 'taskfilter') $('#tasktbody').innerHTML = taskRows(db.tasks.filter(x => x.owner === ME).sort((a, b) => a.due.localeCompare(b.due)), t.value);
 });
 // Forms never submit natively (sandboxed frames block it); buttons and Enter call this directly.
 document.addEventListener('submit', e => e.preventDefault());
